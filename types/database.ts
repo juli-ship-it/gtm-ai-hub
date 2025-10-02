@@ -127,6 +127,19 @@ export interface Database {
           ethics_considerations: string | null
           status: 'new' | 'triaged' | 'building' | 'shipped' | 'declined'
           priority: 'low' | 'medium' | 'high' | 'urgent'
+          title: string | null
+          category: 'campaign_execution' | 'content_creation' | 'lead_management' | 'reporting' | 'other' | null
+          current_process: string | null
+          pain_points: string | null
+          frequency: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'ad_hoc' | null
+          time_friendly: string | null
+          systems: string[] | null
+          sensitivity: 'low' | 'medium' | 'high' | 'confidential' | null
+          links: string | null
+          slack_team_id: string | null
+          slack_team_name: string | null
+          slack_user_id: string | null
+          slack_username: string | null
           created_at: string
           updated_at: string
         }
@@ -139,6 +152,19 @@ export interface Database {
           ethics_considerations?: string | null
           status?: 'new' | 'triaged' | 'building' | 'shipped' | 'declined'
           priority?: 'low' | 'medium' | 'high' | 'urgent'
+          title?: string | null
+          category?: 'campaign_execution' | 'content_creation' | 'lead_management' | 'reporting' | 'other' | null
+          current_process?: string | null
+          pain_points?: string | null
+          frequency?: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'ad_hoc' | null
+          time_friendly?: string | null
+          systems?: string[] | null
+          sensitivity?: 'low' | 'medium' | 'high' | 'confidential' | null
+          links?: string | null
+          slack_team_id?: string | null
+          slack_team_name?: string | null
+          slack_user_id?: string | null
+          slack_username?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -151,6 +177,19 @@ export interface Database {
           ethics_considerations?: string | null
           status?: 'new' | 'triaged' | 'building' | 'shipped' | 'declined'
           priority?: 'low' | 'medium' | 'high' | 'urgent'
+          title?: string | null
+          category?: 'campaign_execution' | 'content_creation' | 'lead_management' | 'reporting' | 'other' | null
+          current_process?: string | null
+          pain_points?: string | null
+          frequency?: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'ad_hoc' | null
+          time_friendly?: string | null
+          systems?: string[] | null
+          sensitivity?: 'low' | 'medium' | 'high' | 'confidential' | null
+          links?: string | null
+          slack_team_id?: string | null
+          slack_team_name?: string | null
+          slack_user_id?: string | null
+          slack_username?: string | null
           created_at?: string
           updated_at?: string
         }

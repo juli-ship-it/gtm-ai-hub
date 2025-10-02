@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
+import { Logo } from '@/components/logo'
+import { useAuth } from '@/lib/auth/context'
 import { 
   LayoutDashboard, 
   FileText, 
@@ -10,8 +12,7 @@ import {
   ClipboardList, 
   BookOpen, 
   MessageSquare,
-  Settings,
-  Zap
+  Settings
 } from 'lucide-react'
 
 const navigation = [
@@ -26,20 +27,13 @@ const navigation = [
 
 export function Sidebar() {
   const pathname = usePathname()
+  const { user } = useAuth()
 
   return (
     <div className="flex h-full w-64 flex-col bg-white border-r border-gray-200">
       {/* Logo */}
       <div className="flex h-16 items-center px-6 border-b border-gray-200">
-        <div className="flex items-center space-x-3">
-          <div className="p-2 bg-wl-accent rounded-xl">
-            <Zap className="h-6 w-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-wl-text">GTM AI Hub</h1>
-            <p className="text-xs text-wl-muted">Powered by AI</p>
-          </div>
-        </div>
+        <Logo size="md" />
       </div>
 
       {/* Navigation */}
@@ -73,14 +67,21 @@ export function Sidebar() {
       <div className="p-4 border-t border-gray-200">
         <div className="flex items-center space-x-3">
           <div className="h-8 w-8 bg-wl-accent rounded-full flex items-center justify-center">
-            <span className="text-sm font-medium text-white">JR</span>
+            <span className="text-sm font-medium text-white">
+              {user?.email ? 
+                user.email.split('@')[0].split('.').map(part => part.charAt(0).toUpperCase()).join('') : 
+                'U'
+              }
+            </span>
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-wl-text truncate">
-              Juliana Reyes
-            </p>
-            <p className="text-xs text-wl-muted truncate">
-              GTM Architect
+              {user?.email ? 
+                user.email.split('@')[0].split('.').map(part => 
+                  part.charAt(0).toUpperCase() + part.slice(1)
+                ).join(' ') : 
+                'User'
+              }
             </p>
           </div>
         </div>
