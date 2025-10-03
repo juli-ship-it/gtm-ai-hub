@@ -1,3 +1,6 @@
+'use client'
+
+import { useEffect, useState } from 'react'
 import { PageHeader } from '@/components/page-header'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -16,94 +19,13 @@ import {
   ClipboardList,
   Shield
 } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+import { Database } from '@/types/database'
 
-// Mock data
-const mockTemplates = [
-  {
-    id: '1',
-    slug: 'youtube-to-blog-seo',
-    name: 'YouTube → Blog (SEO)',
-    category: 'content',
-    description: 'Convert YouTube videos into SEO-optimized blog posts with keyword research and meta descriptions',
-    version: 'v1.2',
-    runs: 45,
-    avgTime: '2m 34s',
-    lastRun: '2024-01-15T10:30:00Z',
-    successRate: 96,
-    isNew: true,
-    isPopular: true
-  },
-  {
-    id: '2',
-    slug: 'blog-to-linkedin',
-    name: 'Blog → LinkedIn',
-    category: 'content',
-    description: 'Transform blog posts into engaging LinkedIn content with professional tone and hashtags',
-    version: 'v1.0',
-    runs: 32,
-    avgTime: '1m 12s',
-    lastRun: '2024-01-15T11:15:00Z',
-    successRate: 94,
-    isNew: false,
-    isPopular: true
-  },
-  {
-    id: '3',
-    slug: 'webinar-to-nurture',
-    name: 'Webinar → Nurture Campaign',
-    category: 'content',
-    description: 'Create email nurture sequences from webinar content with personalized follow-ups',
-    version: 'v1.1',
-    runs: 28,
-    avgTime: '3m 45s',
-    lastRun: '2024-01-14T16:20:00Z',
-    successRate: 89,
-    isNew: false,
-    isPopular: false
-  },
-  {
-    id: '4',
-    slug: 'weekly-campaign-report',
-    name: 'Weekly Campaign Report',
-    category: 'reporting',
-    description: 'Generate comprehensive weekly campaign performance reports with insights and recommendations',
-    version: 'v2.0',
-    runs: 67,
-    avgTime: '4m 56s',
-    lastRun: '2024-01-15T09:00:00Z',
-    successRate: 98,
-    isNew: false,
-    isPopular: true
-  },
-  {
-    id: '5',
-    slug: 'daily-spend-alerts',
-    name: 'Daily Spend & CPA Alerts',
-    category: 'reporting',
-    description: 'Monitor daily ad spend and cost-per-acquisition with automated alerts and recommendations',
-    version: 'v1.3',
-    runs: 89,
-    avgTime: '1m 30s',
-    lastRun: '2024-01-15T08:00:00Z',
-    successRate: 92,
-    isNew: false,
-    isPopular: false
-  },
-  {
-    id: '6',
-    slug: 'jira-slack-intake',
-    name: 'Jira → Slack Intake Bot',
-    category: 'intake',
-    description: 'Automatically create intake requests from Jira tickets and notify teams via Slack',
-    version: 'v1.0',
-    runs: 156,
-    avgTime: '30s',
-    lastRun: '2024-01-15T12:45:00Z',
-    successRate: 99,
-    isNew: true,
-    isPopular: true
-  }
-]
+type Template = Database['public']['Tables']['template']['Row'] & {
+  template_runs?: { count: number }[]
+  last_run?: Database['public']['Tables']['template_run']['Row']
+}
 
 const categoryIcons = {
   content: FileText,
@@ -120,6 +42,106 @@ const categoryColors = {
 }
 
 export default function TemplatesPage() {
+  const [templates, setTemplates] = useState<Template[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState('all')
+
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      const supabase = createClient()
+      
+      try {
+        const { data, error } = await supabase
+          .from('template')
+          .select(`
+            *,
+            template_runs:template_run(count),
+            last_run:template_run(
+              started_at,
+              finished_at,
+              status
+            )
+          `)
+          .eq('enabled', true)
+          .order('created_at', { ascending: false })
+
+        if (error) throw error
+
+        // Get the most recent run for each template
+        const templatesWithLastRun = await Promise.all(
+          (data || []).map(async (template: any) => {
+            const { data: lastRun } = await supabase
+              .from('template_run')
+              .select('started_at, finished_at, status')
+              .eq('template_id', template.id)
+              .order('started_at', { ascending: false })
+              .limit(1)
+              .single()
+
+            return {
+              ...template,
+              last_run: lastRun
+            }
+          })
+        )
+
+        setTemplates(templatesWithLastRun)
+      } catch (error) {
+        console.error('Error fetching templates:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchTemplates()
+  }, [])
+
+  const filteredTemplates = templates.filter(template => {
+    const matchesSearch = template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         template.description?.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesCategory = categoryFilter === 'all' || template.category === categoryFilter
+    return matchesSearch && matchesCategory
+  })
+
+  const formatDuration = (startedAt: string, finishedAt: string | null) => {
+    if (!finishedAt) return 'Running...'
+    
+    const start = new Date(startedAt)
+    const end = new Date(finishedAt)
+    const diffMs = end.getTime() - start.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffSecs = Math.floor((diffMs % 60000) / 1000)
+    
+    return `${diffMins}m ${diffSecs}s`
+  }
+
+  const getSuccessRate = (template: Template) => {
+    // This would need to be calculated from actual run data
+    // For now, return a placeholder
+    return 95
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-wl-bg">
+        <div className="flex">
+          <Sidebar />
+          <div className="flex-1 p-8">
+            <PageHeader
+              title="Template Catalog"
+              description="Discover and run AI-powered automation templates for your GTM workflows."
+            />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="h-64 bg-gray-200 rounded-lg animate-pulse" />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
   return (
     <div className="min-h-screen bg-wl-bg">
       <div className="flex">
@@ -143,10 +165,12 @@ export default function TemplatesPage() {
                 <Input
                   placeholder="Search templates..."
                   className="pl-10"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
             </div>
-            <Select defaultValue="all">
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
               <SelectTrigger className="w-48">
                 <Filter className="mr-2 h-4 w-4" />
                 <SelectValue placeholder="Filter by category" />
@@ -162,91 +186,116 @@ export default function TemplatesPage() {
           </div>
 
           {/* Templates Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockTemplates.map((template) => {
-              const CategoryIcon = categoryIcons[template.category as keyof typeof categoryIcons]
-              const categoryColor = categoryColors[template.category as keyof typeof categoryColors]
-              
-              return (
-                <Card key={template.id} className="wl-card-hover group">
-                  <CardHeader className="pb-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className="p-2 bg-wl-accent/10 rounded-xl">
-                          <CategoryIcon className="h-5 w-5 text-wl-accent" />
-                        </div>
-                        <div>
-                          <CardTitle className="text-lg">{template.name}</CardTitle>
-                          <div className="flex items-center space-x-2 mt-1">
-                            <Badge variant="outline" className={categoryColor}>
-                              {template.category}
-                            </Badge>
-                            <Badge variant="outline" className="text-xs">
-                              {template.version}
-                            </Badge>
+          {filteredTemplates.length === 0 ? (
+            <div className="text-center py-12">
+              <FileText className="h-12 w-12 text-wl-muted mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-wl-text mb-2">No templates found</h3>
+              <p className="text-wl-muted mb-4">
+                {searchTerm || categoryFilter !== 'all' 
+                  ? 'Try adjusting your search or filter criteria.'
+                  : 'Get started by creating your first template.'
+                }
+              </p>
+              <Button className="wl-button-primary">
+                <FileText className="mr-2 h-4 w-4" />
+                Create Template
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredTemplates.map((template) => {
+                const CategoryIcon = categoryIcons[template.category as keyof typeof categoryIcons]
+                const categoryColor = categoryColors[template.category as keyof typeof categoryColors]
+                const runCount = template.template_runs?.[0]?.count || 0
+                const isNew = new Date(template.created_at) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // Created within last 7 days
+                const isPopular = runCount > 10
+                
+                return (
+                  <Card key={template.id} className="wl-card-hover group">
+                    <CardHeader className="pb-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center space-x-3">
+                          <div className="p-2 bg-wl-accent/10 rounded-xl">
+                            <CategoryIcon className="h-5 w-5 text-wl-accent" />
+                          </div>
+                          <div>
+                            <CardTitle className="text-lg">{template.name}</CardTitle>
+                            <div className="flex items-center space-x-2 mt-1">
+                              <Badge variant="outline" className={categoryColor}>
+                                {template.category}
+                              </Badge>
+                              <Badge variant="outline" className="text-xs">
+                                {template.version}
+                              </Badge>
+                            </div>
                           </div>
                         </div>
+                        <div className="flex items-center space-x-1">
+                          {isNew && (
+                            <Badge variant="secondary" className="text-xs">
+                              New
+                            </Badge>
+                          )}
+                          {isPopular && (
+                            <Badge variant="secondary" className="text-xs">
+                              <Star className="h-3 w-3 mr-1" />
+                              Popular
+                            </Badge>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex items-center space-x-1">
-                        {template.isNew && (
-                          <Badge variant="secondary" className="text-xs">
-                            New
-                          </Badge>
-                        )}
-                        {template.isPopular && (
-                          <Badge variant="secondary" className="text-xs">
-                            <Star className="h-3 w-3 mr-1" />
-                            Popular
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  </CardHeader>
-                  
-                  <CardContent className="space-y-4">
-                    <CardDescription className="text-sm">
-                      {template.description}
-                    </CardDescription>
+                    </CardHeader>
                     
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <p className="text-wl-muted">Runs</p>
-                        <p className="font-semibold text-wl-text">{template.runs}</p>
+                    <CardContent className="space-y-4">
+                      <CardDescription className="text-sm">
+                        {template.description}
+                      </CardDescription>
+                      
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <p className="text-wl-muted">Runs</p>
+                          <p className="font-semibold text-wl-text">{runCount}</p>
+                        </div>
+                        <div>
+                          <p className="text-wl-muted">Avg Time</p>
+                          <p className="font-semibold text-wl-text">
+                            {template.last_run ? formatDuration(template.last_run.started_at, template.last_run.finished_at) : 'N/A'}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-wl-muted">Success Rate</p>
+                          <p className="font-semibold text-wl-text">{getSuccessRate(template)}%</p>
+                        </div>
+                        <div>
+                          <p className="text-wl-muted">Last Run</p>
+                          <p className="font-semibold text-wl-text">
+                            {template.last_run 
+                              ? new Date(template.last_run.started_at).toLocaleDateString()
+                              : 'Never'
+                            }
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-wl-muted">Avg Time</p>
-                        <p className="font-semibold text-wl-text">{template.avgTime}</p>
+                      
+                      <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                        <div className="flex items-center text-sm text-wl-muted">
+                          <Clock className="h-4 w-4 mr-1" />
+                          Updated {new Date(template.created_at).toLocaleDateString()}
+                        </div>
+                        <Button 
+                          size="sm" 
+                          className="wl-button-primary group-hover:shadow-lg transition-all duration-200"
+                        >
+                          <Play className="mr-2 h-4 w-4" />
+                          Run Template
+                        </Button>
                       </div>
-                      <div>
-                        <p className="text-wl-muted">Success Rate</p>
-                        <p className="font-semibold text-wl-text">{template.successRate}%</p>
-                      </div>
-                      <div>
-                        <p className="text-wl-muted">Last Run</p>
-                        <p className="font-semibold text-wl-text">
-                          {new Date(template.lastRun).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                      <div className="flex items-center text-sm text-wl-muted">
-                        <Clock className="h-4 w-4 mr-1" />
-                        Updated 2 days ago
-                      </div>
-                      <Button 
-                        size="sm" 
-                        className="wl-button-primary group-hover:shadow-lg transition-all duration-200"
-                      >
-                        <Play className="mr-2 h-4 w-4" />
-                        Run Template
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              )
-            })}
-          </div>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -16,3 +16,6 @@ export const createClientSupabase = () => {
 
 // For backward compatibility
 export const supabase = createClientSupabase()
+
+// Export createClient for compatibility with existing code
+export const createClient = createClientSupabase

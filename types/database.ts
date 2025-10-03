@@ -281,6 +281,195 @@ export interface Database {
           created_at?: string
         }
       }
+      hr_module: {
+        Row: {
+          id: string
+          slug: string
+          title: string
+          description: string | null
+          status: 'draft' | 'published' | 'archived'
+          ethics_required: boolean
+          estimated_hours: number
+          difficulty: 'beginner' | 'intermediate' | 'advanced'
+          created_at: string
+          created_by: string | null
+        }
+        Insert: {
+          id?: string
+          slug: string
+          title: string
+          description?: string | null
+          status?: 'draft' | 'published' | 'archived'
+          ethics_required?: boolean
+          estimated_hours?: number
+          difficulty?: 'beginner' | 'intermediate' | 'advanced'
+          created_at?: string
+          created_by?: string | null
+        }
+        Update: {
+          id?: string
+          slug?: string
+          title?: string
+          description?: string | null
+          status?: 'draft' | 'published' | 'archived'
+          ethics_required?: boolean
+          estimated_hours?: number
+          difficulty?: 'beginner' | 'intermediate' | 'advanced'
+          created_at?: string
+          created_by?: string | null
+        }
+      }
+      hr_lesson: {
+        Row: {
+          id: string
+          module_id: string
+          slug: string
+          title: string
+          content_md: string | null
+          video_url: string | null
+          quiz: Json | null
+          order_num: number | null
+          estimated_minutes: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          module_id: string
+          slug: string
+          title: string
+          content_md?: string | null
+          video_url?: string | null
+          quiz?: Json | null
+          order_num?: number | null
+          estimated_minutes?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          module_id?: string
+          slug?: string
+          title?: string
+          content_md?: string | null
+          video_url?: string | null
+          quiz?: Json | null
+          order_num?: number | null
+          estimated_minutes?: number
+          created_at?: string
+        }
+      }
+      hr_progress: {
+        Row: {
+          user_id: string
+          lesson_id: string
+          completed: boolean
+          score: number | null
+          completed_at: string | null
+        }
+        Insert: {
+          user_id: string
+          lesson_id: string
+          completed?: boolean
+          score?: number | null
+          completed_at?: string | null
+        }
+        Update: {
+          user_id?: string
+          lesson_id?: string
+          completed?: boolean
+          score?: number | null
+          completed_at?: string | null
+        }
+      }
+      hr_feedback: {
+        Row: {
+          id: string
+          user_id: string
+          module_id: string
+          rating: number | null
+          comments: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          module_id: string
+          rating?: number | null
+          comments?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          module_id?: string
+          rating?: number | null
+          comments?: string | null
+          created_at?: string
+        }
+      }
+      hr_intake_request: {
+        Row: {
+          id: string
+          user_id: string
+          jtbd: string
+          desired_module: string | null
+          notes: string | null
+          status: 'new' | 'triaged' | 'building' | 'shipped' | 'declined'
+          slack_team_id: string | null
+          slack_team_name: string | null
+          slack_user_id: string | null
+          slack_username: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          jtbd: string
+          desired_module?: string | null
+          notes?: string | null
+          status?: 'new' | 'triaged' | 'building' | 'shipped' | 'declined'
+          slack_team_id?: string | null
+          slack_team_name?: string | null
+          slack_user_id?: string | null
+          slack_username?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          jtbd?: string
+          desired_module?: string | null
+          notes?: string | null
+          status?: 'new' | 'triaged' | 'building' | 'shipped' | 'declined'
+          slack_team_id?: string | null
+          slack_team_name?: string | null
+          slack_user_id?: string | null
+          slack_username?: string | null
+          created_at?: string
+        }
+      }
+      hr_badge: {
+        Row: {
+          id: string
+          user_id: string
+          module_id: string
+          badge_type: 'completion' | 'excellence' | 'ethics' | 'pioneer'
+          earned_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          module_id: string
+          badge_type?: 'completion' | 'excellence' | 'ethics' | 'pioneer'
+          earned_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          module_id?: string
+          badge_type?: 'completion' | 'excellence' | 'ethics' | 'pioneer'
+          earned_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never

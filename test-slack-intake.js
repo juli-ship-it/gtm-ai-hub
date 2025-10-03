@@ -24,11 +24,11 @@ const testData = {
 
 async function testSlackIntake() {
   try {
-    const response = await fetch('http://localhost:54321/functions/v1/slack-intake', {
+    const response = await fetch('https://qvfvylflnfxrhyzwlhpm.supabase.co/functions/v1/slack-intake', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`
+        'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`
       },
       body: JSON.stringify(testData)
     })

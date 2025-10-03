@@ -11,29 +11,21 @@ const supabase = createClient(
   }
 )
 
-interface SlackIntakeData {
+interface SlackHRIntakeData {
   event_type: string
   submitter_id: string
   submitter_username: string
   team_id: string
   team: string
-  title: string
   jtbd: string
-  category: string
-  current_process: string
-  pain_points: string
-  frequency: string
-  time_friendly: string
-  systems: string[]
-  sensitivity: string
-  urgency: string
-  links: string
+  desired_module?: string
+  notes?: string
   view_id: string
   callback_id: string
 }
 
 export default async function handler(req: Request) {
-  console.log(`[${new Date().toISOString()}] Request received: ${req.method} ${req.url}`)
+  console.log(`[${new Date().toISOString()}] HR University intake request received: ${req.method} ${req.url}`)
   
   // Handle CORS
   if (req.method === 'OPTIONS') {
@@ -52,52 +44,46 @@ export default async function handler(req: Request) {
   }
 
   try {
-    console.log('Parsing request body...')
+    console.log('Parsing HR University intake request body...')
     const slackData = await req.json()
-    console.log('Request data received:', JSON.stringify(slackData, null, 2))
+    console.log('HR University request data received:', JSON.stringify(slackData, null, 2))
     
     // Simple validation
-    if (!slackData.title || !slackData.submitter_username) {
-      console.log('Missing required fields')
+    if (!slackData.jtbd || !slackData.submitter_username) {
+      console.log('Missing required fields for HR University intake')
       return new Response(JSON.stringify({ 
         success: false, 
-        error: 'Missing required fields: title and submitter_username are required' 
+        error: 'Missing required fields: jtbd and submitter_username are required' 
       }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       })
     }
 
-    console.log('Creating simple intake request...')
+    console.log('Creating HR University intake request...')
     
-    // Create intake request with minimal data
+    // Find or create user
+    const userId = await findOrCreateUser(slackData)
+    
+    // Create HR University intake request
     const { data, error } = await supabase
-      .from('intake_request')
+      .from('hr_intake_request')
       .insert({
-        title: slackData.title,
-        problem_statement: slackData.jtbd || 'No description provided',
-        automation_idea: slackData.current_process || 'No automation idea provided',
-        category: slackData.category || 'other',
-        current_process: slackData.current_process || 'No current process described',
-        pain_points: slackData.pain_points || 'No pain points described',
-        frequency: slackData.frequency || 'ad_hoc',
-        time_friendly: slackData.time_friendly || 'Unknown',
-        systems: slackData.systems || [],
-        sensitivity: slackData.sensitivity || 'low',
-        links: slackData.links || '',
-        priority: 'medium',
+        user_id: userId,
+        jtbd: slackData.jtbd,
+        desired_module: slackData.desired_module || null,
+        notes: slackData.notes || null,
+        status: 'new',
         slack_team_id: slackData.team_id || '',
         slack_team_name: slackData.team || '',
         slack_user_id: slackData.submitter_id || '',
-        slack_username: slackData.submitter_username,
-        requester: '00000000-0000-0000-0000-000000000000', // Dummy UUID for now
-        status: 'new'
+        slack_username: slackData.submitter_username
       })
       .select()
       .single()
 
     if (error) {
-      console.error('Database error:', error)
+      console.error('Database error creating HR University intake request:', error)
       return new Response(JSON.stringify({ 
         success: false, 
         error: `Database error: ${error.message}` 
@@ -107,12 +93,15 @@ export default async function handler(req: Request) {
       })
     }
 
-    console.log(`Created intake request ${data.id}`)
+    console.log(`Created HR University intake request ${data.id}`)
+
+    // Send notification to Slack channel (optional)
+    await notifySlackChannel(data, slackData)
 
     return new Response(JSON.stringify({ 
       success: true, 
-      intake_request_id: data.id,
-      message: 'Intake request created successfully'
+      hr_intake_request_id: data.id,
+      message: 'HR University intake request created successfully'
     }), {
       status: 200,
       headers: { 
@@ -122,7 +111,7 @@ export default async function handler(req: Request) {
     })
 
   } catch (error) {
-    console.error('Error processing Slack intake:', error)
+    console.error('Error processing HR University Slack intake:', error)
     return new Response(JSON.stringify({ 
       success: false, 
       error: error instanceof Error ? error.message : 'Unknown error occurred'
@@ -136,7 +125,7 @@ export default async function handler(req: Request) {
   }
 }
 
-async function findOrCreateUser(slackData: SlackIntakeData): Promise<string> {
+async function findOrCreateUser(slackData: SlackHRIntakeData): Promise<string> {
   const email = `${slackData.submitter_username}@workleap.com`
   
   console.log(`Looking for user: ${email}`)
@@ -156,7 +145,6 @@ async function findOrCreateUser(slackData: SlackIntakeData): Promise<string> {
   console.log(`User not found in app_user table, creating new user`)
   
   // Create new user directly in app_user table
-  // We'll use a UUID for the ID since we can't easily query auth.users
   const { data: newUser, error: createError } = await supabase
     .from('app_user')
     .insert({
@@ -173,4 +161,35 @@ async function findOrCreateUser(slackData: SlackIntakeData): Promise<string> {
 
   console.log(`Created new user: ${newUser.id}`)
   return newUser.id
+}
+
+async function notifySlackChannel(hrIntakeData: any, slackData: SlackHRIntakeData) {
+  // This would integrate with Slack API to send a notification
+  // For now, we'll just log the notification
+  console.log('Would send Slack notification:', {
+    channel: '#hr-university-intake',
+    text: `New HR University module request from @${slackData.submitter_username}`,
+    blocks: [
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: `*New HR University Module Request*\n\n*Requested by:* @${slackData.submitter_username}\n*Job to be done:* ${slackData.jtbd}\n*Desired module:* ${slackData.desired_module || 'Not specified'}\n*Additional notes:* ${slackData.notes || 'None'}`
+        }
+      },
+      {
+        type: 'actions',
+        elements: [
+          {
+            type: 'button',
+            text: {
+              type: 'plain_text',
+              text: 'View in Admin Panel'
+            },
+            url: `${process.env.SUPABASE_URL}/admin/hr-university/intake`
+          }
+        ]
+      }
+    ]
+  })
 }

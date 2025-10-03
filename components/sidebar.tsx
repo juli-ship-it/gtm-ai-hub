@@ -12,7 +12,10 @@ import {
   ClipboardList, 
   BookOpen, 
   MessageSquare,
-  Settings
+  Settings,
+  Eye,
+  GraduationCap,
+  BarChart3
 } from 'lucide-react'
 
 const navigation = [
@@ -22,7 +25,9 @@ const navigation = [
   { name: 'Intake', href: '/intake', icon: ClipboardList },
   { name: 'Playbooks', href: '/playbooks', icon: BookOpen },
   { name: 'Prompts', href: '/prompts', icon: MessageSquare },
+  { name: 'HR University', href: '/app/hr-university', icon: GraduationCap },
   { name: 'Admin', href: '/admin', icon: Settings },
+  { name: 'Demo', href: '/demo', icon: Eye },
 ]
 
 export function Sidebar() {

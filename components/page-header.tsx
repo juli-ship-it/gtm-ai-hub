@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils"
 interface PageHeaderProps {
   title: string
   description?: string
+  subtitle?: string
   children?: React.ReactNode
   className?: string
 }
@@ -10,6 +11,7 @@ interface PageHeaderProps {
 export function PageHeader({ 
   title, 
   description, 
+  subtitle,
   children, 
   className 
 }: PageHeaderProps) {
@@ -20,9 +22,9 @@ export function PageHeader({
           <h1 className="text-3xl font-bold text-wl-text wl-hand-drawn">
             {title}
           </h1>
-          {description && (
+          {(description || subtitle) && (
             <p className="text-lg text-wl-muted max-w-2xl">
-              {description}
+              {description || subtitle}
             </p>
           )}
         </div>
