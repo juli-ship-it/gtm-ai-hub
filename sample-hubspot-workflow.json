@@ -1,0 +1,158 @@
+{
+  "id": "sample-hubspot-workflow",
+  "name": "HubSpot Segment to Excel Export",
+  "nodes": [
+    {
+      "id": "webhook-1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 300],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "hubspot-segment-export",
+        "options": {}
+      },
+      "webhookId": "webhook-123"
+    },
+    {
+      "id": "hubspot-1",
+      "name": "HubSpot Get Segment",
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 1,
+      "position": [300, 300],
+      "parameters": {
+        "resource": "segment",
+        "operation": "get",
+        "segmentId": "={{ $json.segment_id }}"
+      },
+      "credentials": {
+        "hubspotApi": "hubspot-credentials"
+      }
+    },
+    {
+      "id": "hubspot-2",
+      "name": "HubSpot Get Contacts",
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 1,
+      "position": [500, 300],
+      "parameters": {
+        "resource": "contact",
+        "operation": "getAll",
+        "filters": {
+          "property": [
+            {
+              "property": "{{ $json.contact_properties }}",
+              "value": "{{ $json.property_value }}"
+            }
+          ]
+        }
+      },
+      "credentials": {
+        "hubspotApi": "hubspot-credentials"
+      }
+    },
+    {
+      "id": "excel-1",
+      "name": "Excel Export",
+      "type": "n8n-nodes-base.excel",
+      "typeVersion": 1,
+      "position": [700, 300],
+      "parameters": {
+        "operation": "write",
+        "fileName": "{{ $json.excel_filename || 'hubspot-export' }}.xlsx",
+        "sheetName": "{{ $json.sheet_name || 'Contacts' }}",
+        "dataToWrite": "={{ $json.contacts }}"
+      }
+    },
+    {
+      "id": "slack-1",
+      "name": "Slack Notification",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [900, 300],
+      "parameters": {
+        "resource": "message",
+        "operation": "post",
+        "channel": "{{ $json.slack_channel || '#general' }}",
+        "text": "HubSpot export completed! File: {{ $json.excel_filename }}.xlsx"
+      },
+      "credentials": {
+        "slackApi": "slack-credentials"
+      }
+    },
+    {
+      "id": "email-1",
+      "name": "Email Notification",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [1100, 300],
+      "parameters": {
+        "toEmail": "{{ $json.email_to }}",
+        "subject": "HubSpot Export Complete",
+        "message": "Your HubSpot segment export is ready!",
+        "attachments": "={{ $json.excel_file }}"
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HubSpot Get Segment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HubSpot Get Segment": {
+      "main": [
+        [
+          {
+            "node": "HubSpot Get Contacts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HubSpot Get Contacts": {
+      "main": [
+        [
+          {
+            "node": "Excel Export",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Excel Export": {
+      "main": [
+        [
+          {
+            "node": "Slack Notification",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Email Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "n8n-instance-123"
+  }
+}

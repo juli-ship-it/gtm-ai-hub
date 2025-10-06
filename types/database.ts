@@ -44,6 +44,16 @@ export interface Database {
           requires_approval: boolean
           created_by: string | null
           created_at: string
+          n8n_workflow_json: Json | null
+          workflow_variables: Json | null
+          execution_instructions: string | null
+          estimated_duration_minutes: number | null
+          tags: string[] | null
+          difficulty_level: 'beginner' | 'intermediate' | 'advanced' | null
+          systems_required: string[] | null
+          file_requirements: Json | null
+          is_public: boolean
+          last_modified_at: string
         }
         Insert: {
           id?: string
@@ -59,6 +69,16 @@ export interface Database {
           requires_approval?: boolean
           created_by?: string | null
           created_at?: string
+          n8n_workflow_json?: Json | null
+          workflow_variables?: Json | null
+          execution_instructions?: string | null
+          estimated_duration_minutes?: number | null
+          tags?: string[] | null
+          difficulty_level?: 'beginner' | 'intermediate' | 'advanced' | null
+          systems_required?: string[] | null
+          file_requirements?: Json | null
+          is_public?: boolean
+          last_modified_at?: string
         }
         Update: {
           id?: string
@@ -74,6 +94,16 @@ export interface Database {
           requires_approval?: boolean
           created_by?: string | null
           created_at?: string
+          n8n_workflow_json?: Json | null
+          workflow_variables?: Json | null
+          execution_instructions?: string | null
+          estimated_duration_minutes?: number | null
+          tags?: string[] | null
+          difficulty_level?: 'beginner' | 'intermediate' | 'advanced' | null
+          systems_required?: string[] | null
+          file_requirements?: Json | null
+          is_public?: boolean
+          last_modified_at?: string
         }
       }
       template_run: {
@@ -665,6 +695,154 @@ export interface Database {
           module_id?: string
           badge_type?: 'completion' | 'excellence' | 'ethics' | 'pioneer'
           earned_at?: string
+        }
+      }
+      template_variable: {
+        Row: {
+          id: string
+          template_id: string
+          name: string
+          type: 'string' | 'number' | 'boolean' | 'file' | 'select' | 'multiselect' | 'date' | 'email' | 'url'
+          required: boolean
+          description: string | null
+          default_value: Json | null
+          validation_rules: Json | null
+          order_index: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          template_id: string
+          name: string
+          type: 'string' | 'number' | 'boolean' | 'file' | 'select' | 'multiselect' | 'date' | 'email' | 'url'
+          required?: boolean
+          description?: string | null
+          default_value?: Json | null
+          validation_rules?: Json | null
+          order_index?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          template_id?: string
+          name?: string
+          type?: 'string' | 'number' | 'boolean' | 'file' | 'select' | 'multiselect' | 'date' | 'email' | 'url'
+          required?: boolean
+          description?: string | null
+          default_value?: Json | null
+          validation_rules?: Json | null
+          order_index?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      template_execution_context: {
+        Row: {
+          id: string
+          template_run_id: string
+          variable_name: string
+          variable_value: Json
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          template_run_id: string
+          variable_name: string
+          variable_value: Json
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          template_run_id?: string
+          variable_name?: string
+          variable_value?: Json
+          created_at?: string
+        }
+      }
+      template_favorite: {
+        Row: {
+          id: string
+          template_id: string
+          user_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          template_id: string
+          user_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          template_id?: string
+          user_id?: string
+          created_at?: string
+        }
+      }
+      template_rating: {
+        Row: {
+          id: string
+          template_id: string
+          user_id: string
+          rating: number | null
+          feedback: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          template_id: string
+          user_id: string
+          rating?: number | null
+          feedback?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          template_id?: string
+          user_id?: string
+          rating?: number | null
+          feedback?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      template_version: {
+        Row: {
+          id: string
+          template_id: string
+          version_number: string
+          n8n_workflow_json: Json
+          workflow_variables: Json | null
+          changelog: string | null
+          is_active: boolean
+          created_by: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          template_id: string
+          version_number: string
+          n8n_workflow_json: Json
+          workflow_variables?: Json | null
+          changelog?: string | null
+          is_active?: boolean
+          created_by?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          template_id?: string
+          version_number?: string
+          n8n_workflow_json?: Json
+          workflow_variables?: Json | null
+          changelog?: string | null
+          is_active?: boolean
+          created_by?: string | null
+          created_at?: string
         }
       }
     }

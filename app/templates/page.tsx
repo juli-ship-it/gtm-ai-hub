@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Sidebar } from '@/components/sidebar'
+import { TemplateCreationForm } from '@/components/template-creation-form'
+import { TemplateExecutionForm } from '@/components/template-execution-form'
 import { 
   Search, 
   Filter, 
@@ -17,7 +19,10 @@ import {
   FileText,
   BarChart3,
   ClipboardList,
-  Shield
+  Shield,
+  Plus,
+  Eye,
+  Settings
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/database'
@@ -25,6 +30,7 @@ import { Database } from '@/types/database'
 type Template = Database['public']['Tables']['template']['Row'] & {
   template_runs?: { count: number }[]
   last_run?: Database['public']['Tables']['template_run']['Row']
+  template_variables?: Database['public']['Tables']['template_variable']['Row'][]
 }
 
 const categoryIcons = {
@@ -46,6 +52,9 @@ export default function TemplatesPage() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('all')
+  const [showCreateForm, setShowCreateForm] = useState(false)
+  const [executingTemplate, setExecutingTemplate] = useState<Template | null>(null)
+  const [viewingTemplate, setViewingTemplate] = useState<Template | null>(null)
 
   useEffect(() => {
     const fetchTemplates = async () => {
@@ -61,6 +70,16 @@ export default function TemplatesPage() {
               started_at,
               finished_at,
               status
+            ),
+            template_variables:template_variable(
+              id,
+              name,
+              type,
+              required,
+              description,
+              default_value,
+              validation_rules,
+              order_index
             )
           `)
           .eq('enabled', true)
@@ -122,6 +141,36 @@ export default function TemplatesPage() {
     return 95
   }
 
+  const handleCreateTemplate = () => {
+    setShowCreateForm(true)
+  }
+
+  const handleTemplateCreated = (template: Template) => {
+    setShowCreateForm(false)
+    // Refresh templates list
+    fetchTemplates()
+  }
+
+  const handleExecuteTemplate = (template: Template) => {
+    setExecutingTemplate(template)
+  }
+
+  const handleExecutionSuccess = (runId: string) => {
+    setExecutingTemplate(null)
+    // Refresh templates list to show updated run count
+    fetchTemplates()
+  }
+
+  const handleViewTemplate = (template: Template) => {
+    setViewingTemplate(template)
+  }
+
+  const handleCloseModals = () => {
+    setShowCreateForm(false)
+    setExecutingTemplate(null)
+    setViewingTemplate(null)
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-wl-bg">
@@ -151,8 +200,8 @@ export default function TemplatesPage() {
             title="Template Catalog"
             description="Discover and run AI-powered automation templates for your GTM workflows."
           >
-            <Button className="wl-button-primary">
-              <FileText className="mr-2 h-4 w-4" />
+            <Button className="wl-button-primary" onClick={handleCreateTemplate}>
+              <Plus className="mr-2 h-4 w-4" />
               Create Template
             </Button>
           </PageHeader>
@@ -282,13 +331,24 @@ export default function TemplatesPage() {
                           <Clock className="h-4 w-4 mr-1" />
                           Updated {new Date(template.created_at).toLocaleDateString()}
                         </div>
-                        <Button 
-                          size="sm" 
-                          className="wl-button-primary group-hover:shadow-lg transition-all duration-200"
-                        >
-                          <Play className="mr-2 h-4 w-4" />
-                          Run Template
-                        </Button>
+                        <div className="flex items-center space-x-2">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleViewTemplate(template)}
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            View
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            className="wl-button-primary group-hover:shadow-lg transition-all duration-200"
+                            onClick={() => handleExecuteTemplate(template)}
+                          >
+                            <Play className="mr-2 h-4 w-4" />
+                            Run Template
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -298,6 +358,121 @@ export default function TemplatesPage() {
           )}
         </div>
       </div>
+
+      {/* Template Creation Modal */}
+      {showCreateForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+            <TemplateCreationForm
+              onSuccess={handleTemplateCreated}
+              onCancel={handleCloseModals}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Template Execution Modal */}
+      {executingTemplate && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <TemplateExecutionForm
+              template={executingTemplate}
+              onSuccess={handleExecutionSuccess}
+              onCancel={handleCloseModals}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Template View Modal */}
+      {viewingTemplate && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold">{viewingTemplate.name}</h2>
+                <Button variant="outline" onClick={handleCloseModals}>
+                  Close
+                </Button>
+              </div>
+              
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Description</h3>
+                  <p className="text-gray-600">{viewingTemplate.description}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="font-medium">Category</h4>
+                    <Badge variant="outline">{viewingTemplate.category}</Badge>
+                  </div>
+                  <div>
+                    <h4 className="font-medium">Difficulty</h4>
+                    <Badge variant="outline">{viewingTemplate.difficulty_level}</Badge>
+                  </div>
+                  <div>
+                    <h4 className="font-medium">Duration</h4>
+                    <p>{viewingTemplate.estimated_duration_minutes} minutes</p>
+                  </div>
+                  <div>
+                    <h4 className="font-medium">Systems</h4>
+                    <div className="flex flex-wrap gap-1">
+                      {viewingTemplate.systems_required?.map(system => (
+                        <Badge key={system} variant="secondary">{system}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {viewingTemplate.template_variables && viewingTemplate.template_variables.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4">Required Variables</h3>
+                    <div className="space-y-3">
+                      {viewingTemplate.template_variables.map((variable) => (
+                        <div key={variable.id} className="border rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium">{variable.name}</span>
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="outline">{variable.type}</Badge>
+                              {variable.required && <Badge variant="destructive">Required</Badge>}
+                            </div>
+                          </div>
+                          {variable.description && (
+                            <p className="text-sm text-gray-600">{variable.description}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {viewingTemplate.execution_instructions && (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Instructions</h3>
+                    <div className="p-4 bg-blue-50 rounded-lg">
+                      <p className="text-blue-800">{viewingTemplate.execution_instructions}</p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex justify-end space-x-2">
+                  <Button variant="outline" onClick={handleCloseModals}>
+                    Close
+                  </Button>
+                  <Button onClick={() => {
+                    setViewingTemplate(null)
+                    handleExecuteTemplate(viewingTemplate)
+                  }}>
+                    <Play className="h-4 w-4 mr-2" />
+                    Execute Template
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
