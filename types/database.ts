@@ -140,6 +140,7 @@ export interface Database {
           slack_team_name: string | null
           slack_user_id: string | null
           slack_username: string | null
+          request_type: 'real' | 'showcase' | 'demo'
           created_at: string
           updated_at: string
         }
@@ -165,6 +166,7 @@ export interface Database {
           slack_team_name?: string | null
           slack_user_id?: string | null
           slack_username?: string | null
+          request_type?: 'real' | 'showcase' | 'demo'
           created_at?: string
           updated_at?: string
         }
@@ -190,6 +192,7 @@ export interface Database {
           slack_team_name?: string | null
           slack_user_id?: string | null
           slack_username?: string | null
+          request_type?: 'real' | 'showcase' | 'demo'
           created_at?: string
           updated_at?: string
         }
@@ -278,6 +281,200 @@ export interface Database {
           intake_request_id?: string
           author_id?: string
           content?: string
+          created_at?: string
+        }
+      }
+      intake_activity_log: {
+        Row: {
+          id: string
+          intake_request_id: string
+          user_id: string | null
+          action_type: 'status_changed' | 'priority_changed' | 'assigned' | 'unassigned' | 'comment_added' | 'file_attached' | 'tag_added' | 'tag_removed' | 'field_updated' | 'created' | 'viewed'
+          old_value: string | null
+          new_value: string | null
+          description: string | null
+          metadata: Json | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          intake_request_id: string
+          user_id?: string | null
+          action_type: 'status_changed' | 'priority_changed' | 'assigned' | 'unassigned' | 'comment_added' | 'file_attached' | 'tag_added' | 'tag_removed' | 'field_updated' | 'created' | 'viewed'
+          old_value?: string | null
+          new_value?: string | null
+          description?: string | null
+          metadata?: Json | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          intake_request_id?: string
+          user_id?: string | null
+          action_type?: 'status_changed' | 'priority_changed' | 'assigned' | 'unassigned' | 'comment_added' | 'file_attached' | 'tag_added' | 'tag_removed' | 'field_updated' | 'created' | 'viewed'
+          old_value?: string | null
+          new_value?: string | null
+          description?: string | null
+          metadata?: Json | null
+          created_at?: string
+        }
+      }
+      intake_assignment: {
+        Row: {
+          id: string
+          intake_request_id: string
+          assigned_to: string
+          assigned_by: string
+          assigned_at: string
+          unassigned_at: string | null
+          notes: string | null
+        }
+        Insert: {
+          id?: string
+          intake_request_id: string
+          assigned_to: string
+          assigned_by: string
+          assigned_at?: string
+          unassigned_at?: string | null
+          notes?: string | null
+        }
+        Update: {
+          id?: string
+          intake_request_id?: string
+          assigned_to?: string
+          assigned_by?: string
+          assigned_at?: string
+          unassigned_at?: string | null
+          notes?: string | null
+        }
+      }
+      intake_attachment: {
+        Row: {
+          id: string
+          intake_request_id: string
+          uploaded_by: string
+          file_name: string
+          file_url: string | null
+          file_type: string | null
+          file_size: number | null
+          attachment_type: 'file' | 'link' | 'image' | 'document'
+          description: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          intake_request_id: string
+          uploaded_by: string
+          file_name: string
+          file_url?: string | null
+          file_type?: string | null
+          file_size?: number | null
+          attachment_type?: 'file' | 'link' | 'image' | 'document'
+          description?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          intake_request_id?: string
+          uploaded_by?: string
+          file_name?: string
+          file_url?: string | null
+          file_type?: string | null
+          file_size?: number | null
+          attachment_type?: 'file' | 'link' | 'image' | 'document'
+          description?: string | null
+          created_at?: string
+        }
+      }
+      intake_tag: {
+        Row: {
+          id: string
+          name: string
+          color: string
+          description: string | null
+          created_by: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          color?: string
+          description?: string | null
+          created_by?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          color?: string
+          description?: string | null
+          created_by?: string | null
+          created_at?: string
+        }
+      }
+      intake_request_tag: {
+        Row: {
+          intake_request_id: string
+          tag_id: string
+          added_by: string
+          added_at: string
+        }
+        Insert: {
+          intake_request_id: string
+          tag_id: string
+          added_by: string
+          added_at?: string
+        }
+        Update: {
+          intake_request_id?: string
+          tag_id?: string
+          added_by?: string
+          added_at?: string
+        }
+      }
+      intake_watcher: {
+        Row: {
+          intake_request_id: string
+          user_id: string
+          added_at: string
+        }
+        Insert: {
+          intake_request_id: string
+          user_id: string
+          added_at?: string
+        }
+        Update: {
+          intake_request_id?: string
+          user_id?: string
+          added_at?: string
+        }
+      }
+      intake_status_history: {
+        Row: {
+          id: string
+          intake_request_id: string
+          from_status: 'new' | 'triaged' | 'building' | 'shipped' | 'declined' | null
+          to_status: 'new' | 'triaged' | 'building' | 'shipped' | 'declined'
+          changed_by: string | null
+          reason: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          intake_request_id: string
+          from_status?: 'new' | 'triaged' | 'building' | 'shipped' | 'declined' | null
+          to_status: 'new' | 'triaged' | 'building' | 'shipped' | 'declined'
+          changed_by?: string | null
+          reason?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          intake_request_id?: string
+          from_status?: 'new' | 'triaged' | 'building' | 'shipped' | 'declined' | null
+          to_status?: 'new' | 'triaged' | 'building' | 'shipped' | 'declined'
+          changed_by?: string | null
+          reason?: string | null
           created_at?: string
         }
       }

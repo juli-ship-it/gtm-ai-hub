@@ -32,6 +32,7 @@ interface SlackIntakeData {
   urgency: string
   links: string
   gpt_agent_url?: string  // New field for GPT agent URL
+  request_type?: string   // New field for request type (request/showcase)
   view_id: string
   callback_id: string
 }
@@ -100,11 +101,15 @@ async function processRequest(req: Request) {
       })
     }
 
-    console.log('Creating simple intake request...')
+    console.log('Creating intake request...')
+    
+    // Determine request type from payload
+    const requestType = slackData.request_type === 'showcase' ? 'showcase' : 'real'
+    console.log(`Request type: ${requestType}`)
     
     // For now, let's create the intake request without a user reference
     // We'll store the user info in the slack fields instead
-    console.log(`Creating intake request for: ${slackData.submitter_username}`)
+    console.log(`Creating ${requestType} intake request for: ${slackData.submitter_username}`)
     
     // Create intake request with minimal data
     const { data, error } = await supabase
@@ -126,6 +131,7 @@ async function processRequest(req: Request) {
         slack_team_name: slackData.team || '',
         slack_user_id: slackData.submitter_id || '',
         slack_username: slackData.submitter_username,
+        request_type: requestType,
         requester: null, // We'll set this to null for now
         status: 'new'
       })
@@ -177,7 +183,8 @@ async function processRequest(req: Request) {
       success: true, 
       intake_request_id: data.id,
       gpt_agent_id: gptAgentId,
-      message: 'Intake request created successfully' + (gptAgentId ? ' with GPT agent' : '')
+      request_type: requestType,
+      message: `${requestType === 'real' ? 'Intake request' : 'Showcase example'} created successfully` + (gptAgentId ? ' with GPT agent' : '')
     }), {
       status: 200,
       headers: { 

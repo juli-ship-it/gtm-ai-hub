@@ -19,10 +19,20 @@ import {
   User,
   AlertCircle,
   CheckCircle,
-  ArrowRight
+  ArrowRight,
+  Star,
+  Zap,
+  Play,
+  Pause,
+  CheckCircle2,
+  X,
+  Edit3,
+  MoreHorizontal
 } from 'lucide-react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/database'
+import { IntakeForm } from '@/components/intake-form'
 
 type IntakeRequest = Database['public']['Tables']['intake_request']['Row'] & {
   requester_user?: Database['public']['Tables']['app_user']['Row']
@@ -36,12 +46,26 @@ const priorityColors = {
   urgent: 'bg-red-100 text-red-800'
 }
 
+const typeColors = {
+  real: 'bg-blue-100 text-blue-800',
+  showcase: 'bg-purple-100 text-purple-800',
+  demo: 'bg-green-100 text-green-800'
+}
+
+const typeIcons = {
+  real: MessageSquare,
+  showcase: Star,
+  demo: Zap
+}
+
 export default function IntakePage() {
   const [intakeRequests, setIntakeRequests] = useState<IntakeRequest[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [priorityFilter, setPriorityFilter] = useState('all')
+  const [typeFilter, setTypeFilter] = useState('all')
+  const [isIntakeFormOpen, setIsIntakeFormOpen] = useState(false)
 
   useEffect(() => {
     const fetchIntakeRequests = async () => {
@@ -103,20 +127,86 @@ export default function IntakePage() {
     
     const matchesStatus = statusFilter === 'all' || request.status === statusFilter
     const matchesPriority = priorityFilter === 'all' || request.priority === priorityFilter
+    // Handle requests that might not have request_type field yet (fallback to 'real')
+    const requestType = request.request_type || 'real'
+    const matchesType = typeFilter === 'all' || requestType === typeFilter
     
-    return matchesSearch && matchesStatus && matchesPriority
+    
+    
+    return matchesSearch && matchesStatus && matchesPriority && matchesType
   })
 
   const getStats = () => {
-    const newCount = intakeRequests.filter(r => r.status === 'new').length
-    const inProgressCount = intakeRequests.filter(r => ['triaged', 'building'].includes(r.status)).length
-    const shippedCount = intakeRequests.filter(r => r.status === 'shipped').length
-    const totalCount = intakeRequests.length
+    const realRequests = intakeRequests.filter(r => (r.request_type || 'real') === 'real')
+    const newCount = realRequests.filter(r => r.status === 'new').length
+    const inProgressCount = realRequests.filter(r => ['triaged', 'building'].includes(r.status)).length
+    const shippedCount = realRequests.filter(r => r.status === 'shipped').length
+    const totalCount = realRequests.length
 
     return { newCount, inProgressCount, shippedCount, totalCount }
   }
 
   const stats = getStats()
+
+  const handleIntakeSuccess = (intakeId: string) => {
+    // Refresh the intake requests list
+    window.location.reload() // Simple refresh for now
+    setIsIntakeFormOpen(false)
+  }
+
+  const handleQuickStatusUpdate = async (requestId: string, newStatus: string) => {
+    const supabase = createClient()
+    
+    try {
+      const { error } = await supabase
+        .from('intake_request')
+        .update({ status: newStatus })
+        .eq('id', requestId)
+
+      if (error) throw error
+      
+      // Update local state
+      setIntakeRequests(prev => 
+        prev.map(req => 
+          req.id === requestId 
+            ? { ...req, status: newStatus as any }
+            : req
+        )
+      )
+    } catch (error) {
+      console.error('Error updating status:', error)
+    }
+  }
+
+  const getStatusActions = (currentStatus: string) => {
+    switch (currentStatus) {
+      case 'new':
+        return [
+          { label: 'Start Review', status: 'triaged', icon: Play, color: 'bg-blue-100 text-blue-800 hover:bg-blue-200' },
+          { label: 'Decline', status: 'declined', icon: X, color: 'bg-red-100 text-red-800 hover:bg-red-200' }
+        ]
+      case 'triaged':
+        return [
+          { label: 'Start Building', status: 'building', icon: Play, color: 'bg-green-100 text-green-800 hover:bg-green-200' },
+          { label: 'Back to New', status: 'new', icon: Pause, color: 'bg-gray-100 text-gray-800 hover:bg-gray-200' }
+        ]
+      case 'building':
+        return [
+          { label: 'Mark Shipped', status: 'shipped', icon: CheckCircle2, color: 'bg-green-100 text-green-800 hover:bg-green-200' },
+          { label: 'Back to Review', status: 'triaged', icon: Pause, color: 'bg-gray-100 text-gray-800 hover:bg-gray-200' }
+        ]
+      case 'shipped':
+        return [
+          { label: 'Reopen', status: 'building', icon: Edit3, color: 'bg-orange-100 text-orange-800 hover:bg-orange-200' }
+        ]
+      case 'declined':
+        return [
+          { label: 'Reopen', status: 'new', icon: Edit3, color: 'bg-blue-100 text-blue-800 hover:bg-blue-200' }
+        ]
+      default:
+        return []
+    }
+  }
 
   if (loading) {
     return (
@@ -152,7 +242,10 @@ export default function IntakePage() {
             title="Intake Board"
             description="Submit and track automation requests from your team."
           >
-            <Button className="wl-button-primary">
+            <Button 
+              className="wl-button-primary"
+              onClick={() => setIsIntakeFormOpen(true)}
+            >
               <Plus className="mr-2 h-4 w-4" />
               New Request
             </Button>
@@ -248,6 +341,17 @@ export default function IntakePage() {
                 <SelectItem value="low">Low</SelectItem>
               </SelectContent>
             </Select>
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Filter by type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="real">Real Requests</SelectItem>
+                <SelectItem value="showcase">Showcase</SelectItem>
+                <SelectItem value="demo">Demo</SelectItem>
+                <SelectItem value="all">All Types</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Intake Requests */}
@@ -261,7 +365,10 @@ export default function IntakePage() {
                   : 'Get started by submitting your first automation request.'
                 }
               </p>
-              <Button className="wl-button-primary">
+              <Button 
+                className="wl-button-primary"
+                onClick={() => setIsIntakeFormOpen(true)}
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 New Request
               </Button>
@@ -269,16 +376,20 @@ export default function IntakePage() {
           ) : (
             <div className="space-y-6">
               {filteredRequests.map((request) => (
-                <Card key={request.id} className="wl-card-hover">
+                <Card key={request.id} className="wl-card hover:shadow-lg transition-shadow">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center space-x-3">
                         <div className="flex-shrink-0">
                           <div className="p-2 bg-wl-accent/10 rounded-xl">
-                            <MessageSquare className="h-5 w-5 text-wl-accent" />
+                            {(() => {
+                              const requestType = request.request_type || 'real'
+                              const TypeIcon = typeIcons[requestType] || MessageSquare
+                              return <TypeIcon className="h-5 w-5 text-wl-accent" />
+                            })()}
                           </div>
                         </div>
-                        <div>
+                        <div className="flex-1">
                           <div className="flex items-center space-x-2 mb-1">
                             <h3 className="font-semibold text-wl-text">
                               {request.title || request.jira_issue_key || `Request ${request.id.slice(0, 8)}`}
@@ -286,6 +397,9 @@ export default function IntakePage() {
                             <StatusBadge status={request.status} />
                             <Badge className={priorityColors[request.priority]}>
                               {request.priority}
+                            </Badge>
+                            <Badge className={typeColors[request.request_type || 'real']}>
+                              {request.request_type || 'real'}
                             </Badge>
                           </div>
                           <div className="flex items-center space-x-4 text-sm text-wl-muted">
@@ -310,16 +424,20 @@ export default function IntakePage() {
                           </div>
                         </div>
                       </div>
-                      <Button variant="ghost" size="sm">
-                        <ArrowRight className="h-4 w-4" />
-                      </Button>
+                      <div className="flex items-center space-x-2">
+                        <Link href={`/intake/${request.id}`}>
+                          <Button variant="ghost" size="sm">
+                            <ArrowRight className="h-4 w-4" />
+                          </Button>
+                        </Link>
+                      </div>
                     </div>
                     
-                    <div className="space-y-4">
+                    <div className="space-y-3 mb-4">
                       {request.problem_statement && (
                         <div>
-                          <h4 className="font-medium text-wl-text mb-2">Problem Statement</h4>
-                          <p className="text-wl-muted text-sm">
+                          <h4 className="font-medium text-wl-text mb-1">Problem Statement</h4>
+                          <p className="text-wl-muted text-sm line-clamp-2">
                             {request.problem_statement}
                           </p>
                         </div>
@@ -327,21 +445,36 @@ export default function IntakePage() {
                       
                       {request.automation_idea && (
                         <div>
-                          <h4 className="font-medium text-wl-text mb-2">Automation Idea</h4>
-                          <p className="text-wl-muted text-sm">
+                          <h4 className="font-medium text-wl-text mb-1">Automation Idea</h4>
+                          <p className="text-wl-muted text-sm line-clamp-2">
                             {request.automation_idea}
                           </p>
                         </div>
                       )}
-                      
-                      {request.ethics_considerations && (
-                        <div>
-                          <h4 className="font-medium text-wl-text mb-2">Ethics Considerations</h4>
-                          <p className="text-wl-muted text-sm">
-                            {request.ethics_considerations}
-                          </p>
-                        </div>
-                      )}
+                    </div>
+
+                    {/* Quick Actions */}
+                    <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                      <div className="flex items-center space-x-2">
+                        {getStatusActions(request.status).map((action, index) => {
+                          const ActionIcon = action.icon
+                          return (
+                            <Button
+                              key={index}
+                              variant="ghost"
+                              size="sm"
+                              className={`text-xs ${action.color}`}
+                              onClick={() => handleQuickStatusUpdate(request.id, action.status)}
+                            >
+                              <ActionIcon className="h-3 w-3 mr-1" />
+                              {action.label}
+                            </Button>
+                          )
+                        })}
+                      </div>
+                      <div className="flex items-center space-x-1 text-xs text-wl-muted">
+                        <span>ID: {request.id.slice(0, 8)}</span>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -350,6 +483,13 @@ export default function IntakePage() {
           )}
         </div>
       </div>
+
+      {/* Intake Form Modal */}
+      <IntakeForm
+        isOpen={isIntakeFormOpen}
+        onClose={() => setIsIntakeFormOpen(false)}
+        onSuccess={handleIntakeSuccess}
+      />
     </div>
   )
 }

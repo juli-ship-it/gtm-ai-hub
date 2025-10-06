@@ -50,6 +50,7 @@ Slack Modal Submission → n8n Workflow → Supabase Edge Function → Database
 | `submitter_username` | `slack_username` | Direct mapping |
 | `team_id` | `slack_team_id` | Direct mapping |
 | `team` | `slack_team_name` | Direct mapping |
+| `request_type` | `request_type` | Maps 'request' → 'real', 'showcase' → 'showcase' |
 
 ## Setup Instructions
 
