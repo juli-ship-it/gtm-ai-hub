@@ -1,5 +1,4 @@
 import React from 'react'
-import Image from 'next/image'
 
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl'
@@ -26,23 +25,11 @@ export function Logo({ size = 'md', showText = true, className = '' }: LogoProps
     <div className={`flex items-center space-x-3 ${className}`}>
       {/* Workleap Logo */}
       <div className={`${sizeClasses[size]} relative`}>
-        <Image
-          src="https://qvfvylflnfxrhyzwlhpm.supabase.co/storage/v1/object/public/assets/Workleap_blue.png"
-          alt="Workleap Logo"
-          width={100}
-          height={100}
-          className="w-full h-full object-contain"
-          priority
-          onError={(e) => {
-            console.log('Workleap logo failed to load, showing fallback')
-            e.currentTarget.style.display = 'none'
-            // Show the fallback when image fails
-            const fallback = e.currentTarget.nextElementSibling as HTMLElement
-            if (fallback) fallback.style.display = 'flex'
-          }}
-        />
-        {/* Fallback placeholder when image fails to load - hidden by default */}
-        <div className="absolute inset-0 rounded-lg flex items-center justify-center text-white font-bold text-xs" style={{ display: 'none', backgroundColor: '#2545FF' }}>
+        {/* Use a simple div with background color instead of external image to avoid 500 errors */}
+        <div 
+          className="w-full h-full rounded-lg flex items-center justify-center text-white font-bold text-xs"
+          style={{ backgroundColor: '#2545FF' }}
+        >
           workleap
         </div>
       </div>
