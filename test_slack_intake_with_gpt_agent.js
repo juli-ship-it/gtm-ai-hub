@@ -1,0 +1,36 @@
+// Test the slack-intake function with GPT agent URL
+const testData = {
+  "title": "Test GPT Agent Request",
+  "submitter_username": "juliana.reyes",
+  "jtbd": "I need help with content creation using GPT agents",
+  "category": "content",
+  "links": "https://chatgpt.com/g/g-3TfXg9het-workleap-content-assistant",
+  "current_process": "Manual content creation",
+  "pain_points": "Time consuming",
+  "frequency": "daily",
+  "time_friendly": "2 hours",
+  "systems": ["slack", "notion"],
+  "sensitivity": "low",
+  "urgency": "medium"
+}
+
+async function testSlackIntake() {
+  try {
+    const response = await fetch('https://qvfvylflnfxrhyzwlhpm.supabase.co/functions/v1/slack-intake', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2ZnZ5bGZsbWZ4cnJoeXp3bGhwbSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzM1OTQ0NDQwLCJleHAiOjIwNTE1MjA0NDB9.8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q'
+      },
+      body: JSON.stringify(testData)
+    })
+
+    const result = await response.json()
+    console.log('Response status:', response.status)
+    console.log('Response:', JSON.stringify(result, null, 2))
+  } catch (error) {
+    console.error('Error:', error)
+  }
+}
+
+testSlackIntake()

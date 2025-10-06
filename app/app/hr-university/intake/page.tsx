@@ -82,7 +82,7 @@ export default function HRIntakePage() {
   return (
     <div className="space-y-8">
       <div className="flex items-center space-x-4">
-        <Link href="/hr-university">
+        <Link href="/app/hr-university">
           <Button variant="outline" size="sm">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to HR University

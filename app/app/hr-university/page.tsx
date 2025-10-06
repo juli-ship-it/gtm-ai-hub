@@ -57,8 +57,8 @@ export default function HRUniversityPage() {
   return (
     <div className="space-y-8">
       <PageHeader
-        title="AI in HR University"
-        description="Master AI-powered people management through hands-on training with real AI tools"
+        title="AI University"
+        subtitle="Master AI-powered people management through hands-on training with real AI tools"
       />
 
       {/* Stats Overview */}

@@ -7,7 +7,7 @@
     /* Workleap Design Tokens */
     --wl-bg: #F8FAFC;
     --wl-card: #FFFFFF;
-    --wl-accent: #4F46E5;
+    --wl-accent: #2545FF;
     --wl-accent-2: #22C55E;
     --wl-text: #0F172A;
     --wl-muted: #64748B;
@@ -19,7 +19,7 @@
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
+    --primary: 225 100% 50%;
     --primary-foreground: 210 40% 98%;
     --secondary: 210 40% 96%;
     --secondary-foreground: 222.2 84% 4.9%;
@@ -31,7 +31,7 @@
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
+    --ring: 225 100% 50%;
     --radius: 0.75rem;
   }
 

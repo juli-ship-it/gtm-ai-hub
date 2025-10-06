@@ -24,17 +24,17 @@ export function Logo({ size = 'md', showText = true, className = '' }: LogoProps
 
   return (
     <div className={`flex items-center space-x-3 ${className}`}>
-      {/* Logo Icon */}
+      {/* Workleap Logo */}
       <div className={`${sizeClasses[size]} relative`}>
         <Image
-          src="/images/logo.png"
-          alt="GTM AI Hub Logo"
+          src="https://qvfvylflnfxrhyzwlhpm.supabase.co/storage/v1/object/public/assets/Workleap_blue.png"
+          alt="Workleap Logo"
           width={100}
           height={100}
           className="w-full h-full object-contain"
           priority
           onError={(e) => {
-            console.log('Logo image failed to load, showing fallback')
+            console.log('Workleap logo failed to load, showing fallback')
             e.currentTarget.style.display = 'none'
             // Show the fallback when image fails
             const fallback = e.currentTarget.nextElementSibling as HTMLElement
@@ -42,8 +42,8 @@ export function Logo({ size = 'md', showText = true, className = '' }: LogoProps
           }}
         />
         {/* Fallback placeholder when image fails to load - hidden by default */}
-        <div className="absolute inset-0 bg-wl-accent rounded-full flex items-center justify-center text-white font-bold text-xs" style={{ display: 'none' }}>
-          GT
+        <div className="absolute inset-0 rounded-lg flex items-center justify-center text-white font-bold text-xs" style={{ display: 'none', backgroundColor: '#2545FF' }}>
+          workleap
         </div>
       </div>
       
@@ -53,7 +53,6 @@ export function Logo({ size = 'md', showText = true, className = '' }: LogoProps
           <h1 className={`font-bold text-wl-text ${textSizeClasses[size]}`}>
             GTM AI Hub
           </h1>
-          <p className="text-xs text-wl-muted -mt-1">Powered by AI</p>
         </div>
       )}
     </div>

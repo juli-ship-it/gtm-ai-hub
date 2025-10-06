@@ -48,6 +48,7 @@ export default function IntakePage() {
       const supabase = createClient()
       
       try {
+        // First try with the join, but handle null requester
         const { data, error } = await supabase
           .from('intake_request')
           .select(`
@@ -59,11 +60,30 @@ export default function IntakePage() {
           `)
           .order('created_at', { ascending: false })
 
-        if (error) throw error
-
-        setIntakeRequests(data || [])
+        if (error) {
+          console.error('Error with join query:', error)
+          console.error('Error details:', JSON.stringify(error, null, 2))
+          // Fallback to simple query without join
+          const { data: simpleData, error: simpleError } = await supabase
+            .from('intake_request')
+            .select('*')
+            .order('created_at', { ascending: false })
+          
+          if (simpleError) {
+            console.error('Simple query also failed:', simpleError)
+            console.error('Simple error details:', JSON.stringify(simpleError, null, 2))
+            throw simpleError
+          }
+          console.log('Simple query data:', simpleData)
+          setIntakeRequests(simpleData || [])
+        } else {
+          console.log('Join query data:', data)
+          setIntakeRequests(data || [])
+        }
       } catch (error) {
         console.error('Error fetching intake requests:', error)
+        // Set empty array on error to show "no requests" state
+        setIntakeRequests([])
       } finally {
         setLoading(false)
       }
@@ -77,7 +97,9 @@ export default function IntakePage() {
       request.jira_issue_key?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       request.problem_statement?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       request.automation_idea?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.requester_user?.email?.toLowerCase().includes(searchTerm.toLowerCase())
+      request.requester_user?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      request.slack_username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      request.title?.toLowerCase().includes(searchTerm.toLowerCase())
     
     const matchesStatus = statusFilter === 'all' || request.status === statusFilter
     const matchesPriority = priorityFilter === 'all' || request.priority === priorityFilter
@@ -259,7 +281,7 @@ export default function IntakePage() {
                         <div>
                           <div className="flex items-center space-x-2 mb-1">
                             <h3 className="font-semibold text-wl-text">
-                              {request.jira_issue_key || `Request ${request.id.slice(0, 8)}`}
+                              {request.title || request.jira_issue_key || `Request ${request.id.slice(0, 8)}`}
                             </h3>
                             <StatusBadge status={request.status} />
                             <Badge className={priorityColors[request.priority]}>
@@ -269,7 +291,11 @@ export default function IntakePage() {
                           <div className="flex items-center space-x-4 text-sm text-wl-muted">
                             <div className="flex items-center space-x-1">
                               <User className="h-4 w-4" />
-                              <span>{request.requester_user?.email || 'Unknown User'}</span>
+                              <span>
+                                {request.requester_user?.email || 
+                                 request.slack_username || 
+                                 'Unknown User'}
+                              </span>
                             </div>
                             <div className="flex items-center space-x-1">
                               <Clock className="h-4 w-4" />
