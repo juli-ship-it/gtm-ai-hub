@@ -38,7 +38,7 @@ export interface N8NNode {
 
 export interface DetectedVariable {
   name: string
-  type: 'string' | 'number' | 'boolean' | 'file' | 'select' | 'multiselect' | 'date' | 'email' | 'url'
+  type: 'string' | 'number' | 'boolean' | 'file' | 'select' | 'multiselect' | 'date' | 'email' | 'url' | 'object'
   required: boolean
   description: string
   defaultValue?: any

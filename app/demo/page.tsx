@@ -153,10 +153,10 @@ export default function TemplateSystemDemo() {
                       Slack Notification
                     </Button>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-
+            </div>
+          </CardContent>
+        </Card>
+        
             {/* Variable Configuration */}
             {selectedTemplate && (
               <Card>
@@ -176,7 +176,7 @@ export default function TemplateSystemDemo() {
                       <p className="text-sm text-gray-600">{variable.description}</p>
                       
                       {variable.type === 'string' && (
-                        <Input
+            <Input
                           id={variable.name}
                           value={variables[variable.name] || ''}
                           onChange={(e) => handleVariableChange(variable.name, e.target.value)}
@@ -191,13 +191,13 @@ export default function TemplateSystemDemo() {
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select an option" />
-                          </SelectTrigger>
-                          <SelectContent>
+          </SelectTrigger>
+          <SelectContent>
                             <SelectItem value="contact">Contact</SelectItem>
                             <SelectItem value="company">Company</SelectItem>
                             <SelectItem value="deal">Deal</SelectItem>
-                          </SelectContent>
-                        </Select>
+          </SelectContent>
+        </Select>
                       )}
                     </div>
                   ))}
@@ -237,12 +237,12 @@ export default function TemplateSystemDemo() {
                     <pre className="bg-gray-100 p-2 rounded text-sm">
                       {JSON.stringify(variables, null, 2)}
                     </pre>
-                  </div>
-                </CardContent>
-              </Card>
+              </div>
+            </CardContent>
+          </Card>
             )}
-          </div>
-
+              </div>
+              
           {/* Workflow JSON Display */}
           <div className="space-y-6">
             <Card>
@@ -261,35 +261,35 @@ export default function TemplateSystemDemo() {
                   <div className="text-center py-8 text-gray-500">
                     <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                     <p>No workflow selected</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
             {/* Detected Variables */}
             {selectedTemplate && (
               <Card>
-                <CardHeader>
+            <CardHeader>
                   <CardTitle>Detected Variables</CardTitle>
                   <CardDescription>
                     Variables automatically detected from the workflow
-                  </CardDescription>
-                </CardHeader>
+                    </CardDescription>
+            </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
                     {selectedTemplate.template_variables?.map((variable: any) => (
                       <div key={variable.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                        <div>
+                <div>
                           <span className="font-medium">{variable.name}</span>
                           <Badge variant="outline" className="ml-2">{variable.type}</Badge>
                           {variable.required && <Badge variant="destructive" className="ml-1">Required</Badge>}
-                        </div>
+                </div>
                         <span className="text-sm text-gray-600">{variable.description}</span>
-                      </div>
+                </div>
                     ))}
-                  </div>
-                </CardContent>
-              </Card>
+              </div>
+            </CardContent>
+          </Card>
             )}
           </div>
         </div>

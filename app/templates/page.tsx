@@ -9,7 +9,9 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Sidebar } from '@/components/sidebar'
 import { TemplateCreationForm } from '@/components/template-creation-form'
+import { TemplateEditForm } from '@/components/template-edit-form'
 import { TemplateExecutionForm } from '@/components/template-execution-form'
+import { TemplateCloneForm } from '@/components/template-clone-form'
 import { 
   Search, 
   Filter, 
@@ -22,7 +24,8 @@ import {
   Shield,
   Plus,
   Eye,
-  Settings
+  Settings,
+  ExternalLink
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/database'
@@ -50,22 +53,86 @@ const categoryColors = {
 export default function TemplatesPage() {
   const [templates, setTemplates] = useState<Template[]>([])
   const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState<any>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [showCreateForm, setShowCreateForm] = useState(false)
+  const [editingTemplate, setEditingTemplate] = useState<Template | null>(null)
   const [executingTemplate, setExecutingTemplate] = useState<Template | null>(null)
   const [viewingTemplate, setViewingTemplate] = useState<Template | null>(null)
+  const [cloningTemplate, setCloningTemplate] = useState<Template | null>(null)
 
   useEffect(() => {
     const fetchTemplates = async () => {
-      // Temporarily bypass database connection to show the UI
-      // This will show the "No templates found" state with working "Create Template" button
+      const supabase = createClient()
+      
       try {
-        // Simulate a short delay
-        await new Promise(resolve => setTimeout(resolve, 500))
+        setLoading(true)
         
-        // Set empty array to show "No templates found" state
-        setTemplates([])
+        // Get current user
+        const { data: { user } } = await supabase.auth.getUser()
+        setUser(user)
+        // First try with basic fields to see if templates exist
+        const { data, error } = await supabase
+          .from('template')
+          .select(`
+            *,
+            template_runs:template_run(count),
+            last_run:template_run(
+              started_at,
+              finished_at,
+              status
+            ),
+            template_variables:template_variable(
+              id,
+              name,
+              type,
+              required,
+              description,
+              default_value,
+              validation_rules,
+              order_index,
+              n8n_enum,
+              excel_config,
+              category,
+              business_context,
+              ai_reasoning,
+              validation
+            )
+          `)
+          // .eq('enabled', true) // Temporarily removed to show all templates
+          .order('created_at', { ascending: false })
+
+        if (error) {
+          console.error('❌ Error fetching templates:', error)
+          throw error
+        }
+
+        console.log('📊 Templates fetched:', data?.length || 0)
+        console.log('📋 First template:', data?.[0])
+
+        // Get the most recent run for each template
+        const templatesWithLastRun = await Promise.all(
+          (data || []).map(async (template: any) => {
+            const { data: lastRun } = await supabase
+              .from('template_run')
+              .select('started_at, finished_at, status')
+              .eq('template_id', template.id)
+              .order('started_at', { ascending: false })
+              .limit(1)
+              .single()
+
+            return {
+              ...template,
+              last_run: lastRun,
+              is_owner: template.created_by === user?.id
+            }
+          })
+        )
+
+        console.log('Templates loaded:', templatesWithLastRun)
+        console.log('First template variables:', templatesWithLastRun[0]?.template_variables)
+        setTemplates(templatesWithLastRun)
       } catch (error) {
         console.error('Error fetching templates:', error)
         setTemplates([])
@@ -112,6 +179,17 @@ export default function TemplatesPage() {
     setTemplates(prev => [template, ...prev])
   }
 
+  const handleEditTemplate = (template: Template) => {
+    console.log('Edit template clicked:', template)
+    setEditingTemplate(template)
+  }
+
+  const handleTemplateUpdated = (updatedTemplate: Template) => {
+    setEditingTemplate(null)
+    // Update the template in the list
+    setTemplates(prev => prev.map(t => t.id === updatedTemplate.id ? updatedTemplate : t))
+  }
+
   const handleExecuteTemplate = (template: Template) => {
     setExecutingTemplate(template)
   }
@@ -122,14 +200,118 @@ export default function TemplatesPage() {
     window.location.reload()
   }
 
-  const handleViewTemplate = (template: Template) => {
-    setViewingTemplate(template)
+  const handleViewTemplate = async (template: Template) => {
+    // Fetch the template with all variables for viewing
+    try {
+      const supabase = createClient()
+      const { data: fullTemplate, error } = await supabase
+        .from('template')
+        .select(`
+          *,
+          template_variables:template_variable(
+            id,
+            name,
+            type,
+            required,
+            description,
+            default_value,
+            validation_rules,
+            order_index,
+            n8n_enum,
+            excel_config,
+            category,
+            business_context,
+            ai_reasoning,
+            validation
+          )
+        `)
+        .eq('id', template.id)
+        .single()
+
+      if (error) {
+        console.error('Error fetching template for viewing:', error)
+        // Fallback to the original template if fetch fails
+        setViewingTemplate(template)
+        return
+      }
+
+      console.log('Template loaded for viewing:', fullTemplate)
+      setViewingTemplate(fullTemplate)
+    } catch (error) {
+      console.error('Error fetching template for viewing:', error)
+      // Fallback to the original template if fetch fails
+      setViewingTemplate(template)
+    }
   }
 
   const handleCloseModals = () => {
     setShowCreateForm(false)
+    setEditingTemplate(null)
     setExecutingTemplate(null)
     setViewingTemplate(null)
+    setCloningTemplate(null)
+  }
+
+  const handleCloneToN8N = async (template: Template) => {
+    if (!template.n8n_workflow_json) {
+      alert('This template does not have an n8n workflow to clone.')
+      return
+    }
+
+    // Check if n8n_workflow_json contains analysis data (old format) or actual workflow
+    const workflowData = template.n8n_workflow_json as any
+    const isAnalysisData = workflowData && (
+      workflowData.systems || 
+      workflowData.variables || 
+      workflowData.complexity ||
+      workflowData.estimatedDuration
+    )
+
+    if (isAnalysisData) {
+      alert('This template was created before the fix. Please recreate the template to enable cloning functionality.')
+      return
+    }
+
+    // Fetch the template with all variables for cloning
+    try {
+      const supabase = createClient()
+      const { data: fullTemplate, error } = await supabase
+        .from('template')
+        .select(`
+          *,
+          template_variables:template_variable(
+            id,
+            name,
+            type,
+            required,
+            description,
+            default_value,
+            validation_rules,
+            order_index,
+            n8n_enum,
+            excel_config,
+            category,
+            business_context,
+            ai_reasoning,
+            validation
+          )
+        `)
+        .eq('id', template.id)
+        .single()
+
+      if (error) {
+        console.error('Error fetching template for cloning:', error)
+        alert('Failed to load template details for cloning.')
+        return
+      }
+
+      console.log('Template loaded for cloning:', fullTemplate)
+      console.log('Template variables:', fullTemplate.template_variables)
+      setCloningTemplate(fullTemplate)
+    } catch (error) {
+      console.error('Error fetching template for cloning:', error)
+      alert('Failed to load template details for cloning.')
+    }
   }
 
   if (loading) {
@@ -261,6 +443,7 @@ export default function TemplatesPage() {
                         {template.description}
                       </CardDescription>
                       
+                      
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
                           <p className="text-wl-muted">Runs</p>
@@ -292,22 +475,48 @@ export default function TemplatesPage() {
                           <Clock className="h-4 w-4 mr-1" />
                           Updated {new Date(template.created_at).toLocaleDateString()}
                         </div>
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <Button 
                             size="sm" 
                             variant="outline"
                             onClick={() => handleViewTemplate(template)}
+                            className="text-xs px-3 py-2 min-w-[80px]"
                           >
-                            <Eye className="h-4 w-4 mr-1" />
+                            <Eye className="h-3 w-3 mr-1" />
                             View
                           </Button>
+                          {(template as any).is_owner && (
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => {
+                                console.log('Edit button clicked for template:', template)
+                                handleEditTemplate(template)
+                              }}
+                              className="border-blue-500 text-blue-500 hover:bg-blue-50 text-xs px-3 py-2 min-w-[80px]"
+                            >
+                              <Settings className="h-3 w-3 mr-1" />
+                              Edit
+                            </Button>
+                          )}
+                          {template.n8n_workflow_json && (
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleCloneToN8N(template)}
+                              className="border-green-500 text-green-500 hover:bg-green-50 text-xs px-3 py-2 min-w-[80px]"
+                            >
+                              <ExternalLink className="h-3 w-3 mr-1" />
+                              Clone
+                            </Button>
+                          )}
                           <Button 
                             size="sm" 
-                            className="wl-button-primary group-hover:shadow-lg transition-all duration-200"
+                            className="wl-button-primary group-hover:shadow-lg transition-all duration-200 text-xs px-3 py-2 min-w-[80px]"
                             onClick={() => handleExecuteTemplate(template)}
                           >
-                            <Play className="mr-2 h-4 w-4" />
-                            Run Template
+                            <Play className="mr-1 h-3 w-3" />
+                            Run
                           </Button>
                         </div>
                       </div>
@@ -331,6 +540,19 @@ export default function TemplatesPage() {
           </div>
         </div>
       )}
+
+            {/* Template Edit Modal */}
+            {editingTemplate && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
+                  <TemplateEditForm
+                    template={editingTemplate}
+                    onSuccess={handleTemplateUpdated}
+                    onCancel={handleCloseModals}
+                  />
+                </div>
+              </div>
+            )}
 
       {/* Template Execution Modal */}
       {executingTemplate && (
@@ -378,7 +600,7 @@ export default function TemplatesPage() {
                   </div>
                   <div>
                     <h4 className="font-medium">Systems</h4>
-                    <div className="flex flex-wrap gap-1">
+                        <div className="flex flex-wrap gap-2">
                       {viewingTemplate.systems_required?.map(system => (
                         <Badge key={system} variant="secondary">{system}</Badge>
                       ))}
@@ -410,9 +632,136 @@ export default function TemplatesPage() {
 
                 {viewingTemplate.execution_instructions && (
                   <div>
-                    <h3 className="text-lg font-semibold mb-2">Instructions</h3>
-                    <div className="p-4 bg-blue-50 rounded-lg">
-                      <p className="text-blue-800">{viewingTemplate.execution_instructions}</p>
+                    <h3 className="text-lg font-semibold mb-4">Step-by-Step Instructions</h3>
+                    <div className="bg-blue-50 rounded-lg border border-blue-200 p-4">
+                      <div className="space-y-4">
+                        {viewingTemplate.execution_instructions.split('\n\n').map((section, sectionIndex) => {
+                          if (section.trim().startsWith('Step-by-Step Instructions:')) {
+                            return null // Skip the header
+                          }
+                          
+                          if (section.trim().startsWith('Business Logic:')) {
+                            return (
+                              <div key={sectionIndex} className="mt-6">
+                                <h4 className="font-semibold text-blue-800 mb-2">Business Logic</h4>
+                                <div className="space-y-2">
+                                  {section.replace('Business Logic:\n', '').split('\n').map((line, lineIndex) => {
+                                    const trimmedLine = line.trim()
+                                    if (!trimmedLine) return null
+                                    return (
+                                      <div key={lineIndex} className="flex items-start">
+                                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                                        <p className="text-blue-900 text-sm">{trimmedLine}</p>
+                                      </div>
+                                    )
+                                  })}
+                                </div>
+                              </div>
+                            )
+                          }
+                          
+                          if (section.trim().startsWith('AI Insights:')) {
+                            return (
+                              <div key={sectionIndex} className="mt-6">
+                                <h4 className="font-semibold text-green-800 mb-2">AI Insights</h4>
+                                <div className="space-y-2">
+                                  {section.replace('AI Insights:\n', '').split('\n').map((line, lineIndex) => {
+                                    const trimmedLine = line.trim()
+                                    if (!trimmedLine) return null
+                                    return (
+                                      <div key={lineIndex} className="flex items-start">
+                                        <div className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                                        <p className="text-green-900 text-sm">{trimmedLine}</p>
+                                      </div>
+                                    )
+                                  })}
+                                </div>
+                              </div>
+                            )
+                          }
+                          
+                          if (section.trim().startsWith('Systems Used:')) {
+                            return (
+                              <div key={sectionIndex} className="mt-6">
+                                <h4 className="font-semibold text-gray-700 mb-2">Systems Used</h4>
+                                <p className="text-gray-600 text-sm">{section.replace('Systems Used: ', '')}</p>
+                              </div>
+                            )
+                          }
+                          
+                          // Handle numbered steps
+                          if (section.match(/^\d+\./)) {
+                            return (
+                              <div key={sectionIndex} className="space-y-2">
+                                {section.split('\n').map((line, lineIndex) => {
+                                  const trimmedLine = line.trim()
+                                  if (!trimmedLine) return null
+                                  
+                                  if (trimmedLine.match(/^\d+\./)) {
+                                    return (
+                                      <h4 key={lineIndex} className="font-semibold text-blue-800 text-base">
+                                        {trimmedLine}
+                                      </h4>
+                                    )
+                                  } else if (trimmedLine.startsWith('•')) {
+                                    return (
+                                      <div key={lineIndex} className="flex items-start ml-4">
+                                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                                        <p className="text-blue-900 text-sm">{trimmedLine.substring(1).trim()}</p>
+                                      </div>
+                                    )
+                                  }
+                                  return null
+                                })}
+                              </div>
+                            )
+                          }
+                          
+                          return null
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* How to Use Video Section */}
+                {viewingTemplate.how_to_use_video_url && (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4">How to Use This Template</h3>
+                    <div className="bg-purple-50 rounded-lg border border-purple-200 p-4">
+                      <div className="aspect-video rounded-lg overflow-hidden">
+                        <iframe
+                          src={viewingTemplate.how_to_use_video_url}
+                          title="How to Use This Template"
+                          className="w-full h-full"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      </div>
+                      <p className="text-sm text-purple-700 mt-2">
+                        Watch this video to learn how to use this template effectively.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* How it was Built Video Section */}
+                {viewingTemplate.how_it_was_built_video_url && (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4">How This Template Was Built</h3>
+                    <div className="bg-orange-50 rounded-lg border border-orange-200 p-4">
+                      <div className="aspect-video rounded-lg overflow-hidden">
+                        <iframe
+                          src={viewingTemplate.how_it_was_built_video_url}
+                          title="How This Template Was Built"
+                          className="w-full h-full"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      </div>
+                      <p className="text-sm text-orange-700 mt-2">
+                        Watch this video to understand how this template was created and the thought process behind it.
+                      </p>
                     </div>
                   </div>
                 )}
@@ -421,6 +770,16 @@ export default function TemplatesPage() {
                   <Button variant="outline" onClick={handleCloseModals}>
                     Close
                   </Button>
+                  {viewingTemplate.n8n_workflow_json && (
+                    <Button 
+                      variant="outline"
+                      onClick={() => handleCloneToN8N(viewingTemplate)}
+                      className="border-green-500 text-green-500 hover:bg-green-50"
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Clone in n8n
+                    </Button>
+                  )}
                   <Button onClick={() => {
                     setViewingTemplate(null)
                     handleExecuteTemplate(viewingTemplate)
@@ -431,6 +790,18 @@ export default function TemplatesPage() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Template Clone Modal */}
+      {cloningTemplate && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+            <TemplateCloneForm 
+              template={cloningTemplate} 
+              onClose={handleCloseModals}
+            />
           </div>
         </div>
       )}

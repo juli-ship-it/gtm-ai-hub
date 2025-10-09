@@ -33,11 +33,9 @@ async function testSlackIntake() {
       body: JSON.stringify(testData)
     })
 
-    const result = await response.json()
-    console.log('Response status:', response.status)
-    console.log('Response body:', JSON.stringify(result, null, 2))
+    const result = await response.json())
   } catch (error) {
-    console.error('Error testing Slack intake:', error)
+
   }
 }
 

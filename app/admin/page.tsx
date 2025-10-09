@@ -72,6 +72,12 @@ const mockIntegrations = [
     description: 'Data warehouse'
   },
   {
+    name: 'Snowflake MCP',
+    status: 'connected',
+    lastSync: '2024-01-15T15:00:00Z',
+    description: 'Model Context Protocol for AI agents'
+  },
+  {
     name: 'Google Analytics',
     status: 'error',
     lastSync: '2024-01-14T09:15:00Z',

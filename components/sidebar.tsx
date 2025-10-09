@@ -16,7 +16,8 @@ import {
   Eye,
   GraduationCap,
   BarChart3,
-  Bot
+  Bot,
+  Database
 } from 'lucide-react'
 
 const navigation = [
@@ -27,6 +28,7 @@ const navigation = [
   { name: 'Playbooks', href: '/playbooks', icon: BookOpen },
   { name: 'Prompts', href: '/prompts', icon: MessageSquare },
   { name: 'GPT Agents', href: '/gpt-agents', icon: Bot },
+  { name: 'Snowflake MCP', href: '/snowflake-mcp', icon: Database },
   { name: 'HR University', href: '/app/hr-university', icon: GraduationCap },
   { name: 'Admin', href: '/admin', icon: Settings },
   { name: 'Demo', href: '/demo', icon: Eye },

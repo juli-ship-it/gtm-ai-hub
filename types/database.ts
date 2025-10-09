@@ -54,6 +54,8 @@ export interface Database {
           file_requirements: Json | null
           is_public: boolean
           last_modified_at: string
+          how_to_use_video_url: string | null
+          how_it_was_built_video_url: string | null
         }
         Insert: {
           id?: string
@@ -79,6 +81,8 @@ export interface Database {
           file_requirements?: Json | null
           is_public?: boolean
           last_modified_at?: string
+          how_to_use_video_url?: string | null
+          how_it_was_built_video_url?: string | null
         }
         Update: {
           id?: string
@@ -104,6 +108,8 @@ export interface Database {
           file_requirements?: Json | null
           is_public?: boolean
           last_modified_at?: string
+          how_to_use_video_url?: string | null
+          how_it_was_built_video_url?: string | null
         }
       }
       template_run: {

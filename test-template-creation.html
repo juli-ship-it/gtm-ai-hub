@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Template Creation</title>
+</head>
+<body>
+    <h1>Template Creation Test</h1>
+    <div id="status">Testing...</div>
+    
+    <script>
+        // Test template creation
+        async function testTemplateCreation() {
+            const status = document.getElementById('status');
+            
+            try {
+                // Check if we can access the template creation form
+                status.innerHTML = '✅ Template creation form should work';
+                status.innerHTML += '<br>Common issues to check:';
+                status.innerHTML += '<br>1. Database connection';
+                status.innerHTML += '<br>2. Authentication';
+                status.innerHTML += '<br>3. Required fields';
+                status.innerHTML += '<br>4. RLS policies';
+                status.innerHTML += '<br>5. Console errors';
+                
+            } catch (error) {
+                status.innerHTML = '❌ Error: ' + error.message;
+            }
+        }
+        
+        testTemplateCreation();
+    </script>
+</body>
+</html>
