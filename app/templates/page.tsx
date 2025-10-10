@@ -10,7 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Sidebar } from '@/components/sidebar'
 import { TemplateCreationForm } from '@/components/template-creation-form'
 import { TemplateEditForm } from '@/components/template-edit-form'
-import { TemplateExecutionForm } from '@/components/template-execution-form'
 import { TemplateCloneForm } from '@/components/template-clone-form'
 import { 
   Search, 
@@ -58,7 +57,6 @@ export default function TemplatesPage() {
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [editingTemplate, setEditingTemplate] = useState<Template | null>(null)
-  const [executingTemplate, setExecutingTemplate] = useState<Template | null>(null)
   const [viewingTemplate, setViewingTemplate] = useState<Template | null>(null)
   const [cloningTemplate, setCloningTemplate] = useState<Template | null>(null)
 
@@ -190,15 +188,7 @@ export default function TemplatesPage() {
     setTemplates(prev => prev.map(t => t.id === updatedTemplate.id ? updatedTemplate : t))
   }
 
-  const handleExecuteTemplate = (template: Template) => {
-    setExecutingTemplate(template)
-  }
 
-  const handleExecutionSuccess = (runId: string) => {
-    setExecutingTemplate(null)
-    // Refresh templates list to show updated run count
-    window.location.reload()
-  }
 
   const handleViewTemplate = async (template: Template) => {
     // Fetch the template with all variables for viewing
@@ -247,7 +237,6 @@ export default function TemplatesPage() {
   const handleCloseModals = () => {
     setShowCreateForm(false)
     setEditingTemplate(null)
-    setExecutingTemplate(null)
     setViewingTemplate(null)
     setCloningTemplate(null)
   }
@@ -510,14 +499,6 @@ export default function TemplatesPage() {
                               Clone
                             </Button>
                           )}
-                          <Button 
-                            size="sm" 
-                            className="wl-button-primary group-hover:shadow-lg transition-all duration-200 text-xs px-3 py-2 min-w-[80px]"
-                            onClick={() => handleExecuteTemplate(template)}
-                          >
-                            <Play className="mr-1 h-3 w-3" />
-                            Run
-                          </Button>
                         </div>
                       </div>
                     </CardContent>
@@ -554,18 +535,6 @@ export default function TemplatesPage() {
               </div>
             )}
 
-      {/* Template Execution Modal */}
-      {executingTemplate && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <TemplateExecutionForm
-              template={executingTemplate}
-              onSuccess={handleExecutionSuccess}
-              onCancel={handleCloseModals}
-            />
-          </div>
-        </div>
-      )}
 
       {/* Template View Modal */}
       {viewingTemplate && (
@@ -780,13 +749,6 @@ export default function TemplatesPage() {
                       Clone in n8n
                     </Button>
                   )}
-                  <Button onClick={() => {
-                    setViewingTemplate(null)
-                    handleExecuteTemplate(viewingTemplate)
-                  }}>
-                    <Play className="h-4 w-4 mr-2" />
-                    Execute Template
-                  </Button>
                 </div>
               </div>
             </div>

@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+
+# Development files
+*.log
+*.sql
+*.js
+!next.config.js
+!vite.config.js
+!vitest.config.ts
+
+# Test files
+test/
+*.test.*
+*.spec.*
+
+# Documentation
+*.md
+!README.md
+
+# Scripts
+scripts/
+
+# Supabase local files
+supabase/migrations/
+supabase/functions/
+
+# Environment files
+.env*
+!env.example
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+.next/
+dist/
+build/
+
+# Temporary files
+*.tmp
+*.temp
