@@ -28,6 +28,7 @@ import {
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/database'
+import { convertLoomUrlToEmbed } from '@/lib/utils'
 
 type Template = Database['public']['Tables']['template']['Row'] & {
   template_runs?: { count: number }[]
@@ -694,46 +695,96 @@ export default function TemplatesPage() {
                 )}
 
                 {/* How to Use Video Section */}
-                {viewingTemplate.how_to_use_video_url && (
-                  <div>
-                    <h3 className="text-lg font-semibold mb-4">How to Use This Template</h3>
-                    <div className="bg-purple-50 rounded-lg border border-purple-200 p-4">
-                      <div className="aspect-video rounded-lg overflow-hidden">
-                        <iframe
-                          src={viewingTemplate.how_to_use_video_url}
-                          title="How to Use This Template"
-                          className="w-full h-full"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                        />
+                {viewingTemplate.how_to_use_video_url && (() => {
+                  const embedUrl = convertLoomUrlToEmbed(viewingTemplate.how_to_use_video_url)
+                  return embedUrl ? (
+                    <div>
+                      <h3 className="text-lg font-semibold mb-4">How to Use This Template</h3>
+                      <div className="bg-purple-50 rounded-lg border border-purple-200 p-4">
+                        <div className="aspect-video rounded-lg overflow-hidden">
+                          <iframe
+                            src={embedUrl}
+                            title="How to Use This Template"
+                            className="w-full h-full"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                          />
+                        </div>
+                        <p className="text-sm text-purple-700 mt-2">
+                          Watch this video to learn how to use this template effectively.
+                        </p>
                       </div>
-                      <p className="text-sm text-purple-700 mt-2">
-                        Watch this video to learn how to use this template effectively.
-                      </p>
                     </div>
-                  </div>
-                )}
+                  ) : (
+                    <div>
+                      <h3 className="text-lg font-semibold mb-4">How to Use This Template</h3>
+                      <div className="bg-purple-50 rounded-lg border border-purple-200 p-4">
+                        <div className="aspect-video rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+                          <div className="text-center">
+                            <p className="text-gray-600 mb-2">Invalid Loom URL</p>
+                            <a 
+                              href={viewingTemplate.how_to_use_video_url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-800 underline"
+                            >
+                              Open video in new tab
+                            </a>
+                          </div>
+                        </div>
+                        <p className="text-sm text-purple-700 mt-2">
+                          Watch this video to learn how to use this template effectively.
+                        </p>
+                      </div>
+                    </div>
+                  )
+                })()}
 
                 {/* How it was Built Video Section */}
-                {viewingTemplate.how_it_was_built_video_url && (
-                  <div>
-                    <h3 className="text-lg font-semibold mb-4">How This Template Was Built</h3>
-                    <div className="bg-orange-50 rounded-lg border border-orange-200 p-4">
-                      <div className="aspect-video rounded-lg overflow-hidden">
-                        <iframe
-                          src={viewingTemplate.how_it_was_built_video_url}
-                          title="How This Template Was Built"
-                          className="w-full h-full"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                        />
+                {viewingTemplate.how_it_was_built_video_url && (() => {
+                  const embedUrl = convertLoomUrlToEmbed(viewingTemplate.how_it_was_built_video_url)
+                  return embedUrl ? (
+                    <div>
+                      <h3 className="text-lg font-semibold mb-4">How This Template Was Built</h3>
+                      <div className="bg-orange-50 rounded-lg border border-orange-200 p-4">
+                        <div className="aspect-video rounded-lg overflow-hidden">
+                          <iframe
+                            src={embedUrl}
+                            title="How This Template Was Built"
+                            className="w-full h-full"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                          />
+                        </div>
+                        <p className="text-sm text-orange-700 mt-2">
+                          Watch this video to understand how this template was created and the thought process behind it.
+                        </p>
                       </div>
-                      <p className="text-sm text-orange-700 mt-2">
-                        Watch this video to understand how this template was created and the thought process behind it.
-                      </p>
                     </div>
-                  </div>
-                )}
+                  ) : (
+                    <div>
+                      <h3 className="text-lg font-semibold mb-4">How This Template Was Built</h3>
+                      <div className="bg-orange-50 rounded-lg border border-orange-200 p-4">
+                        <div className="aspect-video rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+                          <div className="text-center">
+                            <p className="text-gray-600 mb-2">Invalid Loom URL</p>
+                            <a 
+                              href={viewingTemplate.how_it_was_built_video_url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-800 underline"
+                            >
+                              Open video in new tab
+                            </a>
+                          </div>
+                        </div>
+                        <p className="text-sm text-orange-700 mt-2">
+                          Watch this video to understand how this template was created and the thought process behind it.
+                        </p>
+                      </div>
+                    </div>
+                  )
+                })()}
 
                 <div className="flex justify-end space-x-2">
                   <Button variant="outline" onClick={handleCloseModals}>

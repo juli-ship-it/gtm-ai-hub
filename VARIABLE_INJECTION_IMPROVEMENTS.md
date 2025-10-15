@@ -1,10 +1,10 @@
 # Variable Injection Improvements
 
 ## Problem
-The n8n workflow cloning feature was not properly injecting user-provided variable values into the workflow JSON. When users filled out variables in the clone form, those values weren't being replaced in the actual workflow JSON that gets cloned.
+The n8n workflow cloning feature was not properly injecting user-provided variable values into the workflow JSON. When users filled out variables in the clone form, those values were being injected as raw values (e.g., `12345`) instead of n8n expressions (e.g., `={{ $json.variableName }}`), which broke the workflow functionality.
 
 ## Solution
-Updated the `n8n-workflow-cloner.ts` to properly handle template variable names and inject them into the correct n8n workflow parameters.
+Updated the `n8n-workflow-cloner.ts` to properly inject variables as n8n expressions instead of raw values. The system now creates proper n8n expressions like `={{ $json.variableName }}` that n8n can evaluate at runtime.
 
 ## Key Changes
 
@@ -32,9 +32,10 @@ Updated the `n8n-workflow-cloner.ts` to properly handle template variable names 
 - Now handles `notificationEmail` → `params.toEmail`
 
 ### 5. Enhanced Generic Variable Injection
+- **FIXED**: `findAndReplaceInObject()` now creates n8n expressions (`={{ $json.variableName }}`) instead of raw values
+- **FIXED**: `shouldReplaceWithVariable()` now allows numeric values to be replaced
 - Improved `injectGenericVariables()` method with better logging
-- Enhanced `findAndReplaceInObject()` with more intelligent pattern matching
-- Improved `shouldReplaceWithVariable()` with better heuristics
+- Enhanced pattern matching for better variable detection
 
 ### 6. Added Comprehensive Logging
 - Added console.log statements throughout the injection process
@@ -73,8 +74,9 @@ When you fill out variables like:
 - `Trigger Interval: "Days"`
 
 The workflow JSON should be updated with:
-- `params.listId = "{{ $json.hubspotListId }}"`
-- `params.fileName = "{{ $json.excelFilePath }}"`
+- `params.url = "https://api.hubspot.com/crm/v3/lists/={{ $json.hubspotListId }}/memberships"`
+- `params.queryParameters.parameters[0].value = "={{ $json.hubspotListId }}"`
+- `params.fileName = "={{ $json.excelFilePath }}"`
 - `params.rule.interval = "Days"`
 
 ## Debugging

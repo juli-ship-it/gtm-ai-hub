@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Logo } from '@/components/logo'
 import { useAuth } from '@/lib/auth/context'
+import { Badge } from '@/components/ui/badge'
 import { 
   LayoutDashboard, 
   FileText, 
@@ -13,30 +14,39 @@ import {
   BookOpen, 
   MessageSquare,
   Settings,
-  Eye,
   GraduationCap,
   BarChart3,
   Bot,
-  Database
+  Database,
+  LogOut
 } from 'lucide-react'
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Templates', href: '/templates', icon: FileText },
-  { name: 'Runs', href: '/runs', icon: Play },
+  { name: 'Runs', href: '/runs', icon: Play, badge: 'Coming Soon' },
   { name: 'Intake', href: '/intake', icon: ClipboardList },
-  { name: 'Playbooks', href: '/playbooks', icon: BookOpen },
-  { name: 'Prompts', href: '/prompts', icon: MessageSquare },
+  { name: 'Playbooks', href: '/playbooks', icon: BookOpen, badge: 'Coming Soon' },
+  { name: 'Prompts', href: '/prompts', icon: MessageSquare, badge: 'Coming Soon' },
   { name: 'GPT Agents', href: '/gpt-agents', icon: Bot },
-  { name: 'Snowflake MCP', href: '/snowflake-mcp', icon: Database },
-  { name: 'HR University', href: '/app/hr-university', icon: GraduationCap },
+  { name: 'Data Assistant', href: '/data-assistant', icon: Database, badge: 'Soon' },
+  { name: 'HR University', href: '/app/hr-university', icon: GraduationCap, badge: 'Coming Soon' },
   { name: 'Admin', href: '/admin', icon: Settings },
-  { name: 'Demo', href: '/demo', icon: Eye },
 ]
 
 export function Sidebar() {
   const pathname = usePathname()
-  const { user } = useAuth()
+  const { user, signOut } = useAuth()
+
+  const handleSignOut = async () => {
+    try {
+      await signOut()
+      // Redirect to login page or home page after logout
+      window.location.href = '/'
+    } catch (error) {
+      console.error('Error signing out:', error)
+    }
+  }
 
   return (
     <div className="flex h-full w-64 flex-col bg-white border-r border-gray-200">
@@ -54,19 +64,34 @@ export function Sidebar() {
               key={item.name}
               href={item.href}
               className={cn(
-                'group flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200',
+                'group flex items-center justify-between px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200',
                 isActive
                   ? 'bg-wl-accent text-white shadow-sm'
                   : 'text-wl-muted hover:bg-gray-100 hover:text-wl-text'
               )}
             >
-              <item.icon
-                className={cn(
-                  'mr-3 h-5 w-5 flex-shrink-0',
-                  isActive ? 'text-white' : 'text-wl-muted group-hover:text-wl-text'
-                )}
-              />
-              {item.name}
+              <div className="flex items-center">
+                <item.icon
+                  className={cn(
+                    'mr-3 h-5 w-5 flex-shrink-0',
+                    isActive ? 'text-white' : 'text-wl-muted group-hover:text-wl-text'
+                  )}
+                />
+                {item.name}
+              </div>
+              {item.badge && (
+                <Badge 
+                  variant="secondary" 
+                  className={cn(
+                    'text-[10px] px-1.5 py-0.5 h-4',
+                    isActive 
+                      ? 'bg-white/20 text-white border-white/30' 
+                      : 'bg-blue-100 text-blue-800 border-blue-200'
+                  )}
+                >
+                  Soon
+                </Badge>
+              )}
             </Link>
           )
         })}
@@ -74,7 +99,7 @@ export function Sidebar() {
 
       {/* User section */}
       <div className="p-4 border-t border-gray-200">
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-3 mb-3">
           <div className="h-8 w-8 bg-wl-accent rounded-full flex items-center justify-center">
             <span className="text-sm font-medium text-white">
               {user?.email ? 
@@ -94,6 +119,15 @@ export function Sidebar() {
             </p>
           </div>
         </div>
+        
+        {/* Logout button */}
+        <button
+          onClick={handleSignOut}
+          className="w-full flex items-center px-3 py-2 text-sm text-wl-muted hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
+        >
+          <LogOut className="mr-3 h-4 w-4" />
+          Sign Out
+        </button>
       </div>
     </div>
   )

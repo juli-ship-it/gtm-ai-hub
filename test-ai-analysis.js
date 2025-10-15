@@ -50,12 +50,13 @@ Return a JSON response with detectedVariables array.`
     })
 
     if (error) {
-
-    } else {)
+      console.error('Error:', error)
+    } else {
+      console.log('Success:', data)
     }
 
   } catch (err) {
-
+    console.error('Exception:', err)
   }
 }
 

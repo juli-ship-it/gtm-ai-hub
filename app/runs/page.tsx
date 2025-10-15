@@ -117,6 +117,9 @@ export default function RunsPage() {
             description="Track and monitor all your automation runs, their status, and artifacts."
           >
             <div className="flex items-center space-x-3">
+              <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
+                Coming Soon
+              </Badge>
               <Button variant="outline" size="sm">
                 <Download className="mr-2 h-4 w-4" />
                 Export

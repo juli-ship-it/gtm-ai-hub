@@ -246,6 +246,9 @@ export class N8NWorkflowCloner {
         injectedCount += this.injectGenericVariables(node, variables)
     }
 
+    // DYNAMIC AI-DRIVEN INJECTION: Try to inject ANY variable based on content analysis
+    injectedCount += this.injectDynamicVariables(node, variables, dynamicMappings)
+
     return injectedCount
   }
 
@@ -271,7 +274,8 @@ export class N8NWorkflowCloner {
       'Trigger Interval': 'interval',
       'scheduleInterval': 'interval',
       'Days Between Triggers': 'intervalValue',
-      'daysBetweenTriggers': 'intervalValue'
+      'daysBetweenTriggers': 'intervalValue',
+      'rule': 'rule' // Handle generic rule variable
     }
 
     // Check for schedule trigger hour
@@ -301,6 +305,11 @@ export class N8NWorkflowCloner {
           params.rule.intervalValue = parseInt(value)
           injectedCount++
           console.log(`✅ Set intervalValue to: ${value}`)
+        } else if (paramPath === 'rule') {
+          // Handle generic rule variable - replace the entire rule object
+          params.rule = value
+          injectedCount++
+          console.log(`✅ Set rule to: ${JSON.stringify(value)}`)
         }
       }
     }
@@ -325,10 +334,18 @@ export class N8NWorkflowCloner {
     const hubspotListVars = Object.keys(variables).filter(key => 
       key.startsWith('HubSpot List ') && key.length <= 15 // A, B, C, etc.
     )
+    
+    // Also handle generic list ID variables
+    const genericListVars = Object.keys(variables).filter(key => 
+      key.toLowerCase().includes('list') && key.toLowerCase().includes('id')
+    )
 
-    for (const varName of hubspotListVars) {
+    // Process both HubSpot list variables and generic list variables
+    const allListVars = [...hubspotListVars, ...genericListVars]
+    
+    for (const varName of allListVars) {
       const value = variables[varName]
-      console.log(`🔍 Found HubSpot list variable: "${varName}" = "${value}"`)
+      console.log(`🔍 Found list variable: "${varName}" = "${value}"`)
       
       // Check if this variable should be applied to this specific node
       const shouldApplyToThisNode = dynamicMappings && dynamicMappings[varName] 
@@ -336,19 +353,19 @@ export class N8NWorkflowCloner {
         : true // If no dynamic mappings, apply to all nodes (legacy behavior)
       
       if (shouldApplyToThisNode) {
-        // Update the URL and query parameter value
+        // Update the URL and query parameter value with n8n expressions
         if (params.url && params.queryParameters?.parameters) {
-          // Extract current list ID from URL
-          const currentListId = params.url.match(/\/lists\/(\d+)\//)?.[1]
+          // Extract current list ID from URL (handle both numeric IDs and variable expressions)
+          const currentListId = params.url.match(/\/lists\/([^/]+)\//)?.[1]
           if (currentListId) {
-            // Update URL
+            // Update URL with actual value
             params.url = params.url.replace(`/lists/${currentListId}/`, `/lists/${value}/`)
-            // Update query parameter
+            // Update query parameter with actual value
             const listIdParam = params.queryParameters.parameters.find((p: any) => p.name === 'listId')
             if (listIdParam) {
               listIdParam.value = value
               injectedCount++
-              console.log(`✅ Updated HubSpot list ID to: ${value} for node: ${node.name}`)
+              console.log(`✅ Updated HubSpot list ID to actual value: ${value} for node: ${node.name}`)
             }
           }
         }
@@ -372,31 +389,45 @@ export class N8NWorkflowCloner {
         console.log(`🔍 Found legacy variable: "${aiName}" = "${value}"`)
         
         if (paramKey === 'demoListId' || paramKey === 'signupListId') {
-          // Update the URL and query parameter value
+          // Update the URL and query parameter value with n8n expressions
           if (params.url && params.queryParameters?.parameters) {
             const currentListId = params.url.match(/\/lists\/(\d+)\//)?.[1]
             if (currentListId) {
-              params.url = params.url.replace(`/lists/${currentListId}/`, `/lists/${value}/`)
+              params.url = params.url.replace(`/lists/${currentListId}/`, `/lists/={{ $json.${aiName} }}/`)
               const listIdParam = params.queryParameters.parameters.find((p: any) => p.name === 'listId')
               if (listIdParam) {
-                listIdParam.value = value
+                listIdParam.value = `={{ $json.${aiName} }}`
                 injectedCount++
-                console.log(`✅ Updated HubSpot list ID to: ${value}`)
+                console.log(`✅ Updated HubSpot list ID to n8n expression: ={{ $json.${aiName} }}`)
               }
             }
           }
-        } else if (paramKey === 'listId' && params.listId) {
-          params.listId = value
-          injectedCount++
-          console.log(`✅ Set HubSpot list ID to: ${value}`)
+        } else if (paramKey === 'listId') {
+          // Handle listId in URL and query parameters
+          if (params.url && params.queryParameters?.parameters) {
+            const currentListId = params.url.match(/\/lists\/(\d+)\//)?.[1]
+            if (currentListId) {
+              params.url = params.url.replace(`/lists/${currentListId}/`, `/lists/={{ $json.${aiName} }}/`)
+              const listIdParam = params.queryParameters.parameters.find((p: any) => p.name === 'listId')
+              if (listIdParam) {
+                listIdParam.value = `={{ $json.${aiName} }}`
+                injectedCount++
+                console.log(`✅ Updated HubSpot list ID to n8n expression: ={{ $json.${aiName} }}`)
+              }
+            }
+          } else if (params.listId) {
+            params.listId = `={{ $json.${aiName} }}`
+            injectedCount++
+            console.log(`✅ Set HubSpot list ID to n8n expression: ={{ $json.${aiName} }}`)
+          }
         } else if (paramKey === 'segmentId' && params.segmentId) {
-          params.segmentId = value
+          params.segmentId = `={{ $json.${aiName} }}`
           injectedCount++
-          console.log(`✅ Set HubSpot segment ID to: ${value}`)
+          console.log(`✅ Set HubSpot segment ID to n8n expression: ={{ $json.${aiName} }}`)
         } else if (paramKey === 'resource' && params.resource) {
-          params.resource = value
+          params.resource = `={{ $json.${aiName} }}`
           injectedCount++
-          console.log(`✅ Set HubSpot resource to: ${value}`)
+          console.log(`✅ Set HubSpot resource to n8n expression: ={{ $json.${aiName} }}`)
         }
       }
     }
@@ -469,11 +500,11 @@ export class N8NWorkflowCloner {
 
     // Handle generic Excel variables (Excel Workbook, Excel Sheet A, B, C, etc.)
     const excelWorkbookVars = Object.keys(variables).filter(key => 
-      key === 'Excel Workbook' || key === 'Excel Workbook ID'
+      key === 'Excel Workbook' || key === 'Excel Workbook ID' || key === 'workbook'
     )
     
     const excelSheetVars = Object.keys(variables).filter(key => 
-      key.startsWith('Excel Sheet ') && key.length <= 15 // A, B, C, etc.
+      key.startsWith('Excel Sheet ') && key.length <= 15 || key === 'worksheet' // A, B, C, etc.
     )
 
     // Handle Excel Workbook
@@ -675,17 +706,19 @@ export class N8NWorkflowCloner {
     } else if (Array.isArray(obj)) {
       obj.forEach((item, index) => {
         if (this.findAndReplaceInObject(item, variableName, variables)) {
-          obj[index] = variables?.[variableName] || variableName
+          // Create n8n expression instead of using raw value
+          obj[index] = `={{ $json.${variableName} }}`
           replaced = true
-          console.log(`Replaced array item at index ${index} with variable: ${variableName} = ${variables?.[variableName]}`)
+          console.log(`Replaced array item at index ${index} with n8n expression: ={{ $json.${variableName} }}`)
         }
       })
     } else if (typeof obj === 'object' && obj !== null) {
       Object.entries(obj).forEach(([key, value]) => {
         if (this.findAndReplaceInObject(value, variableName, variables)) {
-          obj[key] = variables?.[variableName] || variableName
+          // Create n8n expression instead of using raw value
+          obj[key] = `={{ $json.${variableName} }}`
           replaced = true
-          console.log(`Replaced object property '${key}' with variable: ${variableName} = ${variables?.[variableName]}`)
+          console.log(`Replaced object property '${key}' with n8n expression: ={{ $json.${variableName} }}`)
         }
       })
     }
@@ -702,8 +735,19 @@ export class N8NWorkflowCloner {
       return false
     }
 
-    // Skip if value is too short or looks like a system value
-    if (value.length < 2 || value.match(/^[0-9]+$/) || value.match(/^[a-z]+$/i)) {
+    // Skip if value is too short (but allow numeric values)
+    if (value.length < 1) {
+      return false
+    }
+
+    // Allow numeric values to be replaced if they match common patterns
+    if (value.match(/^[0-9]+$/)) {
+      // Allow replacement of numeric IDs and similar values
+      return true
+    }
+
+    // Skip single character values that aren't numbers
+    if (value.length === 1 && !value.match(/^[0-9]$/)) {
       return false
     }
 
@@ -749,6 +793,7 @@ export class N8NWorkflowCloner {
     delete workflow.versionId
     workflow.active = false // Start as inactive
   }
+
 
   /**
    * Encode workflow for n8n import URL
@@ -804,6 +849,316 @@ export class N8NWorkflowCloner {
       warnings
     }
   }
+
+  /**
+   * DYNAMIC AI-DRIVEN VARIABLE INJECTION
+   * This method analyzes the node content and tries to inject ANY variable
+   * based on intelligent pattern matching, not hardcoded names
+   */
+  private injectDynamicVariables(node: any, variables: Record<string, any>, dynamicMappings?: any): number {
+    let injectedCount = 0
+    const params = node.parameters || {}
+
+    console.log('🔍 DYNAMIC INJECTION: Analyzing node for intelligent variable matching')
+    console.log('Available variables:', Object.keys(variables))
+
+    // For each variable, try to find where it should be injected
+    Object.entries(variables).forEach(([variableName, variableValue]) => {
+      console.log(`\n🔍 Analyzing variable: "${variableName}" = "${variableValue}"`)
+      
+      // Skip if this variable was already injected by other methods
+      if (this.wasVariableAlreadyInjected(params, variableName)) {
+        console.log(`⏭️ Variable "${variableName}" already injected, skipping`)
+        return
+      }
+      
+      // Skip if the parameter already has a non-expression value
+      if (this.hasNonExpressionValue(params, variableName, variableValue)) {
+        console.log(`⏭️ Variable "${variableName}" already has actual value, skipping`)
+        return
+      }
+
+      // Try different injection strategies
+      const strategies = [
+        () => this.tryInjectByContentAnalysis(params, variableName, variableValue),
+        () => this.tryInjectByParameterName(params, variableName, variableValue),
+        () => this.tryInjectByValueMatching(params, variableName, variableValue),
+        () => this.tryInjectByContext(params, variableName, variableValue, node),
+        () => this.tryInjectByGenericPatterns(params, variableName, variableValue, node)
+      ]
+
+      for (const strategy of strategies) {
+        try {
+          const result = strategy()
+          if (result.injected) {
+            injectedCount++
+            console.log(`✅ DYNAMIC INJECTION SUCCESS: "${variableName}" → ${result.description}`)
+            break // Stop trying other strategies for this variable
+          }
+        } catch (error) {
+          console.log(`⚠️ Strategy failed for "${variableName}":`, error.message)
+        }
+      }
+    })
+
+    console.log(`📊 Dynamic injection result: ${injectedCount} variables injected`)
+    return injectedCount
+  }
+
+  /**
+   * Check if a variable was already injected by other methods
+   */
+  private wasVariableAlreadyInjected(params: any, variableName: string): boolean {
+    const paramString = JSON.stringify(params)
+    return paramString.includes(`{{ $json.${variableName} }}`)
+  }
+
+  /**
+   * Check if a parameter already has a non-expression value (actual value instead of variable expression)
+   */
+  private hasNonExpressionValue(params: any, variableName: string, variableValue: any): boolean {
+    const paramString = JSON.stringify(params)
+    
+    // Check if the parameter already contains the actual value (not an expression)
+    const valueFormats = [
+      `"${variableValue}"`,  // String format
+      `${variableValue}`,    // Number format
+      `"${String(variableValue)}"`  // Convert to string
+    ]
+    
+    for (const format of valueFormats) {
+      if (paramString.includes(format) && !paramString.includes(`{{ $json.${variableName} }}`)) {
+        return true
+      }
+    }
+    
+    return false
+  }
+
+  /**
+   * Try to inject by analyzing the content and context
+   */
+  private tryInjectByContentAnalysis(params: any, variableName: string, variableValue: any): { injected: boolean, description: string } {
+    // Strategy 1: Look for URLs with numeric IDs
+    if (params.url && typeof params.url === 'string') {
+      const numericIdPattern = /\/(\d+)\//
+      const match = params.url.match(numericIdPattern)
+      
+      if (match && this.isNumericVariable(variableValue)) {
+        const oldId = match[1]
+        params.url = params.url.replace(`/${oldId}/`, `/={{ $json.${variableName} }}/`)
+        return { injected: true, description: `URL ID replacement: ${oldId} → {{ $json.${variableName} }}` }
+      }
+    }
+
+    // Strategy 2: Look for query parameters with numeric values
+    if (params.queryParameters?.parameters) {
+      for (const param of params.queryParameters.parameters) {
+        if (param.value && this.isNumericVariable(variableValue) && this.isNumericVariable(param.value)) {
+          const oldValue = param.value
+          param.value = `={{ $json.${variableName} }}`
+          return { injected: true, description: `Query parameter replacement: ${oldValue} → {{ $json.${variableName} }}` }
+        }
+      }
+    }
+
+    // Strategy 3: Look for direct parameter values
+    for (const [key, value] of Object.entries(params)) {
+      if (this.isNumericVariable(value) && this.isNumericVariable(variableValue)) {
+        params[key] = `={{ $json.${variableName} }}`
+        return { injected: true, description: `Parameter replacement: ${key} = ${value} → {{ $json.${variableName} }}` }
+      }
+    }
+
+    return { injected: false, description: 'No content match found' }
+  }
+
+  /**
+   * Try to inject by matching parameter names
+   */
+  private tryInjectByParameterName(params: any, variableName: string, variableValue: any): { injected: boolean, description: string } {
+    const variableLower = variableName.toLowerCase()
+    
+    // Look for parameter names that match the variable name
+    for (const [key, value] of Object.entries(params)) {
+      const keyLower = key.toLowerCase()
+      
+      // Direct name match
+      if (keyLower === variableLower) {
+        params[key] = variableValue
+        return { injected: true, description: `Direct name match: ${key} → ${variableValue}` }
+      }
+      
+      // Partial name match
+      if (keyLower.includes(variableLower) || variableLower.includes(keyLower)) {
+        params[key] = variableValue
+        return { injected: true, description: `Partial name match: ${key} → ${variableValue}` }
+      }
+    }
+
+    return { injected: false, description: 'No parameter name match found' }
+  }
+
+  /**
+   * Try to inject by matching values
+   */
+  private tryInjectByValueMatching(params: any, variableName: string, variableValue: any): { injected: boolean, description: string } {
+    // Look for exact value matches
+    const paramString = JSON.stringify(params)
+    
+    // Try different value formats
+    const valueFormats = [
+      `"${variableValue}"`,  // String format
+      `${variableValue}`,    // Number format
+      `"${String(variableValue)}"`  // Convert to string
+    ]
+    
+    for (const format of valueFormats) {
+      if (paramString.includes(format)) {
+        // Replace the exact value with the actual variable value
+        const updatedParams = JSON.parse(paramString.replace(new RegExp(format.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), `"${variableValue}"`))
+        Object.assign(params, updatedParams)
+        return { injected: true, description: `Value match replacement: ${format} → ${variableValue}` }
+      }
+    }
+
+    return { injected: false, description: 'No value match found' }
+  }
+
+  /**
+   * Try to inject by generic patterns that work across different node types
+   */
+  private tryInjectByGenericPatterns(params: any, variableName: string, variableValue: any, node: any): { injected: boolean, description: string } {
+    const variableLower = variableName.toLowerCase()
+    
+    // Generic patterns for common variable types
+    const patterns = [
+      // List ID patterns
+      { pattern: /listId|list_id|listid/i, paths: ['queryParameters.parameters[].value', 'listId', 'id'] },
+      // Workbook patterns  
+      { pattern: /workbook|work_book|workbookid/i, paths: ['workbook', 'fileId', 'spreadsheetId'] },
+      // Worksheet patterns
+      { pattern: /worksheet|work_sheet|sheet/i, paths: ['worksheet', 'sheetName', 'range'] },
+      // Rule patterns
+      { pattern: /rule|schedule|trigger/i, paths: ['rule', 'schedule', 'trigger'] },
+      // URL patterns
+      { pattern: /url|endpoint|api/i, paths: ['url', 'endpoint', 'apiUrl'] }
+    ]
+    
+    for (const { pattern, paths } of patterns) {
+      if (pattern.test(variableName)) {
+        for (const path of paths) {
+          const result = this.tryInjectAtPath(params, path, variableName, variableValue)
+          if (result.injected) {
+            return result
+          }
+        }
+      }
+    }
+    
+    return { injected: false, description: 'No generic pattern match found' }
+  }
+  
+  /**
+   * Try to inject at a specific path in the parameters
+   */
+  private tryInjectAtPath(params: any, path: string, variableName: string, variableValue: any): { injected: boolean, description: string } {
+    try {
+      const pathParts = path.split('.')
+      let current = params
+      
+      // Navigate to the parent object
+      for (let i = 0; i < pathParts.length - 1; i++) {
+        const part = pathParts[i]
+        if (part.includes('[]')) {
+          // Handle array paths like "parameters[]"
+          const arrayName = part.replace('[]', '')
+          if (current[arrayName] && Array.isArray(current[arrayName])) {
+            // Try to inject into each array element
+            for (const item of current[arrayName]) {
+              if (item && typeof item === 'object') {
+                const result = this.tryInjectAtPath(item, pathParts.slice(i + 1).join('.'), variableName, variableValue)
+                if (result.injected) {
+                  return result
+                }
+              }
+            }
+          }
+        } else if (part.includes('[') && part.includes(']')) {
+          // Handle indexed array access like "parameters[0]"
+          const [arrayName, index] = part.split('[')
+          const arrayIndex = parseInt(index.replace(']', ''))
+          if (current[arrayName] && current[arrayName][arrayIndex]) {
+            current = current[arrayName][arrayIndex]
+          } else {
+            return { injected: false, description: `Array index not found: ${path}` }
+          }
+        } else {
+          current = current[part]
+        }
+      }
+      
+      // Set the variable at the final path
+      const finalPart = pathParts[pathParts.length - 1]
+      if (current && current.hasOwnProperty(finalPart)) {
+        const currentValue = current[finalPart]
+        // Only inject if the current value matches the variable value or is a hardcoded value
+        if (currentValue === variableValue || (typeof currentValue === 'string' && !currentValue.includes('{{'))) {
+          current[finalPart] = variableValue
+          return { injected: true, description: `Injected actual value at path: ${path}` }
+        }
+      }
+    } catch (error) {
+      console.log(`Error injecting at path ${path}:`, error.message)
+    }
+    
+    return { injected: false, description: `Path not found or not injectable: ${path}` }
+  }
+
+  /**
+   * Try to inject by context (node type and business logic)
+   */
+  private tryInjectByContext(params: any, variableName: string, variableValue: any, node: any): { injected: boolean, description: string } {
+    const nodeType = node.type
+    const variableLower = variableName.toLowerCase()
+
+    // HubSpot context
+    if (nodeType === 'n8n-nodes-base.httpRequest' && params.url?.includes('api.hubspot.com')) {
+      if (variableLower.includes('list') || variableLower.includes('hubspot')) {
+        // This is likely a HubSpot list ID
+        return this.tryInjectByContentAnalysis(params, variableName, variableValue)
+      }
+    }
+
+    // Excel context
+    if (nodeType === 'n8n-nodes-base.microsoftExcel' || nodeType === 'n8n-nodes-base.excel') {
+      if (variableLower.includes('excel') || variableLower.includes('sheet') || variableLower.includes('workbook')) {
+        // This is likely an Excel configuration
+        return this.tryInjectByParameterName(params, variableName, variableValue)
+      }
+    }
+
+    // Schedule context
+    if (nodeType === 'n8n-nodes-base.scheduleTrigger') {
+      if (variableLower.includes('trigger') || variableLower.includes('schedule') || variableLower.includes('hour') || variableLower.includes('minute')) {
+        // This is likely a schedule configuration
+        return this.tryInjectByParameterName(params, variableName, variableValue)
+      }
+    }
+
+    return { injected: false, description: 'No context match found' }
+  }
+
+  /**
+   * Check if a value is numeric (for ID matching)
+   */
+  private isNumericVariable(value: any): boolean {
+    if (typeof value === 'number') return true
+    if (typeof value === 'string') {
+      return /^\d+$/.test(value) && value.length > 0
+    }
+    return false
+  }
 }
 
 /**
@@ -830,3 +1185,4 @@ export function generateN8NImportUrl(workflowJson: any, variables: Record<string
   const encodedWorkflow = cloner['encodeWorkflowForUrl'](workflowJson)
   return `https://n8n.io/workflows/new?import=${encodedWorkflow}`
 }
+

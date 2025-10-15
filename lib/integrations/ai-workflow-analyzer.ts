@@ -65,93 +65,8 @@ function createAnalysisPrompt(workflow: N8NWorkflow): string {
   const connections = workflow.connections || {}
   
   // Create a detailed prompt for AI analysis
-  return `
-Analyze this n8n workflow and extract business-relevant variables that users would need to configure.
+  return `You are an expert n8n workflow analyst. Analyze this n8n workflow and extract ALL configurable business variables that users need to set up. Return ONLY a JSON object with this exact structure:
 
-Workflow: ${workflow.name}
-Nodes: ${nodes.length}
-
-Node Details:
-${nodes.map(node => `
-- ${node.name} (${node.type})
-  Parameters: ${JSON.stringify(node.parameters, null, 2)}
-  Position: ${node.position}
-`).join('\n')}
-
-Connections:
-${JSON.stringify(connections, null, 2)}
-
-Please analyze this workflow and identify:
-
-1. **What this workflow does** (business purpose)
-2. **What variables users would need to configure** for their specific use case
-3. **Business context** for each variable
-4. **Appropriate variable types** and default values
-5. **Required vs optional** variables
-
-Focus on business-relevant variables like:
-- Schedule settings (when to run) - use correct n8n enums
-- Data source identifiers (list IDs, API endpoints) - use generic names like "HubSpot List A", "HubSpot List B", etc.
-- Data destination settings (file paths, sheet names) - use generic names like "Excel Workbook", "Excel Sheet A", "Excel Sheet B", etc.
-- Excel configuration (worksheets, sheets, columns)
-- Filtering criteria (what data to include)
-- Mapping settings (how to transform data)
-- Notification settings (who to notify)
-
-IMPORTANT: Use GENERIC variable names that work for any use case:
-- Instead of "HubSpot List ID for Demo Requests" → use "HubSpot List A", "HubSpot List B", etc.
-- Instead of "Excel Workbook ID" → use "Excel Workbook"
-- Instead of "Excel Sheet for Demos" → use "Excel Sheet A", "Excel Sheet B", etc.
-- Count the number of similar nodes and create variables accordingly (e.g., if 2 HubSpot lists, create "HubSpot List A" and "HubSpot List B")
-
-CRITICAL SECURITY: DO NOT extract these as variables (they will be handled separately):
-- API keys, tokens, passwords, credentials
-- Authentication tokens (Bearer tokens, OAuth tokens, etc.)
-- Database connection strings
-- Private keys or certificates
-- Any sensitive authentication data
-
-These will be set to empty placeholders and users must manually configure them in n8n for security.
-
-IMPORTANT: For n8n schedule triggers, replicate the exact n8n Schedule Trigger node structure:
-
-SCHEDULE TRIGGER STRUCTURE (matching n8n exactly):
-- Trigger Interval: ["Seconds", "Minutes", "Hours", "Days", "Weeks", "Months", "Custom (Cron)"]
-
-For each interval type, use n8n's exact parameter names:
-
-1. **Seconds Interval:**
-   - "Seconds Between Triggers": number (1-3600)
-
-2. **Minutes Interval:**
-   - "Minutes Between Triggers": number (1-1440)
-   - "Trigger at Minute": number (0-59)
-
-3. **Hours Interval:**
-   - "Hours Between Triggers": number (1-24)
-   - "Trigger at Minute": number (0-59)
-
-4. **Days Interval:**
-   - "Days Between Triggers": number (1-365)
-   - "Trigger at Hour": number (0-23)
-   - "Trigger at Minute": number (0-59)
-
-5. **Weeks Interval:**
-   - "Weeks Between Triggers": number (1-52)
-   - "Trigger on Weekdays": array of weekdays ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-   - "Trigger at Hour": number (0-23)
-   - "Trigger at Minute": number (0-59)
-
-6. **Months Interval:**
-   - "Months Between Triggers": number (1-12)
-   - "Trigger at Day of Month": number (1-31)
-   - "Trigger at Hour": number (0-23)
-   - "Trigger at Minute": number (0-59)
-
-7. **Custom (Cron) Interval:**
-   - "Expression": string (cron expression like "0 9 * * 1-5")
-
-Return your analysis as a JSON object with this exact structure:
 {
   "workflowName": "string",
   "workflowDescription": "string", 
@@ -160,7 +75,7 @@ Return your analysis as a JSON object with this exact structure:
     {
       "name": "string",
       "type": "string|number|boolean|file|select|multiselect|date|email|url|object",
-      "required": boolean,
+      "required": true,
       "description": "string",
       "defaultValue": "any",
       "options": ["array of strings for select/multiselect"],
@@ -174,8 +89,8 @@ Return your analysis as a JSON object with this exact structure:
         "sheetOptions": ["array of sheet options"]
       },
       "validation": {
-        "min": number,
-        "max": number,
+        "min": 0,
+        "max": 100,
         "pattern": "string",
         "fileTypes": ["array of file types"]
       }
@@ -183,15 +98,62 @@ Return your analysis as a JSON object with this exact structure:
   ],
   "systems": ["array of system names"],
   "complexity": "simple|intermediate|advanced",
-  "estimatedDuration": number,
-  "hasFileUpload": boolean,
-  "hasEmailNotification": boolean,
-  "hasSlackNotification": boolean,
-  "errorHandling": boolean,
+  "estimatedDuration": 5,
+  "hasFileUpload": false,
+  "hasEmailNotification": false,
+  "hasSlackNotification": false,
+  "errorHandling": false,
   "webhookNodes": [],
   "aiInsights": ["array of insights"]
 }
-`
+
+CRITICAL INSTRUCTIONS:
+1. Extract SPECIFIC, REAL variables from the workflow parameters - NOT generic placeholders
+2. Look for actual values like:
+   - HubSpot list IDs, contact IDs, deal IDs
+   - Excel file names, sheet names, column names
+   - Schedule trigger times, intervals, cron expressions
+   - Email addresses, webhook URLs, API endpoints
+   - Filter conditions, field mappings, data transformations
+   - Notification settings, Slack channels, email templates
+
+3. For each variable, use the ACTUAL parameter name from the n8n node
+4. Extract the current value as defaultValue if present - THIS IS CRITICAL for proper variable injection
+5. Determine the appropriate type based on the parameter value
+6. Identify which n8n system each variable belongs to (HubSpot, Excel, Schedule, etc.)
+
+VALUE EXTRACTION REQUIREMENTS:
+- ALWAYS extract the current hardcoded value as the defaultValue
+- For HubSpot list IDs: extract the actual numeric ID (e.g., "76841")
+- For Excel workbooks/worksheets: extract the actual names (e.g., "DEMO sheet")
+- For schedule triggers: extract the actual time values (e.g., 11 for 11 AM)
+- The defaultValue must match the exact value in the workflow for proper injection
+
+BUSINESS LOGIC REQUIREMENTS:
+- Provide a clear, detailed explanation of what this workflow accomplishes
+- Explain the business purpose and value
+- Describe the data flow from start to finish
+- Include timing/scheduling information
+- Mention key systems and integrations involved
+- Explain the end result or output
+- Use bullet points or numbered steps for clarity
+
+EXAMPLE BUSINESS LOGIC:
+"This workflow automatically exports demo request leads from a HubSpot email campaign list to an Excel spreadsheet. It runs daily at 11 AM to capture new demo requests, enriches the contact data with additional details, and exports the information to a Microsoft Excel sheet for further processing by the sales team."
+
+Workflow: ${workflow.name}
+Nodes: ${nodes.length}
+
+Node Details:
+${nodes.map(node => `
+- ${node.name} (${node.type})
+  Parameters: ${JSON.stringify(node.parameters, null, 2)}
+`).join('\n')}
+
+Connections:
+${JSON.stringify(connections, null, 2)}
+
+Extract ALL configurable variables that users need to set up. Use the actual parameter names and values from the workflow. Do not extract API keys, passwords, or other credentials.`
 }
 
 async function callAIAnalysis(workflowJson: string): Promise<string> {

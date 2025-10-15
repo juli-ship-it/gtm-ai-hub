@@ -26,6 +26,9 @@ serve(async (req) => {
       promptLength: prompt?.length || 0
     })
     
+    console.log(`[${requestId}] 🔍 Request body received successfully`)
+    console.log(`[${requestId}] 🔍 Prompt preview:`, prompt?.substring(0, 200) + '...')
+    
     // Check OpenAI API key
     const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
     if (!openaiApiKey) {
@@ -56,7 +59,7 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are an expert workflow analyst. Analyze n8n workflows and extract business-relevant variables that users need to configure. Always respond with valid JSON.'
+            content: `You are an expert n8n workflow analyst. Analyze the provided n8n workflow and return ONLY a valid JSON object with the exact structure specified in the user prompt. Do not include any text before or after the JSON. Do not use markdown code blocks. Return only the raw JSON object.`
           },
           {
             role: 'user',
@@ -90,12 +93,14 @@ serve(async (req) => {
       finishReason: openaiData.choices[0].finish_reason
     })
     
+    console.log(`[${requestId}] 🔍 Raw AI Response:`, aiResponse.substring(0, 1000) + '...')
+    
     // Parse the AI response - handle markdown code blocks
+    let jsonContent = aiResponse
     try {
       console.log(`[${requestId}] 🔍 Parsing AI response...`)
       
       // Extract JSON from markdown code blocks if present
-      let jsonContent = aiResponse
       if (aiResponse.includes('```json')) {
         const jsonMatch = aiResponse.match(/```json\s*([\s\S]*?)\s*```/)
         if (jsonMatch && jsonMatch[1]) {
@@ -108,6 +113,15 @@ serve(async (req) => {
         if (codeMatch && codeMatch[1]) {
           jsonContent = codeMatch[1].trim()
           console.log(`[${requestId}] 📝 Extracted content from generic code block`)
+        }
+      }
+      
+      // If still no JSON content extracted, try to find JSON object in the response
+      if (jsonContent === aiResponse) {
+        const jsonObjectMatch = aiResponse.match(/\{[\s\S]*\}/)
+        if (jsonObjectMatch && jsonObjectMatch[0]) {
+          jsonContent = jsonObjectMatch[0].trim()
+          console.log(`[${requestId}] 📝 Extracted JSON object from response`)
         }
       }
       
@@ -136,10 +150,16 @@ serve(async (req) => {
       console.log(`[${requestId}] ❌ Failed to parse AI response:`, {
         error: parseError.message,
         response: aiResponse.substring(0, 500) + '...',
-        jsonContent: jsonContent?.substring(0, 500) + '...'
+        jsonContent: jsonContent ? jsonContent.substring(0, 500) + '...' : 'undefined'
       })
+      console.log(`[${requestId}] 🔍 Full AI response:`, aiResponse)
+      console.log(`[${requestId}] 🔍 Extracted JSON content:`, jsonContent)
       return new Response(
-        JSON.stringify({ error: 'Failed to parse AI response' }),
+        JSON.stringify({ 
+          error: 'Failed to parse AI response',
+          details: parseError.message,
+          response: aiResponse.substring(0, 1000)
+        }),
         { 
           status: 500, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }

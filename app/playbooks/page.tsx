@@ -79,10 +79,15 @@ export default function PlaybooksPage() {
             title="Playbook Catalog"
             description="Create and manage multi-step automation workflows with human checkpoints."
           >
-            <Button className="wl-button-primary">
-              <BookOpen className="mr-2 h-4 w-4" />
-              Create Playbook
-            </Button>
+            <div className="flex items-center space-x-3">
+              <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
+                Coming Soon
+              </Badge>
+              <Button className="wl-button-primary" disabled>
+                <BookOpen className="mr-2 h-4 w-4" />
+                Create Playbook
+              </Button>
+            </div>
           </PageHeader>
 
           {/* Filters */}

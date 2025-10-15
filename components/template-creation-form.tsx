@@ -456,14 +456,16 @@ export function TemplateCreationForm({ template, onSuccess, onCancel }: Template
                   </>
                 )}
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowWorkflowPreview(!showWorkflowPreview)}
-              >
-                {showWorkflowPreview ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
-                {showWorkflowPreview ? 'Hide' : 'Preview'} Workflow
-              </Button>
+              {aiAnalysis && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowWorkflowPreview(!showWorkflowPreview)}
+                >
+                  {showWorkflowPreview ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
+                  {showWorkflowPreview ? 'Hide' : 'Preview'} Workflow
+                </Button>
+              )}
               <Button
                 variant="outline"
                 size="sm"
@@ -541,23 +543,34 @@ export function TemplateCreationForm({ template, onSuccess, onCancel }: Template
               <p className="text-sm font-semibold text-gray-700 mb-3">Business Logic</p>
               <div className="bg-blue-50 rounded-lg border border-blue-200 p-4">
                 <div className="space-y-3">
-                  {aiAnalysis.businessLogic.split('\n').map((line, index) => {
-                    const trimmedLine = line.trim()
-                    if (!trimmedLine) return null
-                    
-                    if (trimmedLine.startsWith('•')) {
-                      return (
-                        <div key={index} className="flex items-start">
-                          <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                          <p className="text-blue-900 text-sm leading-relaxed">{trimmedLine.substring(1).trim()}</p>
-                        </div>
-                      )
-                    } else {
-                      return (
-                        <p key={index} className="font-semibold text-blue-800 text-sm">{trimmedLine}</p>
-                      )
-                    }
-                  })}
+                  {aiAnalysis.businessLogic && aiAnalysis.businessLogic !== 'No business logic analysis available' ? (
+                    aiAnalysis.businessLogic.split('\n').map((line, index) => {
+                      const trimmedLine = line.trim()
+                      if (!trimmedLine) return null
+                      
+                      if (trimmedLine.startsWith('•') || trimmedLine.startsWith('-')) {
+                        return (
+                          <div key={index} className="flex items-start">
+                            <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                            <p className="text-blue-900 text-sm leading-relaxed">{trimmedLine.substring(1).trim()}</p>
+                          </div>
+                        )
+                      } else if (trimmedLine.match(/^\d+\./)) {
+                        return (
+                          <div key={index} className="flex items-start">
+                            <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                            <p className="text-blue-900 text-sm leading-relaxed">{trimmedLine}</p>
+                          </div>
+                        )
+                      } else {
+                        return (
+                          <p key={index} className="text-blue-900 text-sm leading-relaxed">{trimmedLine}</p>
+                        )
+                      }
+                    })
+                  ) : (
+                    <p className="text-blue-700 text-sm italic">Business logic analysis is being generated...</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -575,6 +588,34 @@ export function TemplateCreationForm({ template, onSuccess, onCancel }: Template
                 </div>
               </div>
             </div>
+
+            {/* Detected Variables Section */}
+            {aiAnalysis.detectedVariables && aiAnalysis.detectedVariables.length > 0 && (
+              <div>
+                <p className="text-sm font-semibold text-gray-700 mb-3">Detected Variables ({aiAnalysis.detectedVariables.length})</p>
+                <div className="bg-purple-50 rounded-lg border border-purple-200 p-4">
+                  <div className="space-y-3">
+                    {aiAnalysis.detectedVariables.map((variable, index) => (
+                      <div key={index} className="flex items-start justify-between p-3 bg-white rounded-lg border border-purple-100">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <span className="font-medium text-purple-900">{variable.name}</span>
+                            <Badge variant="outline" className="text-xs">{variable.type}</Badge>
+                            {variable.required && <Badge variant="destructive" className="text-xs">Required</Badge>}
+                          </div>
+                          <p className="text-sm text-purple-700">{variable.description}</p>
+                          {variable.defaultValue && (
+                            <p className="text-xs text-purple-600 mt-1">
+                              Default: {typeof variable.defaultValue === 'string' ? variable.defaultValue : JSON.stringify(variable.defaultValue)}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

@@ -57,3 +57,25 @@ export function getInitials(name: string) {
     .toUpperCase()
     .slice(0, 2)
 }
+
+export function convertLoomUrlToEmbed(loomUrl: string): string | null {
+  if (!loomUrl) return null
+  
+  // Handle different Loom URL formats
+  // https://loom.com/share/VIDEO_ID
+  // https://www.loom.com/share/VIDEO_ID
+  // https://loom.com/embed/VIDEO_ID (already an embed URL)
+  
+  const shareMatch = loomUrl.match(/loom\.com\/share\/([a-zA-Z0-9]+)/)
+  if (shareMatch) {
+    return `https://loom.com/embed/${shareMatch[1]}`
+  }
+  
+  const embedMatch = loomUrl.match(/loom\.com\/embed\/([a-zA-Z0-9]+)/)
+  if (embedMatch) {
+    return loomUrl // Already an embed URL
+  }
+  
+  // If it doesn't match expected patterns, return null
+  return null
+}

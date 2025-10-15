@@ -37,7 +37,7 @@ const categoryIcons = {
 
 const requestTypeInfo = {
   real: {
-    label: 'Real Request',
+    label: 'Request',
     description: 'Submit an actual automation request for your team',
     icon: MessageSquare,
     color: 'bg-blue-100 text-blue-800',

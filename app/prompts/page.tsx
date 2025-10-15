@@ -94,10 +94,15 @@ export default function PromptsPage() {
             title="Prompt Library"
             description="Manage and version your AI prompts for consistent, high-quality outputs."
           >
-            <Button className="wl-button-primary">
-              <Plus className="mr-2 h-4 w-4" />
-              New Prompt
-            </Button>
+            <div className="flex items-center space-x-3">
+              <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
+                Coming Soon
+              </Badge>
+              <Button className="wl-button-primary">
+                <Plus className="mr-2 h-4 w-4" />
+                New Prompt
+              </Button>
+            </div>
           </PageHeader>
 
           {/* Filters */}

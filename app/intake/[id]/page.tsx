@@ -42,6 +42,7 @@ import {
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/database'
+import { useAuth } from '@/lib/auth/context'
 
 type IntakeRequest = Database['public']['Tables']['intake_request']['Row'] & {
   requester_user?: Database['public']['Tables']['app_user']['Row']
@@ -79,6 +80,7 @@ export default function IntakeDetailPage() {
   const params = useParams()
   const router = useRouter()
   const intakeId = params.id as string
+  const { user, loading: authLoading } = useAuth()
   
   const [intakeRequest, setIntakeRequest] = useState<IntakeRequest | null>(null)
   const [comments, setComments] = useState<IntakeComment[]>([])
@@ -168,6 +170,8 @@ export default function IntakeDetailPage() {
     const supabase = createClient()
     
     try {
+      console.log('Fetching comments for request:', intakeId)
+      
       const { data, error } = await supabase
         .from('intake_comment')
         .select(`
@@ -180,10 +184,18 @@ export default function IntakeDetailPage() {
         .eq('intake_request_id', intakeId)
         .order('created_at', { ascending: true })
 
-      if (error) throw error
+      if (error) {
+        console.error('Database error fetching comments:', error)
+        console.error('Error details:', JSON.stringify(error, null, 2))
+        setComments([])
+        return
+      }
+      
+      console.log('Comments fetched successfully:', data?.length || 0, 'comments')
       setComments(data || [])
     } catch (error) {
       console.error('Error fetching comments:', error)
+      setComments([])
     }
   }
 
@@ -244,7 +256,13 @@ export default function IntakeDetailPage() {
     
     try {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
+      if (!user) {
+        console.error('User not authenticated')
+        alert('You must be logged in to add comments')
+        return
+      }
+
+      console.log('Adding comment for user:', user.id, 'to request:', intakeId)
 
       const { data, error } = await supabase
         .from('intake_comment')
@@ -262,12 +280,18 @@ export default function IntakeDetailPage() {
         `)
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('Database error adding comment:', error)
+        alert(`Failed to add comment: ${error.message}`)
+        return
+      }
       
+      console.log('Comment added successfully:', data)
       setComments(prev => [...prev, data])
       setNewComment('')
     } catch (error) {
       console.error('Error adding comment:', error)
+      alert(`Error adding comment: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setIsSubmittingComment(false)
     }
@@ -298,14 +322,14 @@ export default function IntakeDetailPage() {
         }
       default:
         return {
-          label: 'Real Request',
+          label: 'Request',
           color: 'bg-blue-100 text-blue-800',
           description: 'This is a real intake request from a user'
         }
     }
   }
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-wl-bg">
         <div className="flex">
@@ -315,6 +339,32 @@ export default function IntakeDetailPage() {
               <div className="h-8 bg-gray-200 rounded w-1/3"></div>
               <div className="h-64 bg-gray-200 rounded"></div>
               <div className="h-32 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-wl-bg">
+        <div className="flex">
+          <Sidebar />
+          <div className="flex-1 p-8">
+            <PageHeader
+              title="Authentication Required"
+              description="Please sign in to view intake requests."
+            />
+            <div className="text-center py-12">
+              <AlertCircle className="h-12 w-12 text-wl-muted mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-wl-text mb-2">Sign In Required</h3>
+              <p className="text-wl-muted mb-4">
+                You need to be signed in to view and comment on intake requests.
+              </p>
+              <Button onClick={() => router.push('/auth/login')}>
+                Sign In
+              </Button>
             </div>
           </div>
         </div>
@@ -667,24 +717,38 @@ export default function IntakeDetailPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {/* Add Comment */}
-                  <div className="space-y-3">
-                    <Textarea
-                      placeholder="Add a comment..."
-                      value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                      rows={3}
-                    />
-                    <div className="flex justify-end">
-                      <Button
-                        onClick={handleAddComment}
-                        disabled={!newComment.trim() || isSubmittingComment}
-                        size="sm"
+                  {user ? (
+                    <div className="space-y-3">
+                      <Textarea
+                        placeholder="Add a comment..."
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        rows={3}
+                      />
+                      <div className="flex justify-end">
+                        <Button
+                          onClick={handleAddComment}
+                          disabled={!newComment.trim() || isSubmittingComment}
+                          size="sm"
+                        >
+                          <Send className="h-4 w-4 mr-2" />
+                          {isSubmittingComment ? 'Posting...' : 'Post Comment'}
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-4 border-2 border-dashed border-wl-muted/30 rounded-lg">
+                      <MessageSquare className="h-8 w-8 text-wl-muted mx-auto mb-2" />
+                      <p className="text-wl-muted text-sm mb-2">Sign in to add comments</p>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => router.push('/auth/login')}
                       >
-                        <Send className="h-4 w-4 mr-2" />
-                        {isSubmittingComment ? 'Posting...' : 'Post Comment'}
+                        Sign In
                       </Button>
                     </div>
-                  </div>
+                  )}
 
                   {/* Comments List */}
                   <div className="space-y-4">

@@ -56,15 +56,10 @@ export default function HRUniversityPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <PageHeader
-          title="AI in HR University"
-          subtitle="Master AI-powered people management through hands-on training with real AI tools"
-        />
-        <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
-          Coming Soon
-        </Badge>
-      </div>
+      <PageHeader
+        title="AI University"
+        subtitle="Master AI-powered people management through hands-on training with real AI tools"
+      />
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

@@ -1,41 +1,26 @@
-// Test Supabase connection with the same configuration as the API route
+// Test Edge Function directly
 const { createClient } = require('@supabase/supabase-js')
-const https = require('https')
 require('dotenv').config({ path: '.env.local' })
 
 // Fix TLS certificate issue
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
-async function testSupabaseConnection() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+async function testEdgeFunction() {
+  // You'll need to set these environment variables
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://qvfvylflnfxrhyzwlhpm.supabase.co'
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-  if (!supabaseUrl || !supabaseServiceKey) {
-    console.log('❌ Missing environment variables')
+  if (!supabaseServiceKey) {
+    console.log('❌ SUPABASE_SERVICE_ROLE_KEY not set')
+    console.log('Please set the environment variable:')
+    console.log('export SUPABASE_SERVICE_ROLE_KEY=your_service_role_key')
     return
   }
 
-  console.log('🔗 Testing Supabase connection...')
+  console.log('🔗 Testing Edge Function connection...')
   console.log('Supabase URL:', supabaseUrl)
 
-  // Create Supabase client with the same configuration as the API route
-  const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-    global: {
-      fetch: (url, options = {}) => {
-        // In development, bypass TLS certificate verification
-        if (process.env.NODE_ENV === 'development') {
-          const agent = new https.Agent({
-            rejectUnauthorized: false
-          })
-          return fetch(url, {
-            ...options,
-            agent
-          })
-        }
-        return fetch(url, options)
-      }
-    }
-  })
+  const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
   // Test with a simple workflow
   const testWorkflow = {
@@ -73,13 +58,10 @@ async function testSupabaseConnection() {
       }
     } else {
       console.log('✅ Edge Function success:', data)
-      console.log('Response type:', typeof data)
-      console.log('Response keys:', Object.keys(data))
     }
   } catch (err) {
     console.log('❌ Exception:', err.message)
-    console.log('Error details:', err)
   }
 }
 
-testSupabaseConnection()
+testEdgeFunction()

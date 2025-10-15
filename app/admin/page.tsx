@@ -24,66 +24,22 @@ const roleColors = {
   runner: 'bg-green-100 text-green-800'
 }
 
-// Mock data
-const mockUsers = [
-  {
-    id: '1',
-    name: 'Juliana Reyes',
-    email: 'juliana@workleap.com',
-    role: 'admin',
-    lastActive: '2024-01-15T14:30:00Z',
-    status: 'active'
-  },
-  {
-    id: '2',
-    name: 'Sarah Chen',
-    email: 'sarah@workleap.com',
-    role: 'editor',
-    lastActive: '2024-01-15T12:15:00Z',
-    status: 'active'
-  },
-  {
-    id: '3',
-    name: 'Mike Johnson',
-    email: 'mike@workleap.com',
-    role: 'runner',
-    lastActive: '2024-01-14T16:45:00Z',
-    status: 'active'
-  }
-]
+// Types for admin data
+interface User {
+  id: string
+  name: string
+  email: string
+  role: 'admin' | 'editor' | 'runner'
+  lastActive: string
+  status: 'active' | 'inactive'
+}
 
-const mockIntegrations = [
-  {
-    name: 'n8n',
-    status: 'connected',
-    lastSync: '2024-01-15T14:30:00Z',
-    description: 'Workflow orchestration'
-  },
-  {
-    name: 'HubSpot',
-    status: 'connected',
-    lastSync: '2024-01-15T13:20:00Z',
-    description: 'CRM and marketing automation'
-  },
-  {
-    name: 'Snowflake',
-    status: 'disconnected',
-    lastSync: null,
-    description: 'Data warehouse'
-  },
-  {
-    name: 'Snowflake MCP',
-    status: 'connected',
-    lastSync: '2024-01-15T15:00:00Z',
-    description: 'Model Context Protocol for AI agents'
-  },
-  {
-    name: 'Google Analytics',
-    status: 'error',
-    lastSync: '2024-01-14T09:15:00Z',
-    description: 'Web analytics'
-  }
-]
+interface Integration {
+  name: string
+  status: 'connected' | 'disconnected' | 'error'
+  lastSync: string | null
+  description: string
+}
 
 const statusColors = {
   connected: 'bg-green-100 text-green-800',
@@ -98,6 +54,13 @@ const statusIcons = {
 }
 
 export default function AdminPage() {
+  // TODO: Replace with actual data fetching
+  const activeUsersCount = 0 // Will be fetched from database
+  const templatesCount = 0 // Will be fetched from database
+  const connectedIntegrations = 0 // Will be calculated from integrations
+  const totalIntegrations = 0 // Will be fetched from integrations
+  const systemHealth = 100 // Will be calculated from system metrics
+
   return (
     <div className="min-h-screen bg-wl-bg">
       <div className="flex">
@@ -115,7 +78,7 @@ export default function AdminPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-wl-muted">Active Users</p>
-                    <p className="text-2xl font-bold text-wl-text">3</p>
+                    <p className="text-2xl font-bold text-wl-text">{activeUsersCount}</p>
                   </div>
                   <Users className="h-8 w-8 text-wl-accent" />
                 </div>
@@ -127,7 +90,7 @@ export default function AdminPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-wl-muted">Templates</p>
-                    <p className="text-2xl font-bold text-wl-text">6</p>
+                    <p className="text-2xl font-bold text-wl-text">{templatesCount}</p>
                   </div>
                   <Settings className="h-8 w-8 text-wl-accent-2" />
                 </div>
@@ -139,7 +102,7 @@ export default function AdminPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-wl-muted">Integrations</p>
-                    <p className="text-2xl font-bold text-wl-text">2/4</p>
+                    <p className="text-2xl font-bold text-wl-text">{connectedIntegrations}/{totalIntegrations}</p>
                   </div>
                   <Database className="h-8 w-8 text-orange-500" />
                 </div>
@@ -151,7 +114,7 @@ export default function AdminPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-wl-muted">System Health</p>
-                    <p className="text-2xl font-bold text-wl-text">98%</p>
+                    <p className="text-2xl font-bold text-wl-text">{systemHealth}%</p>
                   </div>
                   <Shield className="h-8 w-8 text-green-500" />
                 </div>
@@ -169,29 +132,24 @@ export default function AdminPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {mockUsers.map((user) => (
-                  <div key={user.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                    <div className="flex items-center space-x-3">
-                      <div className="h-10 w-10 bg-wl-accent rounded-full flex items-center justify-center">
-                        <span className="text-sm font-medium text-white">
-                          {user.name.split(' ').map(n => n[0]).join('')}
-                        </span>
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-wl-text">{user.name}</h4>
-                        <p className="text-sm text-wl-muted">{user.email}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Badge className={roleColors[user.role as keyof typeof roleColors]}>
-                        {user.role}
-                      </Badge>
-                      <Button variant="ghost" size="sm">
-                        Edit
-                      </Button>
-                    </div>
+                {/* TODO: Replace with actual users data fetching */}
+                {activeUsersCount === 0 ? (
+                  <div className="text-center py-8">
+                    <Users className="h-12 w-12 text-wl-muted mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-wl-text mb-2">No users found</h3>
+                    <p className="text-wl-muted mb-4">
+                      Get started by adding your first user to the system.
+                    </p>
                   </div>
-                ))}
+                ) : (
+                  <div className="text-center py-8">
+                    <Users className="h-12 w-12 text-wl-muted mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-wl-text mb-2">User data loading...</h3>
+                    <p className="text-wl-muted">
+                      Fetching user information from the database.
+                    </p>
+                  </div>
+                )}
                 <Button className="w-full" variant="outline">
                   <Users className="mr-2 h-4 w-4" />
                   Add User
@@ -208,35 +166,28 @@ export default function AdminPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {mockIntegrations.map((integration) => {
-                  const StatusIcon = statusIcons[integration.status as keyof typeof statusIcons]
-                  return (
-                    <div key={integration.name} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                      <div className="flex items-center space-x-3">
-                        <div className="p-2 bg-wl-accent/10 rounded-xl">
-                          <StatusIcon className="h-5 w-5 text-wl-accent" />
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-wl-text">{integration.name}</h4>
-                          <p className="text-sm text-wl-muted">{integration.description}</p>
-                          {integration.lastSync && (
-                            <p className="text-xs text-wl-muted">
-                              Last sync: {new Date(integration.lastSync).toLocaleString()}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Badge className={statusColors[integration.status as keyof typeof statusColors]}>
-                          {integration.status}
-                        </Badge>
-                        <Button variant="ghost" size="sm">
-                          Configure
-                        </Button>
-                      </div>
-                    </div>
-                  )
-                })}
+                {/* TODO: Replace with actual integrations data fetching */}
+                {totalIntegrations === 0 ? (
+                  <div className="text-center py-8">
+                    <Database className="h-12 w-12 text-wl-muted mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-wl-text mb-2">No integrations configured</h3>
+                    <p className="text-wl-muted mb-4">
+                      Connect external services to enhance your workflow automation.
+                    </p>
+                    <Button variant="outline" className="mt-4">
+                      <Database className="mr-2 h-4 w-4" />
+                      Add Integration
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Database className="h-12 w-12 text-wl-muted mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-wl-text mb-2">Loading integrations...</h3>
+                    <p className="text-wl-muted">
+                      Fetching integration status from the system.
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

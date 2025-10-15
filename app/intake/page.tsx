@@ -33,6 +33,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/database'
 import { IntakeForm } from '@/components/intake-form'
+import { useAuth } from '@/lib/auth/context'
 
 type IntakeRequest = Database['public']['Tables']['intake_request']['Row'] & {
   requester_user?: Database['public']['Tables']['app_user']['Row']
@@ -59,6 +60,7 @@ const typeIcons = {
 }
 
 export default function IntakePage() {
+  const { user, loading: authLoading } = useAuth()
   const [intakeRequests, setIntakeRequests] = useState<IntakeRequest[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -208,7 +210,7 @@ export default function IntakePage() {
     }
   }
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-wl-bg">
         <div className="flex">
@@ -227,6 +229,32 @@ export default function IntakePage() {
               {[...Array(3)].map((_, i) => (
                 <div key={i} className="h-32 bg-gray-200 rounded-lg animate-pulse" />
               ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-wl-bg">
+        <div className="flex">
+          <Sidebar />
+          <div className="flex-1 p-8">
+            <PageHeader
+              title="Authentication Required"
+              description="Please sign in to access the intake board."
+            />
+            <div className="text-center py-12">
+              <AlertCircle className="h-12 w-12 text-wl-muted mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-wl-text mb-2">Sign In Required</h3>
+              <p className="text-wl-muted mb-4">
+                You need to be signed in to view and submit intake requests.
+              </p>
+              <Button onClick={() => window.location.href = '/auth/login'}>
+                Sign In
+              </Button>
             </div>
           </div>
         </div>
@@ -346,7 +374,7 @@ export default function IntakePage() {
                 <SelectValue placeholder="Filter by type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="real">Real Requests</SelectItem>
+                <SelectItem value="real">Requests</SelectItem>
                 <SelectItem value="showcase">Showcase</SelectItem>
                 <SelectItem value="demo">Demo</SelectItem>
                 <SelectItem value="all">All Types</SelectItem>
