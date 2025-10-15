@@ -95,8 +95,8 @@ export interface GongInsight {
 }
 
 export class GongMCPClient {
-  private client: Client
-  private config: GongMCPConfig
+  private client!: Client
+  private config!: GongMCPConfig
   private isConnected: boolean = false
 
   constructor(config: GongMCPConfig) {

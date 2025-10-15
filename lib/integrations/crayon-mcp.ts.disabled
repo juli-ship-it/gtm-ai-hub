@@ -91,8 +91,8 @@ export interface CrayonMarketAlert {
 }
 
 export class CrayonMCPClient {
-  private client: Client
-  private config: CrayonMCPConfig
+  private client!: Client
+  private config!: CrayonMCPConfig
   private isConnected: boolean = false
 
   constructor(config: CrayonMCPConfig) {

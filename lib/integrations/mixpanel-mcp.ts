@@ -245,7 +245,7 @@ class RealMixpanelMCPClient implements MixpanelMCPClient {
 
       return {
         success: true,
-        data: result.content
+        data: result.content as any
       }
     } catch (error) {
       return {
@@ -271,7 +271,7 @@ class RealMixpanelMCPClient implements MixpanelMCPClient {
 
       return {
         success: true,
-        data: result.content
+        data: result.content as any
       }
     } catch (error) {
       return {
@@ -297,7 +297,7 @@ class RealMixpanelMCPClient implements MixpanelMCPClient {
 
       return {
         success: true,
-        data: result.content
+        data: result.content as any
       }
     } catch (error) {
       return {
@@ -315,12 +315,12 @@ class RealMixpanelMCPClient implements MixpanelMCPClient {
     try {
       const result = await this.client.callTool({
         name: 'get_cohorts',
-        arguments: options || {}
+        arguments: (options || {}) as any
       })
 
       return {
         success: true,
-        data: result.content
+        data: result.content as any
       }
     } catch (error) {
       return {

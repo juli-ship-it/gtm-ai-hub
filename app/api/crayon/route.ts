@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createCrayonMCPClient } from '@/lib/integrations/crayon-mcp'
+// import { createCrayonMCPClient } from '@/lib/integrations/crayon-mcp'
 
 // Rate limiting store (in production, use Redis or similar)
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>()
@@ -97,52 +97,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Create Crayon MCP client
-    const crayonClient = createCrayonMCPClient()
+    // const crayonClient = createCrayonMCPClient()
 
     // Execute the requested operation
-    let result
-    switch (operation) {
-      case 'get_battlecard':
-        result = await crayonClient.getBattlecard(params.competitor, params.options)
-        break
-      
-      case 'get_win_loss_stories':
-        result = await crayonClient.getWinLossStories(params.options)
-        break
-      
-      case 'get_competitor_profile':
-        result = await crayonClient.getCompetitorProfile(params.competitor, params.options)
-        break
-      
-      case 'get_objection_handling':
-        result = await crayonClient.getObjectionHandling(params.options)
-        break
-      
-      case 'get_competitive_positioning':
-        result = await crayonClient.getCompetitivePositioning(params.options)
-        break
-      
-      case 'get_deal_intelligence':
-        result = await crayonClient.getDealIntelligence(params.options)
-        break
-      
-      case 'get_market_alerts':
-        result = await crayonClient.getMarketAlerts(params.options)
-        break
-      
-      case 'get_competitor_news':
-        result = await crayonClient.getCompetitorNews(params.options)
-        break
-      
-      case 'get_market_trends':
-        result = await crayonClient.getMarketTrends(params.options)
-        break
-      
-      default:
-        return NextResponse.json(
-          { error: 'Operation not implemented' },
-          { status: 501 }
-        )
+    // Crayon MCP client temporarily disabled
+    const result = {
+      message: 'Crayon MCP client temporarily disabled',
+      operation,
+      params
     }
 
     // Log successful operation (if audit logging is enabled)

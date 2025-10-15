@@ -108,8 +108,8 @@ export interface ClayLeadGenerationCriteria {
 }
 
 export class ClayMCPClient {
-  private client: Client
-  private config: ClayMCPConfig
+  private client!: Client
+  private config!: ClayMCPConfig
   private isConnected: boolean = false
 
   constructor(config: ClayMCPConfig) {

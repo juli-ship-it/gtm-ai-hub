@@ -896,7 +896,7 @@ export class N8NWorkflowCloner {
             break // Stop trying other strategies for this variable
           }
         } catch (error) {
-          console.log(`⚠️ Strategy failed for "${variableName}":`, error.message)
+          console.log(`⚠️ Strategy failed for "${variableName}":`, (error as Error).message)
         }
       }
     })
@@ -1109,7 +1109,7 @@ export class N8NWorkflowCloner {
         }
       }
     } catch (error) {
-      console.log(`Error injecting at path ${path}:`, error.message)
+      console.log(`Error injecting at path ${path}:`, (error as Error).message)
     }
     
     return { injected: false, description: `Path not found or not injectable: ${path}` }

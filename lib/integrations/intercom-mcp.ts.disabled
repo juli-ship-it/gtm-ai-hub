@@ -74,8 +74,8 @@ export interface IntercomTicket {
 }
 
 export class IntercomMCPClient {
-  private client: Client
-  private config: IntercomMCPConfig
+  private client!: Client
+  private config!: IntercomMCPConfig
   private isConnected: boolean = false
 
   constructor(config: IntercomMCPConfig) {

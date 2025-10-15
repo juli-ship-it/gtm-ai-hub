@@ -25,14 +25,12 @@ export interface HubSpotQueryOptions {
 export interface HubSpotContact {
   id: string
   email: string
-  firstname?: string
-  lastname?: string
+  firstname: string
+  lastname: string
   phone?: string
   company?: string
   createdate: string
   lastmodifieddate: string
-  lastname: string
-  firstname: string
   properties: Record<string, any>
   associations?: {
     companies?: string[]
@@ -86,8 +84,8 @@ export interface HubSpotActivity {
 }
 
 export class HubSpotMCPClient {
-  private client: Client
-  private config: HubSpotMCPConfig
+  private client!: Client
+  private config!: HubSpotMCPConfig
   private isConnected: boolean = false
 
   constructor(config: HubSpotMCPConfig) {

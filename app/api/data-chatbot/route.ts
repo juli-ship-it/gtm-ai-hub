@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createSnowflakeMCPClient } from '@/lib/integrations/snowflake-mcp'
 import { SnowflakeMCPSecurity } from '@/lib/integrations/snowflake-mcp'
-import { createIntercomMCPClient } from '@/lib/integrations/intercom-mcp'
-import { createHubSpotMCPClient } from '@/lib/integrations/hubspot-mcp'
-import { createGongMCPClient } from '@/lib/integrations/gong-mcp'
+// import { createIntercomMCPClient } from '@/lib/integrations/intercom-mcp'
+// import { createHubSpotMCPClient } from '@/lib/integrations/hubspot-mcp'
+// import { createGongMCPClient } from '@/lib/integrations/gong-mcp'
 import { createMixpanelMCPClient } from '@/lib/integrations/mixpanel-mcp'
-import { createCrayonMCPClient } from '@/lib/integrations/crayon-mcp'
-import { createClayMCPClient } from '@/lib/integrations/clay-mcp'
+// import { createCrayonMCPClient } from '@/lib/integrations/crayon-mcp'
+// import { createClayMCPClient } from '@/lib/integrations/clay-mcp'
 import { 
   createEnhancedAIPrompt, 
   validateQuery, 
@@ -255,64 +255,15 @@ async function executeSupabaseQuery(query: string): Promise<any> {
 }
 
 async function executeHubSpotQuery(query: string): Promise<any> {
-  const hubspotClient = createHubSpotMCPClient()
-  
-  try {
-    // Parse query to determine which HubSpot data to fetch
-    if (query.toLowerCase().includes('contact')) {
-      const contacts = await hubspotClient.getContacts()
-      return {
-        data: contacts,
-        columns: ['id', 'email', 'firstname', 'lastname', 'company', 'lifecyclestage', 'createdate'],
-        rowCount: contacts.length,
-        executionTime: 0.3
-      }
-    } else if (query.toLowerCase().includes('deal')) {
-      const deals = await hubspotClient.getDeals()
-      return {
-        data: deals,
-        columns: ['id', 'dealname', 'amount', 'dealstage', 'closedate', 'pipeline'],
-        rowCount: deals.length,
-        executionTime: 0.3
-      }
-    } else if (query.toLowerCase().includes('company')) {
-      const companies = await hubspotClient.getCompanies()
-      return {
-        data: companies,
-        columns: ['id', 'name', 'domain', 'industry', 'numberofemployees', 'annualrevenue'],
-        rowCount: companies.length,
-        executionTime: 0.3
-      }
-    } else if (query.toLowerCase().includes('activity')) {
-      const activities = await hubspotClient.getActivities()
-      return {
-        data: activities,
-        columns: ['id', 'type', 'timestamp', 'contact_id', 'company_id', 'deal_id', 'subject'],
-        rowCount: activities.length,
-        executionTime: 0.3
-      }
-    } else {
-      // Default to contacts
-      const contacts = await hubspotClient.getContacts()
-      return {
-        data: contacts,
-        columns: ['id', 'email', 'firstname', 'lastname', 'company', 'lifecyclestage', 'createdate'],
-        rowCount: contacts.length,
-        executionTime: 0.3
-      }
-    }
-  } catch (error) {
-    console.error('HubSpot query error:', error)
-    // Fallback to mock data
-    return {
-      data: [
-        { id: 'contact_1', email: 'john@acme.com', firstname: 'John', lastname: 'Smith', company: 'Acme Corp', lifecyclestage: 'customer', createdate: '2024-01-01T00:00:00Z' },
-        { id: 'contact_2', email: 'sarah@beta.com', firstname: 'Sarah', lastname: 'Johnson', company: 'Beta Inc', lifecyclestage: 'lead', createdate: '2024-01-15T00:00:00Z' }
-      ],
-      columns: ['id', 'email', 'firstname', 'lastname', 'company', 'lifecyclestage', 'createdate'],
-      rowCount: 2,
-      executionTime: 0.3
-    }
+  // HubSpot MCP client temporarily disabled
+  return {
+    data: [
+      { id: 'contact_1', email: 'john@acme.com', firstname: 'John', lastname: 'Smith', company: 'Acme Corp', lifecyclestage: 'customer', createdate: '2024-01-01T00:00:00Z' },
+      { id: 'contact_2', email: 'sarah@beta.com', firstname: 'Sarah', lastname: 'Johnson', company: 'Beta Inc', lifecyclestage: 'lead', createdate: '2024-01-15T00:00:00Z' }
+    ],
+    columns: ['id', 'email', 'firstname', 'lastname', 'company', 'lifecyclestage', 'createdate'],
+    rowCount: 2,
+    executionTime: 0.1
   }
 }
 
@@ -368,214 +319,59 @@ async function executeMixpanelQuery(query: string): Promise<any> {
 }
 
 async function executeIntercomQuery(query: string): Promise<any> {
-  const intercomClient = createIntercomMCPClient()
-  
-  try {
-    // Parse query to determine which Intercom data to fetch
-    if (query.toLowerCase().includes('conversation')) {
-      const conversations = await intercomClient.getConversations()
-      return {
-        data: conversations,
-        columns: ['id', 'topic', 'created_at', 'status', 'contact_id', 'message_count'],
-        rowCount: conversations.length,
-        executionTime: 0.3
+  // Intercom MCP client temporarily disabled
+  return {
+    data: [
+      {
+        id: 'conv_1',
+        topic: 'Billing Question',
+        created_at: '2024-01-15T10:30:00Z',
+        status: 'open',
+        contact_id: 'contact_1',
+        message_count: 3
+      },
+      {
+        id: 'conv_2',
+        topic: 'Feature Request',
+        created_at: '2024-01-20T14:45:00Z',
+        status: 'closed',
+        contact_id: 'contact_2',
+        message_count: 5
       }
-    } else if (query.toLowerCase().includes('contact')) {
-      const contacts = await intercomClient.getContacts()
-      return {
-        data: contacts,
-        columns: ['id', 'name', 'email', 'company_id', 'created_at', 'last_seen_at'],
-        rowCount: contacts.length,
-        executionTime: 0.3
-      }
-    } else if (query.toLowerCase().includes('company')) {
-      const companies = await intercomClient.getCompanies()
-      return {
-        data: companies,
-        columns: ['id', 'name', 'website', 'industry', 'size', 'plan', 'monthly_spend'],
-        rowCount: companies.length,
-        executionTime: 0.3
-      }
-    } else if (query.toLowerCase().includes('ticket')) {
-      const tickets = await intercomClient.getTickets()
-      return {
-        data: tickets,
-        columns: ['id', 'title', 'status', 'priority', 'created_at', 'contact_id', 'assignee_id'],
-        rowCount: tickets.length,
-        executionTime: 0.3
-      }
-    } else {
-      // Default to conversations
-      const conversations = await intercomClient.getConversations()
-      return {
-        data: conversations,
-        columns: ['id', 'topic', 'created_at', 'status', 'contact_id', 'message_count'],
-        rowCount: conversations.length,
-        executionTime: 0.3
-      }
-    }
-  } catch (error) {
-    console.error('Intercom query error:', error)
-    throw error
+    ],
+    columns: ['id', 'topic', 'created_at', 'status', 'contact_id', 'message_count'],
+    rowCount: 2,
+    executionTime: 0.1
   }
 }
 
 async function executeGongQuery(query: string): Promise<any> {
-  const gongClient = createGongMCPClient()
-  
-  try {
-    // Parse query to determine which Gong data to fetch
-    if (query.toLowerCase().includes('call')) {
-      const calls = await gongClient.getCalls()
-      return {
-        data: calls,
-        columns: ['id', 'title', 'started', 'duration', 'outcome', 'score', 'topics'],
-        rowCount: calls.length,
-        executionTime: 0.5
-      }
-    } else if (query.toLowerCase().includes('transcript')) {
-      const transcripts = await gongClient.getTranscripts()
-      return {
-        data: transcripts,
-        columns: ['id', 'call_id', 'summary', 'sentiment', 'confidence', 'key_points'],
-        rowCount: transcripts.length,
-        executionTime: 0.5
-      }
-    } else if (query.toLowerCase().includes('topic')) {
-      const topics = await gongClient.getTopics()
-      return {
-        data: topics,
-        columns: ['id', 'name', 'category', 'frequency', 'sentiment', 'examples'],
-        rowCount: topics.length,
-        executionTime: 0.5
-      }
-    } else if (query.toLowerCase().includes('insight')) {
-      const insights = await gongClient.getInsights()
-      return {
-        data: insights,
-        columns: ['id', 'type', 'content', 'call_id', 'confidence', 'impact', 'action_items'],
-        rowCount: insights.length,
-        executionTime: 0.5
-      }
-    } else {
-      // Default to calls
-      const calls = await gongClient.getCalls()
-      return {
-        data: calls,
-        columns: ['id', 'title', 'started', 'duration', 'outcome', 'score', 'topics'],
-        rowCount: calls.length,
-        executionTime: 0.5
-      }
-    }
-  } catch (error) {
-    console.error('Gong query error:', error)
-    throw error
+  // Gong MCP client temporarily disabled
+  return {
+    data: [],
+    columns: ['id', 'title', 'started', 'duration', 'outcome', 'score', 'topics'],
+    rowCount: 0,
+    executionTime: 0.1
   }
 }
 
 async function executeCrayonQuery(query: string): Promise<any> {
-  const crayonClient = createCrayonMCPClient()
-  
-  try {
-    // Parse query to determine which Crayon data to fetch
-    if (query.toLowerCase().includes('battlecard')) {
-      const battlecard = await crayonClient.getBattlecard('default')
-      return {
-        data: [battlecard],
-        columns: ['competitor', 'strengths', 'weaknesses', 'positioning', 'objections'],
-        rowCount: 1,
-        executionTime: 0.4
-      }
-    } else if (query.toLowerCase().includes('win') || query.toLowerCase().includes('loss')) {
-      const winLossStories = await crayonClient.getWinLossStories()
-      return {
-        data: winLossStories,
-        columns: ['id', 'competitor', 'outcome', 'deal_value', 'key_factors', 'lessons'],
-        rowCount: winLossStories.length,
-        executionTime: 0.4
-      }
-    } else if (query.toLowerCase().includes('competitor')) {
-      const competitorProfile = await crayonClient.getCompetitorProfile('default')
-      return {
-        data: [competitorProfile],
-        columns: ['name', 'description', 'products', 'pricing_model', 'market_position', 'recent_news'],
-        rowCount: 1,
-        executionTime: 0.4
-      }
-    } else if (query.toLowerCase().includes('alert')) {
-      const marketAlerts = await crayonClient.getMarketAlerts()
-      return {
-        data: marketAlerts,
-        columns: ['id', 'type', 'competitor', 'title', 'description', 'impact', 'date'],
-        rowCount: marketAlerts.length,
-        executionTime: 0.4
-      }
-    } else {
-      // Default to battlecard
-      const battlecard = await crayonClient.getBattlecard('default')
-      return {
-        data: [battlecard],
-        columns: ['competitor', 'strengths', 'weaknesses', 'positioning', 'objections'],
-        rowCount: 1,
-        executionTime: 0.4
-      }
-    }
-  } catch (error) {
-    console.error('Crayon query error:', error)
-    throw error
+  // Crayon MCP client temporarily disabled
+  return {
+    data: [],
+    columns: ['competitor', 'strengths', 'weaknesses', 'positioning', 'objections'],
+    rowCount: 0,
+    executionTime: 0.1
   }
 }
 
 async function executeClayQuery(query: string): Promise<any> {
-  const clayClient = createClayMCPClient()
-  
-  try {
-    // Parse query to determine which Clay data to fetch
-    if (query.toLowerCase().includes('enriched') || query.toLowerCase().includes('contact')) {
-      const enrichedContacts = await clayClient.enrichContacts([])
-      return {
-        data: enrichedContacts,
-        columns: ['id', 'email', 'first_name', 'last_name', 'company', 'title', 'enrichment_score'],
-        rowCount: enrichedContacts.length,
-        executionTime: 0.6
-      }
-    } else if (query.toLowerCase().includes('company') && query.toLowerCase().includes('insight')) {
-      const companyInsights = await clayClient.getCompanyInsights([])
-      return {
-        data: companyInsights,
-        columns: ['name', 'domain', 'industry', 'employee_count', 'annual_revenue', 'funding_stage'],
-        rowCount: companyInsights.length,
-        executionTime: 0.6
-      }
-    } else if (query.toLowerCase().includes('prospect')) {
-      const prospects = await clayClient.findProspects({})
-      return {
-        data: prospects,
-        columns: ['id', 'email', 'first_name', 'last_name', 'company', 'title', 'score', 'match_reason'],
-        rowCount: prospects.length,
-        executionTime: 0.6
-      }
-    } else if (query.toLowerCase().includes('verification')) {
-      const verificationResults = await clayClient.verifyContactData([])
-      return {
-        data: verificationResults,
-        columns: ['contact_id', 'email', 'verification_status', 'deliverability', 'bounce_risk'],
-        rowCount: verificationResults.length,
-        executionTime: 0.6
-      }
-    } else {
-      // Default to enriched contacts
-      const enrichedContacts = await clayClient.enrichContacts([])
-      return {
-        data: enrichedContacts,
-        columns: ['id', 'email', 'first_name', 'last_name', 'company', 'title', 'enrichment_score'],
-        rowCount: enrichedContacts.length,
-        executionTime: 0.6
-      }
-    }
-  } catch (error) {
-    console.error('Clay query error:', error)
-    throw error
+  // Clay MCP client temporarily disabled
+  return {
+    data: [],
+    columns: ['id', 'email', 'first_name', 'last_name', 'company', 'title'],
+    rowCount: 0,
+    executionTime: 0.1
   }
 }
 

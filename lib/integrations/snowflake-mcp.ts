@@ -219,7 +219,7 @@ export function createSnowflakeMCPClient(): SnowflakeMCPClient {
 
   // For production, we'll use Snowflake's managed MCP server
   // This requires OAuth authentication and proper configuration
-  return new RealSnowflakeMCPClient('snowflake-mcp', [])
+  return new RealSnowflakeMCPClient()
 }
 
 // Security utilities for MCP

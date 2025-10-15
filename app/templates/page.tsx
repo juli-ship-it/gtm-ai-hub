@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Sidebar } from '@/components/sidebar'
 import { TemplateCreationForm } from '@/components/template-creation-form'
 import { TemplateEditForm } from '@/components/template-edit-form'
-import { TemplateCloneForm } from '@/components/template-clone-form'
+// import { TemplateCloneForm } from '@/components/template-clone-form'
 import { 
   Search, 
   Filter, 
@@ -811,10 +811,14 @@ export default function TemplatesPage() {
       {cloningTemplate && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto">
-            <TemplateCloneForm 
+            {/* <TemplateCloneForm 
               template={cloningTemplate} 
               onClose={handleCloseModals}
-            />
+            /> */}
+            <div className="p-8 text-center">
+              <h2 className="text-xl font-semibold mb-4">Template Cloning</h2>
+              <p className="text-gray-600">Template cloning feature is temporarily disabled.</p>
+            </div>
           </div>
         </div>
       )}
