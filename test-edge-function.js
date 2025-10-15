@@ -7,7 +7,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
 async function testEdgeFunction() {
   // You'll need to set these environment variables
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://qvfvylflnfxrhyzwlhpm.supabase.co'
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://your-project.supabase.co'
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
   if (!supabaseServiceKey) {

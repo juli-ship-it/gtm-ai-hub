@@ -2,8 +2,8 @@
 const { createClient } = require('@supabase/supabase-js')
 
 // You'll need to replace these with your actual values
-const supabaseUrl = 'https://qvfvylflnfxrhyzwlhpm.supabase.co'
-const supabaseKey = 'your-service-role-key-here' // Replace with actual key
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://your-project.supabase.co'
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'your-service-role-key-here'
 
 const supabase = createClient(supabaseUrl, supabaseKey)
 

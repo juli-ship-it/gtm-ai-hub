@@ -2,9 +2,9 @@
 const https = require('https');
 
 async function setSecret() {
-  const projectRef = 'qvfvylflnfxrhyzwlhpm';
+  const projectRef = process.env.SUPABASE_PROJECT_REF || 'your-project-ref';
   const secretName = 'OPENAI_API_KEY';
-  const secretValue = 'sk-your-openai-api-key-here'; // Replace with your actual key
+  const secretValue = process.env.OPENAI_API_KEY || 'sk-your-openai-api-key-here'; // Replace with your actual key
   
   // You'll need to get your Supabase access token from the dashboard
   const accessToken = 'your-supabase-access-token'; // Get this from Supabase dashboard

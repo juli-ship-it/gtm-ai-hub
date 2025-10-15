@@ -135,7 +135,7 @@ export class N8NWorkflowCloner {
       const lowerKey = key.toLowerCase()
       
       if (sensitiveKeys.some(sensitive => lowerKey.includes(sensitive))) {
-        console.log(`🔒 Removing sensitive parameter: ${key} from node: ${nodeName}`)
+        console.log(`🔒 Removing sensitive parameter from node: ${nodeName}`)
         params[key] = '[CONFIGURE_MANUALLY_IN_N8N]'
       } else if (typeof params[key] === 'object' && params[key] !== null) {
         this.cleanSensitiveParameters(params[key], nodeName)
@@ -638,7 +638,7 @@ export class N8NWorkflowCloner {
         if (variables[variableKey]) {
           params.headers[headerKey] = variables[variableKey]
           injectedCount++
-          console.log(`Set header ${headerKey} to: ${variables[variableKey]}`)
+          console.log(`Set header ${headerKey} to configured value`)
         }
       })
     }
@@ -718,7 +718,7 @@ export class N8NWorkflowCloner {
           // Create n8n expression instead of using raw value
           obj[key] = `={{ $json.${variableName} }}`
           replaced = true
-          console.log(`Replaced object property '${key}' with n8n expression: ={{ $json.${variableName} }}`)
+          console.log(`Replaced object property '${key}' with n8n expression`)
         }
       })
     }

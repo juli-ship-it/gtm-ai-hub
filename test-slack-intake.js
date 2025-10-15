@@ -24,7 +24,7 @@ const testData = {
 
 async function testSlackIntake() {
   try {
-    const response = await fetch('https://qvfvylflnfxrhyzwlhpm.supabase.co/functions/v1/slack-intake', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/slack-intake`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
