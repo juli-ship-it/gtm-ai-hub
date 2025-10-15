@@ -164,13 +164,13 @@ export interface Database {
           status: 'new' | 'triaged' | 'building' | 'shipped' | 'declined'
           priority: 'low' | 'medium' | 'high' | 'urgent'
           title: string | null
-          category: 'campaign_execution' | 'content_creation' | 'lead_management' | 'reporting' | 'other' | null
+          category: 'mkt_campaign_execution' | 'mkt_content_creation' | 'mkt_reporting_analytics' | 'mkt_paid_media' | 'mkt_seo_website' | 'mkt_social_community' | 'mkt_lead_nurturing' | 'mkt_events_webinars' | 'mkt_other' | 'sales_enablement' | 'sales_lead_qualification' | 'sales_pipeline_management' | 'sales_customer_outreach' | 'sales_forecasting_hygiene' | 'sales_other' | 'co_employee_engagement' | 'co_team_culture' | 'co_deib' | 'co_learning_development' | 'co_onboarding_experience' | 'co_performance_management' | 'co_recognition_rewards' | 'co_other' | 'cs_onboarding_adoption' | 'cs_health_scoring_alerts' | 'cs_qbr_ebr_prep' | 'cs_renewals_expansion' | 'cs_other' | 'pe_user_research' | 'pe_prds' | 'pe_qa_test_gen' | 'pe_release_docs' | 'pe_other' | 'data_dashboards_reporting' | 'data_etl_quality' | 'data_experimentation_ab' | 'data_other' | 'fin_ap_ar_invoicing' | 'fin_expense_procurement' | 'legal_contracts' | 'finlegal_other' | 'people_recruiting_onboarding' | 'it_provisioning_access' | 'sec_compliance' | 'ops_other' | 'xf_process_improvement' | 'xf_cross_team_collaboration' | 'xf_internal_tools' | 'xf_partnerships' | 'xf_enablement_training' | 'xf_other' | 'campaign_execution' | 'content_creation' | 'lead_management' | 'reporting' | 'other' | null
           current_process: string | null
           pain_points: string | null
-          frequency: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'ad_hoc' | null
+          frequency: 'daily' | 'weekly' | 'monthly' | 'adhoc' | null
           time_friendly: string | null
           systems: string[] | null
-          sensitivity: 'low' | 'medium' | 'high' | 'confidential' | null
+          sensitivity: 'low' | 'med' | 'high' | null
           links: string | null
           slack_team_id: string | null
           slack_team_name: string | null
@@ -190,13 +190,13 @@ export interface Database {
           status?: 'new' | 'triaged' | 'building' | 'shipped' | 'declined'
           priority?: 'low' | 'medium' | 'high' | 'urgent'
           title?: string | null
-          category?: 'campaign_execution' | 'content_creation' | 'lead_management' | 'reporting' | 'other' | null
+          category?: 'mkt_campaign_execution' | 'mkt_content_creation' | 'mkt_reporting_analytics' | 'mkt_paid_media' | 'mkt_seo_website' | 'mkt_social_community' | 'mkt_lead_nurturing' | 'mkt_events_webinars' | 'mkt_other' | 'sales_enablement' | 'sales_lead_qualification' | 'sales_pipeline_management' | 'sales_customer_outreach' | 'sales_forecasting_hygiene' | 'sales_other' | 'co_employee_engagement' | 'co_team_culture' | 'co_deib' | 'co_learning_development' | 'co_onboarding_experience' | 'co_performance_management' | 'co_recognition_rewards' | 'co_other' | 'cs_onboarding_adoption' | 'cs_health_scoring_alerts' | 'cs_qbr_ebr_prep' | 'cs_renewals_expansion' | 'cs_other' | 'pe_user_research' | 'pe_prds' | 'pe_qa_test_gen' | 'pe_release_docs' | 'pe_other' | 'data_dashboards_reporting' | 'data_etl_quality' | 'data_experimentation_ab' | 'data_other' | 'fin_ap_ar_invoicing' | 'fin_expense_procurement' | 'legal_contracts' | 'finlegal_other' | 'people_recruiting_onboarding' | 'it_provisioning_access' | 'sec_compliance' | 'ops_other' | 'xf_process_improvement' | 'xf_cross_team_collaboration' | 'xf_internal_tools' | 'xf_partnerships' | 'xf_enablement_training' | 'xf_other' | 'campaign_execution' | 'content_creation' | 'lead_management' | 'reporting' | 'other' | null
           current_process?: string | null
           pain_points?: string | null
-          frequency?: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'ad_hoc' | null
+          frequency?: 'daily' | 'weekly' | 'monthly' | 'adhoc' | null
           time_friendly?: string | null
           systems?: string[] | null
-          sensitivity?: 'low' | 'medium' | 'high' | 'confidential' | null
+          sensitivity?: 'low' | 'med' | 'high' | null
           links?: string | null
           slack_team_id?: string | null
           slack_team_name?: string | null
@@ -216,13 +216,13 @@ export interface Database {
           status?: 'new' | 'triaged' | 'building' | 'shipped' | 'declined'
           priority?: 'low' | 'medium' | 'high' | 'urgent'
           title?: string | null
-          category?: 'campaign_execution' | 'content_creation' | 'lead_management' | 'reporting' | 'other' | null
+          category?: 'mkt_campaign_execution' | 'mkt_content_creation' | 'mkt_reporting_analytics' | 'mkt_paid_media' | 'mkt_seo_website' | 'mkt_social_community' | 'mkt_lead_nurturing' | 'mkt_events_webinars' | 'mkt_other' | 'sales_enablement' | 'sales_lead_qualification' | 'sales_pipeline_management' | 'sales_customer_outreach' | 'sales_forecasting_hygiene' | 'sales_other' | 'co_employee_engagement' | 'co_team_culture' | 'co_deib' | 'co_learning_development' | 'co_onboarding_experience' | 'co_performance_management' | 'co_recognition_rewards' | 'co_other' | 'cs_onboarding_adoption' | 'cs_health_scoring_alerts' | 'cs_qbr_ebr_prep' | 'cs_renewals_expansion' | 'cs_other' | 'pe_user_research' | 'pe_prds' | 'pe_qa_test_gen' | 'pe_release_docs' | 'pe_other' | 'data_dashboards_reporting' | 'data_etl_quality' | 'data_experimentation_ab' | 'data_other' | 'fin_ap_ar_invoicing' | 'fin_expense_procurement' | 'legal_contracts' | 'finlegal_other' | 'people_recruiting_onboarding' | 'it_provisioning_access' | 'sec_compliance' | 'ops_other' | 'xf_process_improvement' | 'xf_cross_team_collaboration' | 'xf_internal_tools' | 'xf_partnerships' | 'xf_enablement_training' | 'xf_other' | 'campaign_execution' | 'content_creation' | 'lead_management' | 'reporting' | 'other' | null
           current_process?: string | null
           pain_points?: string | null
-          frequency?: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'ad_hoc' | null
+          frequency?: 'daily' | 'weekly' | 'monthly' | 'adhoc' | null
           time_friendly?: string | null
           systems?: string[] | null
-          sensitivity?: 'low' | 'medium' | 'high' | 'confidential' | null
+          sensitivity?: 'low' | 'med' | 'high' | null
           links?: string | null
           slack_team_id?: string | null
           slack_team_name?: string | null

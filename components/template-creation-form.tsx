@@ -380,7 +380,6 @@ export function TemplateCreationForm({ template, onSuccess, onCancel }: Template
             order_index: index
           }))
           
-          console.log('Inserting template variables:', variablesToInsert)
 
           const { error: variablesError } = await (supabase as any)
             .from('template_variable')

@@ -121,7 +121,7 @@ async function processRequest(req: Request) {
         category: slackData.category || 'other',
         current_process: slackData.current_process || 'No current process described',
         pain_points: slackData.pain_points || 'No pain points described',
-        frequency: slackData.frequency || 'ad_hoc',
+        frequency: slackData.frequency || 'adhoc',
         time_friendly: slackData.time_friendly || 'Unknown',
         systems: slackData.systems || [],
         sensitivity: slackData.sensitivity || 'low',

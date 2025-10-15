@@ -1,0 +1,510 @@
+import { Client } from '@modelcontextprotocol/sdk/client/index.js'
+import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
+import { spawn } from 'child_process'
+
+export interface HubSpotMCPConfig {
+  clientId: string
+  clientSecret: string
+  readOnly?: boolean
+  maxResults?: number
+  timeout?: number
+  auditLogging?: boolean
+}
+
+export interface HubSpotQueryOptions {
+  timeRange?: string
+  include?: string[]
+  limit?: number
+  offset?: number
+  stage?: string
+  contactId?: string
+  companyId?: string
+  dealId?: string
+}
+
+export interface HubSpotContact {
+  id: string
+  email: string
+  firstname?: string
+  lastname?: string
+  phone?: string
+  company?: string
+  createdate: string
+  lastmodifieddate: string
+  lastname: string
+  firstname: string
+  properties: Record<string, any>
+  associations?: {
+    companies?: string[]
+    deals?: string[]
+  }
+}
+
+export interface HubSpotDeal {
+  id: string
+  dealname: string
+  amount: number
+  dealstage: string
+  closedate?: string
+  createdate: string
+  lastmodifieddate: string
+  pipeline: string
+  properties: Record<string, any>
+  associations?: {
+    contacts?: string[]
+    companies?: string[]
+  }
+}
+
+export interface HubSpotCompany {
+  id: string
+  name: string
+  domain?: string
+  industry?: string
+  numberofemployees?: number
+  createdate: string
+  lastmodifieddate: string
+  properties: Record<string, any>
+  associations?: {
+    contacts?: string[]
+    deals?: string[]
+  }
+}
+
+export interface HubSpotActivity {
+  id: string
+  type: string
+  timestamp: string
+  contactId?: string
+  companyId?: string
+  dealId?: string
+  properties: Record<string, any>
+  metadata: {
+    source: string
+    sourceId: string
+  }
+}
+
+export class HubSpotMCPClient {
+  private client: Client
+  private config: HubSpotMCPConfig
+  private isConnected: boolean = false
+
+  constructor(config: HubSpotMCPConfig) {
+    this.config = {
+      readOnly: true,
+      maxResults: 100,
+      timeout: 300,
+      auditLogging: false,
+      ...config
+    }
+  }
+
+  async connect(): Promise<void> {
+    if (this.isConnected) return
+
+    // In development mode or when using mock data, skip actual MCP connection
+    if (process.env.NODE_ENV === 'development' || !this.config.clientId || this.config.clientId === 'mock_client_id') {
+      this.isConnected = true
+      if (this.config.auditLogging) {
+        console.log('HubSpot MCP client connected in mock mode')
+      }
+      return
+    }
+
+    try {
+      // Spawn the HubSpot MCP server process
+      const serverProcess = spawn('npx', [
+        '-y',
+        '@hubspot/mcp-server',
+        '--client-id',
+        this.config.clientId,
+        '--client-secret',
+        this.config.clientSecret
+      ], {
+        stdio: ['pipe', 'pipe', 'pipe']
+      })
+
+      // Create transport and client
+      const transport = new StdioClientTransport({
+        reader: serverProcess.stdout!,
+        writer: serverProcess.stdin!
+      })
+
+      this.client = new Client({
+        name: 'hubspot-mcp-client',
+        version: '1.0.0'
+      }, {
+        capabilities: {}
+      })
+
+      await this.client.connect(transport)
+      this.isConnected = true
+
+      if (this.config.auditLogging) {
+        console.log('HubSpot MCP client connected successfully')
+      }
+    } catch (error) {
+      console.error('Failed to connect to HubSpot MCP server:', error)
+      throw error
+    }
+  }
+
+  async disconnect(): Promise<void> {
+    if (this.client && this.isConnected) {
+      await this.client.close()
+      this.isConnected = false
+    }
+  }
+
+  private async executeTool(toolName: string, args: any): Promise<any> {
+    if (!this.isConnected) {
+      await this.connect()
+    }
+
+    // In development mode or mock mode, return mock data
+    if (process.env.NODE_ENV === 'development' || !this.config.clientId || this.config.clientId === 'mock_client_id') {
+      if (this.config.auditLogging) {
+        console.log(`HubSpot MCP tool executed (mock): ${toolName}`, { args })
+      }
+      return [{ text: 'mock_data' }] // Return mock format
+    }
+
+    try {
+      const result = await this.client.callTool({
+        name: toolName,
+        arguments: args
+      })
+
+      if (this.config.auditLogging) {
+        console.log(`HubSpot MCP tool executed: ${toolName}`, { args, result })
+      }
+
+      return result.content
+    } catch (error) {
+      console.error(`HubSpot MCP tool execution failed: ${toolName}`, error)
+      throw error
+    }
+  }
+
+  // Contact Methods
+
+  async getContacts(options: HubSpotQueryOptions = {}): Promise<HubSpotContact[]> {
+    const args = {
+      timeRange: options.timeRange || 'last_30_days',
+      limit: this.config.maxResults,
+      offset: options.offset || 0,
+      properties: options.include || ['email', 'firstname', 'lastname', 'company', 'phone']
+    }
+
+    const result = await this.executeTool('get_contacts', args)
+    
+    // In mock mode, always return mock data
+    if (process.env.NODE_ENV === 'development' || !this.config.clientId || this.config.clientId === 'mock_client_id') {
+      return this.getMockContacts()
+    }
+    
+    return result[0]?.text ? JSON.parse(result[0].text) : this.getMockContacts()
+  }
+
+  async getContactById(contactId: string): Promise<HubSpotContact | null> {
+    const args = { contactId }
+    const result = await this.executeTool('get_contact', args)
+    
+    if (process.env.NODE_ENV === 'development' || !this.config.clientId || this.config.clientId === 'mock_client_id') {
+      return this.getMockContact(contactId)
+    }
+    
+    return result[0]?.text ? JSON.parse(result[0].text) : this.getMockContact(contactId)
+  }
+
+  // Deal Methods
+
+  async getDeals(options: HubSpotQueryOptions = {}): Promise<HubSpotDeal[]> {
+    const args = {
+      timeRange: options.timeRange || 'last_30_days',
+      stage: options.stage,
+      limit: this.config.maxResults,
+      offset: options.offset || 0,
+      properties: options.include || ['dealname', 'amount', 'dealstage', 'closedate', 'pipeline']
+    }
+
+    const result = await this.executeTool('get_deals', args)
+    
+    if (process.env.NODE_ENV === 'development' || !this.config.clientId || this.config.clientId === 'mock_client_id') {
+      return this.getMockDeals()
+    }
+    
+    return result[0]?.text ? JSON.parse(result[0].text) : this.getMockDeals()
+  }
+
+  async getDealById(dealId: string): Promise<HubSpotDeal | null> {
+    const args = { dealId }
+    const result = await this.executeTool('get_deal', args)
+    
+    if (process.env.NODE_ENV === 'development' || !this.config.clientId || this.config.clientId === 'mock_client_id') {
+      return this.getMockDeal(dealId)
+    }
+    
+    return result[0]?.text ? JSON.parse(result[0].text) : this.getMockDeal(dealId)
+  }
+
+  // Company Methods
+
+  async getCompanies(options: HubSpotQueryOptions = {}): Promise<HubSpotCompany[]> {
+    const args = {
+      timeRange: options.timeRange || 'last_30_days',
+      limit: this.config.maxResults,
+      offset: options.offset || 0,
+      properties: options.include || ['name', 'domain', 'industry', 'numberofemployees']
+    }
+
+    const result = await this.executeTool('get_companies', args)
+    
+    if (process.env.NODE_ENV === 'development' || !this.config.clientId || this.config.clientId === 'mock_client_id') {
+      return this.getMockCompanies()
+    }
+    
+    return result[0]?.text ? JSON.parse(result[0].text) : this.getMockCompanies()
+  }
+
+  async getCompanyById(companyId: string): Promise<HubSpotCompany | null> {
+    const args = { companyId }
+    const result = await this.executeTool('get_company', args)
+    
+    if (process.env.NODE_ENV === 'development' || !this.config.clientId || this.config.clientId === 'mock_client_id') {
+      return this.getMockCompany(companyId)
+    }
+    
+    return result[0]?.text ? JSON.parse(result[0].text) : this.getMockCompany(companyId)
+  }
+
+  // Activity Methods
+
+  async getActivities(options: HubSpotQueryOptions = {}): Promise<HubSpotActivity[]> {
+    const args = {
+      timeRange: options.timeRange || 'last_30_days',
+      contactId: options.contactId,
+      companyId: options.companyId,
+      dealId: options.dealId,
+      limit: this.config.maxResults,
+      offset: options.offset || 0
+    }
+
+    const result = await this.executeTool('get_activities', args)
+    
+    if (process.env.NODE_ENV === 'development' || !this.config.clientId || this.config.clientId === 'mock_client_id') {
+      return this.getMockActivities()
+    }
+    
+    return result[0]?.text ? JSON.parse(result[0].text) : this.getMockActivities()
+  }
+
+  // Mock Data Methods (for development)
+
+  private getMockContacts(): HubSpotContact[] {
+    return [
+      {
+        id: 'contact_1',
+        email: 'john@acme.com',
+        firstname: 'John',
+        lastname: 'Smith',
+        phone: '+1-555-0123',
+        company: 'Acme Corp',
+        createdate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+        lastmodifieddate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+        properties: {
+          lifecyclestage: 'customer',
+          lead_status: 'qualified',
+          annual_revenue: 10000000
+        },
+        associations: {
+          companies: ['company_1'],
+          deals: ['deal_1', 'deal_2']
+        }
+      },
+      {
+        id: 'contact_2',
+        email: 'sarah@beta.com',
+        firstname: 'Sarah',
+        lastname: 'Johnson',
+        phone: '+1-555-0456',
+        company: 'Beta Inc',
+        createdate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+        lastmodifieddate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+        properties: {
+          lifecyclestage: 'lead',
+          lead_status: 'new',
+          annual_revenue: 5000000
+        },
+        associations: {
+          companies: ['company_2'],
+          deals: ['deal_3']
+        }
+      }
+    ]
+  }
+
+  private getMockContact(contactId: string): HubSpotContact | null {
+    const contacts = this.getMockContacts()
+    return contacts.find(c => c.id === contactId) || null
+  }
+
+  private getMockDeals(): HubSpotDeal[] {
+    return [
+      {
+        id: 'deal_1',
+        dealname: 'Acme Corp Enterprise License',
+        amount: 50000,
+        dealstage: 'negotiation',
+        closedate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        createdate: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
+        lastmodifieddate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+        pipeline: 'default',
+        properties: {
+          dealtype: 'new_business',
+          lead_source: 'website',
+          probability: 75
+        },
+        associations: {
+          contacts: ['contact_1'],
+          companies: ['company_1']
+        }
+      },
+      {
+        id: 'deal_2',
+        dealname: 'Acme Corp Renewal',
+        amount: 25000,
+        dealstage: 'closed-won',
+        closedate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+        createdate: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
+        lastmodifieddate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+        pipeline: 'default',
+        properties: {
+          dealtype: 'existing_business',
+          lead_source: 'referral',
+          probability: 100
+        },
+        associations: {
+          contacts: ['contact_1'],
+          companies: ['company_1']
+        }
+      }
+    ]
+  }
+
+  private getMockDeal(dealId: string): HubSpotDeal | null {
+    const deals = this.getMockDeals()
+    return deals.find(d => d.id === dealId) || null
+  }
+
+  private getMockCompanies(): HubSpotCompany[] {
+    return [
+      {
+        id: 'company_1',
+        name: 'Acme Corp',
+        domain: 'acme.com',
+        industry: 'Technology',
+        numberofemployees: 350,
+        createdate: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
+        lastmodifieddate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+        properties: {
+          annual_revenue: 10000000,
+          city: 'San Francisco',
+          state: 'CA',
+          country: 'United States'
+        },
+        associations: {
+          contacts: ['contact_1'],
+          deals: ['deal_1', 'deal_2']
+        }
+      },
+      {
+        id: 'company_2',
+        name: 'Beta Inc',
+        domain: 'beta.com',
+        industry: 'Healthcare',
+        numberofemployees: 120,
+        createdate: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(),
+        lastmodifieddate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+        properties: {
+          annual_revenue: 5000000,
+          city: 'Boston',
+          state: 'MA',
+          country: 'United States'
+        },
+        associations: {
+          contacts: ['contact_2'],
+          deals: ['deal_3']
+        }
+      }
+    ]
+  }
+
+  private getMockCompany(companyId: string): HubSpotCompany | null {
+    const companies = this.getMockCompanies()
+    return companies.find(c => c.id === companyId) || null
+  }
+
+  private getMockActivities(): HubSpotActivity[] {
+    return [
+      {
+        id: 'activity_1',
+        type: 'email',
+        timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+        contactId: 'contact_1',
+        companyId: 'company_1',
+        properties: {
+          subject: 'Follow up on enterprise proposal',
+          direction: 'outbound',
+          status: 'sent'
+        },
+        metadata: {
+          source: 'hubspot',
+          sourceId: 'email_1'
+        }
+      },
+      {
+        id: 'activity_2',
+        type: 'call',
+        timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+        contactId: 'contact_2',
+        companyId: 'company_2',
+        properties: {
+          duration: 1800,
+          direction: 'inbound',
+          outcome: 'connected'
+        },
+        metadata: {
+          source: 'hubspot',
+          sourceId: 'call_1'
+        }
+      }
+    ]
+  }
+}
+
+// Factory function to create HubSpot MCP client
+export function createHubSpotMCPClient(config?: Partial<HubSpotMCPConfig>): HubSpotMCPClient {
+  const defaultConfig: HubSpotMCPConfig = {
+    clientId: process.env.HUBSPOT_CLIENT_ID || '',
+    clientSecret: process.env.HUBSPOT_CLIENT_SECRET || '',
+    readOnly: process.env.HUBSPOT_MCP_READ_ONLY === 'true',
+    maxResults: parseInt(process.env.HUBSPOT_MCP_MAX_RESULTS || '100'),
+    timeout: parseInt(process.env.HUBSPOT_MCP_TIMEOUT || '300'),
+    auditLogging: process.env.HUBSPOT_MCP_AUDIT_LOGGING === 'true'
+  }
+
+  const finalConfig = { ...defaultConfig, ...config }
+  return new HubSpotMCPClient(finalConfig)
+}
+
+// Export types for use in other modules
+export type {
+  HubSpotMCPConfig,
+  HubSpotQueryOptions,
+  HubSpotContact,
+  HubSpotDeal,
+  HubSpotCompany,
+  HubSpotActivity
+}

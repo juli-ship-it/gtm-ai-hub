@@ -196,7 +196,6 @@ class RealMixpanelMCPClient implements MixpanelMCPClient {
 
       await this.client.connect(transport)
       this.connected = true
-      console.log('Mixpanel MCP client connected successfully')
     } catch (error) {
       console.error('Failed to connect to Mixpanel MCP server:', error)
       this.connected = false

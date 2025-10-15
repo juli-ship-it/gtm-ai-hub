@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
         category: body.category || 'other',
         current_process: body.current_process || '',
         pain_points: body.pain_points || '',
-        frequency: body.frequency || 'ad_hoc',
+        frequency: body.frequency || 'adhoc',
         time_friendly: body.time_friendly || '',
         systems: body.systems || [],
         sensitivity: body.sensitivity || 'low',

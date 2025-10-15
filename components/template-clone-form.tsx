@@ -37,8 +37,6 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
 
   // Initialize user variables with defaults
   useEffect(() => {
-    console.log('Template clone form - template:', template)
-    console.log('Template clone form - template_variables:', template.template_variables)
     
     const initialVariables: Record<string, any> = {}
     
@@ -108,8 +106,6 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
     setCloneResult(null)
 
     try {
-      console.log('Cloning workflow with variables:', userVariables)
-      console.log('Original workflow JSON:', template.n8n_workflow_json)
       
       // Clone the workflow with user's variables
       const result = await cloneWorkflowToN8N(template.n8n_workflow_json, userVariables)
@@ -147,8 +143,6 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
       
       console.log('🔍 WORKFLOW COMPARISON')
       console.log('====================')
-      console.log('Original workflow:', original)
-      console.log('Cloned workflow:', cloned)
       
       let totalInjections = 0
       let totalChanges = 0

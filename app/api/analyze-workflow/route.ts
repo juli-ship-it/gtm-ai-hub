@@ -111,7 +111,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Workflow JSON is required' }, { status: 400 })
     }
 
-    console.log('🤖 Starting AI analysis via API route...')
 
     // Parse the workflow JSON to get the workflow object
     let workflow
@@ -137,9 +136,6 @@ export async function POST(request: NextRequest) {
     // Create the analysis prompt using structured approach
     const analysisPrompt = createAnalysisPrompt(workflow)
     
-    console.log('📤 Calling Supabase Edge Function for AI analysis...')
-    console.log('Supabase URL:', supabaseUrl)
-    console.log('Service Key exists:', !!supabaseServiceKey)
     
     const { data, error } = await supabase.functions.invoke('analyze-workflow', {
       body: { 
@@ -153,7 +149,6 @@ export async function POST(request: NextRequest) {
       throw new Error(`Edge Function error: ${error.message}`)
     }
 
-    console.log('✅ AI analysis successful via Edge Function')
     return NextResponse.json(data)
 
   } catch (error) {
