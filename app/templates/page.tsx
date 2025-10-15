@@ -296,7 +296,7 @@ export default function TemplatesPage() {
       }
 
       console.log('Template loaded for cloning:', fullTemplate)
-      console.log('Template variables:', fullTemplate.template_variables)
+      console.log('Template variables:', (fullTemplate as any).template_variables)
       setCloningTemplate(fullTemplate)
     } catch (error) {
       console.error('Error fetching template for cloning:', error)
@@ -528,8 +528,8 @@ export default function TemplatesPage() {
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                 <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
                   <TemplateEditForm
-                    template={editingTemplate}
-                    onSuccess={handleTemplateUpdated}
+                    template={editingTemplate as any}
+                    onSuccess={handleTemplateUpdated as any}
                     onCancel={handleCloseModals}
                   />
                 </div>

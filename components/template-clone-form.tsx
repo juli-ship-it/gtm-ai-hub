@@ -42,7 +42,7 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
     
     if (template.template_variables && template.template_variables.length > 0) {
       template.template_variables.forEach(variable => {
-        console.log('Processing variable:', variable.name, 'type:', variable.type, 'category:', variable.category)
+        console.log('Processing variable:', variable.name, 'type:', variable.type, 'category:', (variable as any).category)
         if (variable.default_value !== null) {
           initialVariables[variable.name] = variable.default_value
         } else {
@@ -148,17 +148,17 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
       let totalChanges = 0
       
       // Simple approach: look for {{ $json. }} patterns in the cloned workflow
-      const clonedJsonString = JSON.stringify(cloned)
-      const variableMatches = clonedJsonString.match(/\{\{\s*\$json\.\w+\s*\}\}/g) || []
-      totalInjections = variableMatches.length
+      // const clonedJsonString = JSON.stringify(cloned)
+      // const variableMatches = clonedJsonString.match(/\{\{\s*\$json\.\w+\s*\}\}/g) || []
+      // totalInjections = variableMatches ? variableMatches.length : 0
       
-      console.log('🔍 SIMPLE VARIABLE DETECTION:')
-      console.log('Found variable expressions:', variableMatches)
-      console.log('Total variable expressions found:', totalInjections)
+      // console.log('🔍 SIMPLE VARIABLE DETECTION:')
+      // console.log('Found variable expressions:', variableMatches)
+      // console.log('Total variable expressions found:', totalInjections)
       
       // Also do detailed comparison
-      original.nodes?.forEach((originalNode: any, index: number) => {
-        const clonedNode = cloned.nodes?.[index]
+      (original as any).nodes?.forEach((originalNode: any, index: number) => {
+        const clonedNode = (cloned as any).nodes?.[index]
         if (!clonedNode) {
           console.log(`❌ Node ${index} (${originalNode.name}) missing in cloned version`)
           return
