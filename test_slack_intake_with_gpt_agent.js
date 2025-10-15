@@ -20,7 +20,7 @@ async function testSlackIntake() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2ZnZ5bGZsbWZ4cnJoeXp3bGhwbSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzM1OTQ0NDQwLCJleHAiOjIwNTE1MjA0NDB9.8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q8Q'
+        'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`
       },
       body: JSON.stringify(testData)
     })

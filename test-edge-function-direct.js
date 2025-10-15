@@ -8,7 +8,7 @@ if (process.env.NODE_ENV === 'development') {
 
 async function testEdgeFunction() {
   const supabaseUrl = 'https://qvfvylflnfxrhyzwlhpm.supabase.co'
-  const supabaseServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2ZnZ5bGZsbmZ4cmh5endsaHBtIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1ODY0MDY3MCwiZXhwIjoyMDc0MjE2NjcwfQ.4yq0opgNZEawMmyxOuvOZjCFVw2DA9md6slUJsONRe4'
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
   
   const supabase = createClient(supabaseUrl, supabaseServiceKey)
   
