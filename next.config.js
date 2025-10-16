@@ -9,6 +9,10 @@ const nextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
+  // Force CSS generation
+  generateBuildId: async () => {
+    return 'build-' + Date.now()
+  },
   images: {
     remotePatterns: [
       {
