@@ -1,12 +1,33 @@
-import type { Config } from 'tailwindcss'
-
-const config: Config = {
+/** @type {import('tailwindcss').Config} */
+module.exports = {
   darkMode: ['class'],
   content: [
     './pages/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
     './app/**/*.{ts,tsx}',
     './src/**/*.{ts,tsx}',
+  ],
+  safelist: [
+    'bg-gray-50',
+    'bg-white',
+    'text-gray-900',
+    'text-gray-700',
+    'text-gray-600',
+    'bg-blue-600',
+    'hover:bg-blue-700',
+    'text-blue-600',
+    'hover:text-blue-700',
+    'border-gray-300',
+    'rounded-md',
+    'rounded-lg',
+    'shadow-sm',
+    'border',
+    'border-gray-200',
+    'px-3',
+    'py-2',
+    'focus:outline-none',
+    'focus:ring-2',
+    'focus:ring-blue-500',
   ],
   theme: {
     container: {
@@ -108,5 +129,3 @@ const config: Config = {
   },
   plugins: [require('tailwindcss-animate')],
 }
-
-export default config
