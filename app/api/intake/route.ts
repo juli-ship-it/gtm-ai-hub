@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
 
     // Create app_user if it doesn't exist
     if (!appUser) {
-      const { error: createUserError } = await supabase
+      const { error: createUserError } = await (supabase as any)
         .from('app_user')
         .insert({
           id: user.id,
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create the intake request
-    const { data: intakeRequest, error: intakeError } = await supabase
+    const { data: intakeRequest, error: intakeError } = await (supabase as any)
       .from('intake_request')
       .insert({
         title: body.title,
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Log the creation activity
-    await supabase
+    await (supabase as any)
       .from('intake_activity_log')
       .insert({
         intake_request_id: intakeRequest.id,

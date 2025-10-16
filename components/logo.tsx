@@ -1,3 +1,5 @@
+'use client'
+
 import React from 'react'
 
 interface LogoProps {
@@ -21,17 +23,18 @@ export function Logo({ size = 'md', showText = true, className = '' }: LogoProps
     xl: 'text-3xl'
   }
 
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+  const logoUrl = supabaseUrl ? `${supabaseUrl}/storage/v1/object/public/assets/Workleap_Symbol_blue_4x.png` : '/logo-placeholder.png'
+  
   return (
     <div className={`flex items-center space-x-3 ${className}`}>
       {/* Workleap Logo */}
       <div className={`${sizeClasses[size]} relative`}>
-        {/* Use a simple div with background color instead of external image to avoid 500 errors */}
-        <div 
-          className="w-full h-full rounded-lg flex items-center justify-center text-white font-bold text-xs"
-          style={{ backgroundColor: '#2545FF' }}
-        >
-          workleap
-        </div>
+        <img 
+          src={logoUrl}
+          alt="Workleap Logo"
+          className="w-full h-full object-contain"
+        />
       </div>
       
       {/* Logo Text */}

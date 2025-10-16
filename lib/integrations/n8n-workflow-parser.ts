@@ -88,10 +88,10 @@ export class N8NWorkflowParser {
     const webhookNodes = this.findWebhookNodes()
     
     // Extract variables from webhook parameters
-    webhookNodes.forEach(node => this.extractWebhookVariables(node))
+    webhookNodes.forEach((node: any) => this.extractWebhookVariables(node))
     
     // Scan all nodes for variable expressions
-    this.workflow.nodes.forEach(node => this.scanNodeForVariables(node))
+    this.workflow.nodes.forEach((node: any) => this.scanNodeForVariables(node))
     
     // Analyze workflow complexity and systems
     const systems = this.detectSystems()
@@ -132,7 +132,7 @@ export class N8NWorkflowParser {
       // Extract path parameters like /webhook/:id
       const pathParams = node.parameters.path.match(/:(\w+)/g)
       if (pathParams) {
-        pathParams.forEach(param => {
+        pathParams.forEach((param: string) => {
           const name = param.substring(1) // Remove the :
           this.addVariable(name, 'string', true, `Path parameter: ${name}`, 'webhook', node)
         })
@@ -155,7 +155,7 @@ export class N8NWorkflowParser {
     const variableMatches = nodeParams.match(/\{\{\s*\$json\.(\w+)\s*\}\}/g)
     
     if (variableMatches) {
-      variableMatches.forEach(match => {
+      variableMatches.forEach((match: string) => {
         const variableName = match.match(/\{\{\s*\$json\.(\w+)\s*\}\}/)?.[1]
         if (variableName && !this.detectedVariables.has(variableName)) {
           const type = this.inferVariableType(variableName, node)
@@ -256,7 +256,7 @@ export class N8NWorkflowParser {
     if (node.parameters.url && node.parameters.url.includes('{{')) {
       const urlMatches = node.parameters.url.match(/\{\{\s*\$json\.(\w+)\s*\}\}/g)
       if (urlMatches) {
-        urlMatches.forEach(match => {
+        urlMatches.forEach((match: string) => {
           const variableName = match.match(/\{\{\s*\$json\.(\w+)\s*\}\}/)?.[1]
           if (variableName) {
             this.addVariable(variableName, 'url', true, `URL parameter: ${variableName}`, 'parameter', node)
@@ -359,7 +359,7 @@ export class N8NWorkflowParser {
   private detectSystems(): string[] {
     const systems = new Set<string>()
     
-    this.workflow.nodes.forEach(node => {
+    this.workflow.nodes.forEach((node: any) => {
       switch (node.type) {
         case 'n8n-nodes-base.hubspot':
           systems.add('hubspot')

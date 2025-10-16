@@ -187,7 +187,7 @@ export function N8NScheduleTriggerForm({ onValuesChange, initialValues = {} }: S
                         if (e.target.checked) {
                           updateValue('Trigger on Weekdays', [...currentDays, day])
                         } else {
-                          updateValue('Trigger on Weekdays', currentDays.filter(d => d !== day))
+                          updateValue('Trigger on Weekdays', currentDays.filter((d: any) => d !== day))
                         }
                       }}
                       className="rounded"

@@ -620,7 +620,7 @@ export class N8NWorkflowParameterizer {
     })
 
     const nodeCount = this.workflow.nodes?.length || 0
-    const complexity = nodeCount <= 5 ? 'beginner' : nodeCount <= 15 ? 'intermediate' : 'advanced'
+    const complexity: 'beginner' | 'intermediate' | 'advanced' = nodeCount <= 5 ? 'beginner' : nodeCount <= 15 ? 'intermediate' : 'advanced'
 
     return {
       name: this.workflow.name || 'Parameterized Workflow',

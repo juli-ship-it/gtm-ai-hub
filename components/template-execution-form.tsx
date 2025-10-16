@@ -134,7 +134,7 @@ export function TemplateExecutionForm({ template, onSuccess, onCancel }: Templat
       }
 
       // Create template run record
-      const { data: templateRun, error: runError } = await supabase
+      const { data: templateRun, error: runError } = await (supabase as any)
         .from('template_run')
         .insert({
           template_id: template.id,
@@ -155,7 +155,7 @@ export function TemplateExecutionForm({ template, onSuccess, onCancel }: Templat
       }))
 
       if (contextEntries.length > 0) {
-        const { error: contextError } = await supabase
+        const { error: contextError } = await (supabase as any)
           .from('template_execution_context')
           .insert(contextEntries)
 
@@ -167,7 +167,7 @@ export function TemplateExecutionForm({ template, onSuccess, onCancel }: Templat
       const n8nResponse = await n8nClient.triggerWorkflow(template.n8n_webhook_url, formData)
 
       // Update template run with execution ID
-      await supabase
+      await (supabase as any)
         .from('template_run')
         .update({
           status: 'running',
@@ -191,7 +191,7 @@ export function TemplateExecutionForm({ template, onSuccess, onCancel }: Templat
             clearInterval(pollInterval)
             
             // Update template run with success
-            await supabase
+            await (supabase as any)
               .from('template_run')
               .update({
                 status: 'succeeded',
@@ -214,7 +214,7 @@ export function TemplateExecutionForm({ template, onSuccess, onCancel }: Templat
             clearInterval(pollInterval)
             
             // Update template run with failure
-            await supabase
+            await (supabase as any)
               .from('template_run')
               .update({
                 status: 'failed',

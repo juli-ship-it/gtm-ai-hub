@@ -24,13 +24,13 @@ import {
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Templates', href: '/templates', icon: FileText },
-  { name: 'Runs', href: '/runs', icon: Play, badge: 'Coming Soon' },
+  { name: 'Clones', href: '/runs', icon: Play, badge: 'Coming Soon' },
   { name: 'Intake', href: '/intake', icon: ClipboardList },
   { name: 'Playbooks', href: '/playbooks', icon: BookOpen, badge: 'Coming Soon' },
   { name: 'Prompts', href: '/prompts', icon: MessageSquare, badge: 'Coming Soon' },
   { name: 'GPT Agents', href: '/gpt-agents', icon: Bot },
   { name: 'Data Assistant', href: '/data-assistant', icon: Database, badge: 'Soon' },
-  { name: 'HR University', href: '/app/hr-university', icon: GraduationCap, badge: 'Coming Soon' },
+  { name: 'HR University', href: '/hr-university', icon: GraduationCap, badge: 'Soon' },
   { name: 'Admin', href: '/admin', icon: Settings },
 ]
 

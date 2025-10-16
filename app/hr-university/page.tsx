@@ -125,7 +125,7 @@ export default function HRUniversityPage() {
       <div>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-gray-900">Featured Modules</h2>
-          <Link href="/app/hr-university/modules">
+          <Link href="/hr-university/hr-university-temp/modules">
             <Button variant="outline" className="flex items-center space-x-2">
               <span>View All</span>
               <ArrowRight className="h-4 w-4" />
@@ -167,7 +167,7 @@ export default function HRUniversityPage() {
                 </div>
 
                 <div className="pt-4">
-                  <Link href={`/app/hr-university/modules/${module.id}`}>
+                  <Link href={`/hr-university/hr-university-temp/modules/${module.id}`}>
                     <Button className="w-full">
                       Start Learning
                     </Button>
@@ -187,10 +187,10 @@ export default function HRUniversityPage() {
             <p className="text-gray-600">Begin your AI in HR journey with our foundational modules</p>
           </div>
           <div className="flex space-x-3">
-            <Link href="/app/hr-university/modules">
+            <Link href="/hr-university/hr-university-temp/modules">
               <Button>Browse Modules</Button>
             </Link>
-            <Link href="/app/hr-university/intake">
+            <Link href="/hr-university/hr-university-temp/intake">
               <Button variant="outline">Request New Module</Button>
             </Link>
           </div>

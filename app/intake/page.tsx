@@ -160,7 +160,7 @@ export default function IntakePage() {
     const supabase = createClient()
     
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('intake_request')
         .update({ status: newStatus })
         .eq('id', requestId)
