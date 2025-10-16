@@ -9,8 +9,6 @@ const nextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
-  // Optimize for Vercel deployment
-  output: 'standalone',
   images: {
     remotePatterns: [
       {
