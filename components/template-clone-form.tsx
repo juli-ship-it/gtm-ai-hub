@@ -232,7 +232,7 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
                                   if (e.target.checked) {
                                     handleVariableChange(variable.name, [...currentValues, option])
                                   } else {
-                                    handleVariableChange(variable.name, currentValues.filter(v => v !== option))
+                                    handleVariableChange(variable.name, currentValues.filter((v: string) => v !== option))
                                   }
                                 }}
                                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
@@ -258,7 +258,7 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
                           initialValues={userVariables}
                         />
                       </div>
-                    ) : variable.type === 'object' && varWithExtras.category === 'excel_config' ? (
+                    ) : varWithExtras.category === 'excel_config' ? (
                       <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
                         <h4 className="font-medium">Excel Worksheet Configuration</h4>
                         {varWithExtras.excelConfig?.sheets.map((sheet: string) => (
@@ -281,7 +281,7 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
                                       } else {
                                         handleVariableChange(variable.name, {
                                           ...currentConfig,
-                                          [sheet]: currentColumns.filter(c => c !== column)
+                                          [sheet]: currentColumns.filter((c: string) => c !== column)
                                         })
                                       }
                                     }}
