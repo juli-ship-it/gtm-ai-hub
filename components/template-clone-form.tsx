@@ -152,7 +152,7 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
             {template.template_variables && template.template_variables.length > 0 ? (
               <div className="space-y-4">
                 {template.template_variables.map((variable, index) => {
-                  console.log('Rendering variable:', variable.name, 'type:', variable.type, 'category:', variable.category)
+                  const varWithExtras = variable as any // Type assertion for extended fields
                   return (
                   <div key={variable.id || index} className="space-y-2">
                     <div className="flex items-center space-x-2">
@@ -161,7 +161,7 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
                         {variable.required && <span className="text-red-500 ml-1">*</span>}
                       </label>
                       <Badge variant="outline">{variable.type}</Badge>
-                      {variable.category && <Badge variant="secondary">{variable.category}</Badge>}
+                      {varWithExtras.category && <Badge variant="secondary">{varWithExtras.category}</Badge>}
                     </div>
                     
                     {variable.description && (
@@ -209,9 +209,8 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
                         </SelectTrigger>
                         <SelectContent>
                           {(() => {
-                            const options = variable.options || variable.n8n_enum || getDefaultOptionsForVariable(variable)
-                            console.log(`Options for ${variable.name}:`, options)
-                            return options.map((option) => (
+                            const options = varWithExtras.options || varWithExtras.n8n_enum || getDefaultOptionsForVariable(variable)
+                            return options.map((option: string) => (
                               <SelectItem key={option} value={option}>
                                 {option}
                               </SelectItem>
@@ -223,7 +222,7 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
                       <div className="space-y-2">
                         <p className="text-sm text-gray-600">Select multiple options:</p>
                         <div className="space-y-1">
-                          {(variable.options || []).map((option) => (
+                          {(varWithExtras.options || []).map((option: string) => (
                             <label key={option} className="flex items-center space-x-2">
                               <input
                                 type="checkbox"
@@ -243,7 +242,7 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
                           ))}
                         </div>
                       </div>
-                    ) : variable.name === 'Trigger Interval' || variable.category === 'schedule' || variable.name.includes('Trigger') ? (
+                    ) : variable.name === 'Trigger Interval' || varWithExtras.category === 'schedule' || variable.name.includes('Trigger') ? (
                       <div className="space-y-4 p-4 border rounded-lg bg-blue-50">
                         <h4 className="font-medium text-blue-900">n8n Schedule Trigger Configuration</h4>
                         <p className="text-sm text-blue-800">
@@ -259,14 +258,14 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
                           initialValues={userVariables}
                         />
                       </div>
-                    ) : variable.type === 'object' && variable.category === 'excel_config' ? (
+                    ) : variable.type === 'object' && varWithExtras.category === 'excel_config' ? (
                       <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
                         <h4 className="font-medium">Excel Worksheet Configuration</h4>
-                        {variable.excelConfig?.sheets.map((sheet) => (
+                        {varWithExtras.excelConfig?.sheets.map((sheet: string) => (
                           <div key={sheet} className="space-y-2">
                             <label className="font-medium text-sm">{sheet}</label>
                             <div className="space-y-1">
-                              {variable.excelConfig?.columns[sheet]?.map((column) => (
+                              {varWithExtras.excelConfig?.columns[sheet]?.map((column: string) => (
                                 <label key={column} className="flex items-center space-x-2">
                                   <input
                                     type="checkbox"
