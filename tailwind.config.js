@@ -17,11 +17,31 @@ module.exports = {
     'max-w-md',
     'p-8',
     'p-6',
+    'p-4',
+    'px-4',
+    'py-8',
+    'py-2',
     'space-y-6',
     'space-y-4',
+    'space-y-1.5',
     'mb-6',
+    'mb-8',
+    'mt-4',
+    'mt-2',
     'px-3',
     'py-2',
+    'pt-0',
+    'pb-4',
+    'pt-4',
+    
+    // Grid and layout
+    'grid',
+    'grid-cols-1',
+    'md:grid-cols-2',
+    'lg:grid-cols-3',
+    'gap-6',
+    'container',
+    'mx-auto',
     
     // Colors
     'bg-gray-50',
@@ -41,8 +61,16 @@ module.exports = {
     'border',
     'rounded-md',
     'rounded-lg',
+    'rounded-xl',
     'shadow-sm',
     'shadow-lg',
+    
+    // Hover and transitions
+    'hover:shadow-lg',
+    'hover:-translate-y-1',
+    'transition-all',
+    'duration-200',
+    'transition-colors',
     
     // Focus states
     'focus:outline-none',
@@ -51,14 +79,24 @@ module.exports = {
     
     // Typography
     'text-xl',
+    'text-3xl',
     'font-semibold',
+    'font-bold',
     'text-sm',
     'font-medium',
     'text-center',
+    'leading-none',
+    'tracking-tight',
     
     // Button styles
-    'transition-colors',
     'disabled:opacity-50',
+    
+    // Card specific
+    'bg-white',
+    'rounded-lg',
+    'border',
+    'border-gray-200',
+    'shadow-sm',
   ],
   theme: {
     container: {
