@@ -4,10 +4,10 @@ node_modules/
 # Development files
 *.log
 *.sql
-*.js
-!next.config.js
-!vite.config.js
-!vitest.config.ts
+# *.js - DO NOT exclude JS files - this breaks Vercel deployment
+# !next.config.js
+# !vite.config.js
+# !vitest.config.ts
 
 # Test files
 test/

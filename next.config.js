@@ -6,9 +6,9 @@ const nextConfig = {
     serverComponentsExternalPackages: ['@supabase/supabase-js']
   },
   // Ensure CSS is properly processed in Vercel
-  compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
-  },
+  // compiler: {
+  //   removeConsole: process.env.NODE_ENV === 'production',
+  // },
   // Ensure CSS is properly handled in Vercel
   trailingSlash: false,
   images: {
