@@ -37,20 +37,20 @@ export function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-wl-bg">
-      <Card className="w-full max-w-md p-8">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <Card className="w-full max-w-md p-8 bg-white shadow-lg rounded-xl border">
         <div className="space-y-6">
           <div className="text-center">
             <div className="flex justify-center mb-6">
               <Logo size="lg" />
             </div>
-            <h2 className="text-xl font-semibold text-wl-text">Welcome back</h2>
-            <p className="text-wl-muted">Sign in to your account</p>
+            <h2 className="text-xl font-semibold text-gray-900">Welcome back</h2>
+            <p className="text-gray-600">Sign in to your account</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-wl-text mb-1">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                 Email
               </label>
               <Input
@@ -60,12 +60,12 @@ export function LoginForm() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="your.email@workleap.com"
                 required
-                className="w-full"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-wl-text mb-1">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                 Password
               </label>
               <Input
@@ -75,7 +75,7 @@ export function LoginForm() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
                 required
-                className="w-full"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
@@ -88,16 +88,16 @@ export function LoginForm() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full bg-wl-accent hover:bg-wl-accent/90 text-white"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
             >
               {loading ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>
 
           <div className="text-center">
-            <p className="text-sm text-wl-muted">
+            <p className="text-sm text-gray-600">
               Don't have an account?{' '}
-              <a href="/auth/signup" className="text-wl-accent hover:text-wl-accent/80 font-medium">
+              <a href="/auth/signup" className="text-blue-600 hover:text-blue-700 font-medium">
                 Sign up
               </a>
             </p>
