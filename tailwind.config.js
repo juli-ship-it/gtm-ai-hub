@@ -8,6 +8,22 @@ module.exports = {
     './src/**/*.{ts,tsx}',
   ],
   safelist: [
+    // Layout and spacing
+    'min-h-screen',
+    'flex',
+    'items-center',
+    'justify-center',
+    'w-full',
+    'max-w-md',
+    'p-8',
+    'p-6',
+    'space-y-6',
+    'space-y-4',
+    'mb-6',
+    'px-3',
+    'py-2',
+    
+    // Colors
     'bg-gray-50',
     'bg-white',
     'text-gray-900',
@@ -17,17 +33,32 @@ module.exports = {
     'hover:bg-blue-700',
     'text-blue-600',
     'hover:text-blue-700',
+    'text-white',
+    
+    // Borders and styling
     'border-gray-300',
+    'border-gray-200',
+    'border',
     'rounded-md',
     'rounded-lg',
     'shadow-sm',
-    'border',
-    'border-gray-200',
-    'px-3',
-    'py-2',
+    'shadow-lg',
+    
+    // Focus states
     'focus:outline-none',
     'focus:ring-2',
     'focus:ring-blue-500',
+    
+    // Typography
+    'text-xl',
+    'font-semibold',
+    'text-sm',
+    'font-medium',
+    'text-center',
+    
+    // Button styles
+    'transition-colors',
+    'disabled:opacity-50',
   ],
   theme: {
     container: {
