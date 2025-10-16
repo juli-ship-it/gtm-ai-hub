@@ -25,12 +25,7 @@ const nextConfig = {
       }
     ]
   },
-  webpack: (config, { dev, isServer }) => {
-    // Fix webpack caching issues
-    if (!dev && !isServer) {
-      config.cache = false
-    }
-    
+  webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
       '@': path.resolve(__dirname),
@@ -39,13 +34,6 @@ const nextConfig = {
       '@/app': path.resolve(__dirname, 'app'),
       '@/types': path.resolve(__dirname, 'types'),
       '@/utils': path.resolve(__dirname, 'utils'),
-    }
-    
-    // Ensure proper module resolution
-    config.resolve.fallback = {
-      ...config.resolve.fallback,
-      fs: false,
-      path: false,
     }
     
     return config
