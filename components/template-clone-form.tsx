@@ -528,60 +528,17 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
           <CardContent className="space-y-4">
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Method 1: Direct Import URL</label>
-                <div className="flex items-center space-x-2">
-                  <Input
-                    value={cloneResult.importUrl}
-                    readOnly
-                    className="flex-1"
-                  />
+                <div className="flex justify-center">
                   <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={copyImportUrl}
-                  >
-                    <Copy className="h-4 w-4 mr-2" />
-                    Copy
-                  </Button>
-                  <Button
-                    onClick={() => window.open(cloneResult.importUrl, '_blank')}
-                    className="flex items-center space-x-2"
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Try Import
-                  </Button>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Method 2: Manual Import</label>
-                <div className="flex items-center space-x-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => window.open(cloneResult.alternativeUrl, '_blank')}
-                    className="flex items-center space-x-2"
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Open n8n
-                  </Button>
-                  <Button
-                    variant="outline"
                     onClick={downloadWorkflow}
-                    className="flex items-center space-x-2"
+                    className="flex items-center space-x-2 bg-wl-accent hover:bg-wl-accent/90 text-white px-6 py-3"
                   >
-                    <Download className="h-4 w-4 mr-2" />
+                    <Download className="h-5 w-5 mr-2" />
                     Download JSON
                   </Button>
-                  <Button
-                    variant="secondary"
-                    onClick={compareWorkflows}
-                    className="flex items-center space-x-2"
-                  >
-                    🔍 Compare
-                  </Button>
                 </div>
-                <p className="text-xs text-gray-500">
-                  Download the JSON file and import it manually in n8n
+                <p className="text-sm text-gray-600 text-center">
+                  Download the workflow and import it manually in n8n
                 </p>
               </div>
             </div>

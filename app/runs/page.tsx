@@ -93,10 +93,10 @@ export default function RunsPage() {
         <div className="flex">
           <Sidebar />
           <div className="flex-1 p-8">
-            <PageHeader
-              title="Run History"
-              description="Track and monitor all your automation runs, their status, and artifacts."
-            />
+          <PageHeader
+            title="Clone History"
+            description="Track and monitor all your automation clones, their status, and artifacts."
+          />
             <div className="space-y-4">
               {[...Array(5)].map((_, i) => (
                 <div key={i} className="h-32 bg-gray-200 rounded-lg animate-pulse" />
@@ -113,8 +113,8 @@ export default function RunsPage() {
         <Sidebar />
         <div className="flex-1 p-8">
           <PageHeader
-            title="Run History"
-            description="Track and monitor all your automation runs, their status, and artifacts."
+            title="Clone History"
+            description="Track and monitor all your automation clones, their status, and artifacts."
           >
             <div className="flex items-center space-x-3">
               <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
@@ -137,7 +137,7 @@ export default function RunsPage() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-wl-muted" />
                 <Input
-                  placeholder="Search runs..."
+                  placeholder="Search clones..."
                   className="pl-10"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -159,15 +159,15 @@ export default function RunsPage() {
             </Select>
           </div>
 
-          {/* Runs Table */}
+          {/* Clones Table */}
           {filteredRuns.length === 0 ? (
             <div className="text-center py-12">
               <FileText className="h-12 w-12 text-wl-muted mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-wl-text mb-2">No runs found</h3>
+              <h3 className="text-lg font-medium text-wl-text mb-2">No clones found</h3>
               <p className="text-wl-muted mb-4">
                 {searchTerm || statusFilter !== 'all'
                   ? 'Try adjusting your search or filter criteria.'
-                  : 'Get started by running a template from the Templates page.'
+                  : 'Get started by cloning a template from the Templates page.'
                 }
               </p>
               <Button className="wl-button-primary" onClick={() => window.location.href = '/templates'}>
@@ -178,9 +178,9 @@ export default function RunsPage() {
           ) : (
             <Card className="wl-card">
               <CardHeader>
-                <CardTitle>Recent Runs</CardTitle>
+                <CardTitle>Recent Clones</CardTitle>
                 <CardDescription>
-                  {filteredRuns.length} runs found
+                  {filteredRuns.length} clones found
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -254,7 +254,7 @@ export default function RunsPage() {
                         </Button>
                         {run.status === 'succeeded' && (
                           <Button size="sm" className="wl-button-primary">
-                            Re-run
+                            Re-clone
                           </Button>
                         )}
                       </div>

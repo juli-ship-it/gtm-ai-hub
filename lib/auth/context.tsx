@@ -21,14 +21,15 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 // Create a single Supabase client instance outside the component
+// This is created once and reused across all auth operations
 const supabaseClient = createClientSupabase()
-console.log('🔧 Supabase client created:', !!supabaseClient)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [appUser, setAppUser] = useState<AppUser | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
 
   // Domain restriction for workleap.com emails
   const ALLOWED_DOMAINS = ['workleap.com']
@@ -36,8 +37,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const refreshUser = async () => {
     try {
-      console.log('🔍 Refreshing user...')
-      
       // Add timeout to prevent infinite loading
       const timeoutPromise = new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Auth timeout')), 10000)
@@ -50,12 +49,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       ]) as any
       
       if (sessionError) {
-        console.error('❌ Session error:', sessionError)
         setLoading(false)
         return
       }
-
-      console.log('✅ Session retrieved:', session ? 'User logged in' : 'No user')
 
       setSession(session)
       setUser(session?.user ?? null)
@@ -63,25 +59,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (session?.user) {
         // Skip app user fetch for now to prevent 500 errors
         // This will be handled after user confirms email
-        console.log('👤 User authenticated, skipping app_user fetch for now')
         setAppUser(null)
       } else {
         setAppUser(null)
       }
     } catch (error) {
-      console.error('❌ Error refreshing user:', error)
+      console.error('Error refreshing user:', error)
     } finally {
-      console.log('🏁 Setting loading to false')
       setLoading(false)
     }
   }
 
   useEffect(() => {
+    // Mark as mounted to prevent hydration mismatch
+    setMounted(true)
+    
+    // Only run on client
+    if (typeof window === 'undefined') return
+    
     refreshUser()
 
     const { data: { subscription } } = supabaseClient.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('🔄 Auth state changed:', event, session ? 'User logged in' : 'No user')
         setSession(session)
         setUser(session?.user ?? null)
         setAppUser(null) // Skip app user for now
@@ -94,21 +93,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      console.log('🔐 Attempting sign in for:', email)
       const { data, error } = await supabaseClient.auth.signInWithPassword({
         email,
         password,
       })
       
       if (error) {
-        console.error('❌ Sign in error:', error)
         return { error }
       }
       
-      console.log('✅ Sign in successful:', data.user?.email)
       return { error: null }
     } catch (error) {
-      console.error('❌ Sign in exception:', error)
       return { error }
     }
   }
@@ -164,11 +159,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user,
     appUser,
     session,
-    loading,
+    loading: !mounted || loading,
     signIn,
     signUp,
     signOut,
     refreshUser,
+  }
+
+  // Prevent hydration mismatch by not rendering until mounted on client
+  if (!mounted) {
+    return null
   }
 
   return (

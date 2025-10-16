@@ -38,7 +38,7 @@ export default function AppPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <Card className="bg-white rounded-lg border border-gray-200 shadow-sm">
           <CardHeader className="pb-3">
-            <CardDescription className="text-gray-600">Runs Today</CardDescription>
+            <CardDescription className="text-gray-600">Clones Today</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-gray-900">0</div>
@@ -83,20 +83,20 @@ export default function AppPage() {
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Runs */}
+        {/* Recent Clones */}
         <Card className="bg-white rounded-lg border border-gray-200 shadow-sm">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Recent Runs</CardTitle>
+              <CardTitle>Recent Clones</CardTitle>
               <Link href="/runs" className="text-sm text-blue-600 hover:text-blue-700">
                 View All →
               </Link>
             </div>
-            <CardDescription>Latest automation runs and their status</CardDescription>
+            <CardDescription>Latest automation clones and their status</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="text-center py-8">
-              <p className="text-gray-500 mb-4">No runs yet.</p>
+              <p className="text-gray-500 mb-4">No clones yet.</p>
               <Link href="/templates">
                 <Button>Start with a template</Button>
               </Link>
@@ -130,7 +130,7 @@ export default function AppPage() {
                     <span>Version: v1</span>
                   </div>
                   <Link href="/templates">
-                    <Button size="sm">Run</Button>
+                    <Button size="sm">Clone</Button>
                   </Link>
                 </div>
               </div>
