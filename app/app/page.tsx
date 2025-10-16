@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/lib/auth/context'
 import { CardSkeleton } from '@/components/loading-skeleton'
-import { Logo } from '@/components/logo'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
@@ -20,105 +19,116 @@ export default function AppPage() {
     return <CardSkeleton />
   }
 
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Card className="w-full max-w-md p-8 bg-white shadow-lg rounded-xl border">
-          <div className="text-center space-y-4">
-            <Logo size="lg" />
-            <h2 className="text-xl font-semibold text-gray-900">Access Denied</h2>
-            <p className="text-gray-600">Please sign in to access the application.</p>
-            <Link href="/auth/login">
-              <Button className="w-full">Sign In</Button>
-            </Link>
-          </div>
+  return (
+    <div className="p-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Welcome back, {user?.email?.split('@')[0] || 'User'}! 👋</h1>
+        <p className="text-gray-600 mt-2">Here's what's happening with your GTM automation today.</p>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <Card className="bg-white rounded-lg border border-gray-200 shadow-sm">
+          <CardHeader className="pb-3">
+            <CardDescription className="text-gray-600">Runs Today</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-gray-900">0</div>
+            <p className="text-sm text-green-600 mt-1">↑ +3 vs last period</p>
+            <p className="text-xs text-gray-500 mt-1">vs yesterday</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white rounded-lg border border-gray-200 shadow-sm">
+          <CardHeader className="pb-3">
+            <CardDescription className="text-gray-600">Hours Saved</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-gray-900">0</div>
+            <p className="text-sm text-green-600 mt-1">↑ +8 vs last period</p>
+            <p className="text-xs text-gray-500 mt-1">this week</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white rounded-lg border border-gray-200 shadow-sm">
+          <CardHeader className="pb-3">
+            <CardDescription className="text-gray-600">Success Rate</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-gray-900">0%</div>
+            <p className="text-sm text-green-600 mt-1">↑ +2% vs last period</p>
+            <p className="text-xs text-gray-500 mt-1">last 7 days</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white rounded-lg border border-gray-200 shadow-sm">
+          <CardHeader className="pb-3">
+            <CardDescription className="text-gray-600">Active Templates</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-gray-900">1</div>
+            <p className="text-sm text-green-600 mt-1">↑ 2 new vs last period</p>
+            <p className="text-xs text-gray-500 mt-1">this month</p>
+          </CardContent>
         </Card>
       </div>
-    )
-  }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <Logo size="lg" />
-          <h1 className="text-3xl font-bold text-gray-900 mt-4">Welcome to GTM AI Hub</h1>
-          <p className="text-gray-600 mt-2">Centralize AI templates, GTM playbooks, intake, run history, and metrics</p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Card className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
-            <CardHeader>
-              <CardTitle>Templates</CardTitle>
-              <CardDescription>Manage and execute AI templates</CardDescription>
-            </CardHeader>
-            <CardContent>
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent Runs */}
+        <Card className="bg-white rounded-lg border border-gray-200 shadow-sm">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle>Recent Runs</CardTitle>
+              <Link href="/runs" className="text-sm text-blue-600 hover:text-blue-700">
+                View All →
+              </Link>
+            </div>
+            <CardDescription>Latest automation runs and their status</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-8">
+              <p className="text-gray-500 mb-4">No runs yet.</p>
               <Link href="/templates">
-                <Button className="w-full">View Templates</Button>
+                <Button>Start with a template</Button>
               </Link>
-            </CardContent>
-          </Card>
+            </div>
+          </CardContent>
+        </Card>
 
-          <Card className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
-            <CardHeader>
-              <CardTitle>Intake Requests</CardTitle>
-              <CardDescription>Review and manage automation requests</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Link href="/intake">
-                <Button className="w-full">View Intake</Button>
+        {/* Popular Templates */}
+        <Card className="bg-white rounded-lg border border-gray-200 shadow-sm">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle>Popular Templates</CardTitle>
+              <Link href="/templates" className="text-sm text-blue-600 hover:text-blue-700">
+                View All →
               </Link>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
-            <CardHeader>
-              <CardTitle>Data Assistant</CardTitle>
-              <CardDescription>AI-powered data analysis and insights</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Link href="/data-assistant">
-                <Button className="w-full">Open Assistant</Button>
-              </Link>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
-            <CardHeader>
-              <CardTitle>GPT Agents</CardTitle>
-              <CardDescription>Manage and execute GPT agents</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Link href="/gpt-agents">
-                <Button className="w-full">View Agents</Button>
-              </Link>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
-            <CardHeader>
-              <CardTitle>Playbooks</CardTitle>
-              <CardDescription>GTM playbooks and workflows</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Link href="/playbooks">
-                <Button className="w-full">View Playbooks</Button>
-              </Link>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
-            <CardHeader>
-              <CardTitle>HR University</CardTitle>
-              <CardDescription>Learning modules and training</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Link href="/hr-university">
-                <Button className="w-full">View Modules</Button>
-              </Link>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+            <CardDescription>Most used automation templates</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="p-4 border border-gray-200 rounded-lg hover:border-blue-500 transition-colors">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-semibold text-gray-900">Hubspot Segment List to Excel</h3>
+                  <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">Popular</span>
+                </div>
+                <p className="text-sm text-gray-600 mb-3">This workflow automatically exports demo request leads from a HubSpot email campaign list to an Excel spreadsheet. It runs daily at 9 AM to capture new demo requests, enriches the contact data with additional details, and exports the information to a Microsoft Excel sheet for further processing by the sales team.</p>
+                <div className="flex items-center justify-between">
+                  <div className="text-xs text-gray-500">
+                    <span>Category: content</span>
+                    <span className="mx-2">•</span>
+                    <span>Version: v1</span>
+                  </div>
+                  <Link href="/templates">
+                    <Button size="sm">Run</Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
