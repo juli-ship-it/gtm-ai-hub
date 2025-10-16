@@ -1,3 +1,5 @@
+const path = require('path')
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
@@ -18,6 +20,18 @@ const nextConfig = {
         pathname: '/**',
       }
     ]
+  },
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': path.resolve(__dirname),
+      '@/components': path.resolve(__dirname, 'components'),
+      '@/lib': path.resolve(__dirname, 'lib'),
+      '@/app': path.resolve(__dirname, 'app'),
+      '@/types': path.resolve(__dirname, 'types'),
+      '@/utils': path.resolve(__dirname, 'utils'),
+    }
+    return config
   }
 }
 
