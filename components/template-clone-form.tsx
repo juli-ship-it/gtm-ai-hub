@@ -183,8 +183,8 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
                         onChange={(e) => handleVariableChange(variable.name, parseInt(e.target.value) || 1)}
                         placeholder={`Enter your ${variable.name}`}
                         required={variable.required}
-                        min={variable.validation?.min}
-                        max={variable.validation?.max}
+                        min={varWithExtras.validation?.min}
+                        max={varWithExtras.validation?.max}
                       />
                     ) : variable.type === 'boolean' ? (
                       <Select
