@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { createSnowflakeMCPClient } from '@/lib/integrations/snowflake-mcp'
-import { SnowflakeMCPSecurity } from '@/lib/integrations/snowflake-mcp'
 // import { createIntercomMCPClient } from '@/lib/integrations/intercom-mcp'
 // import { createHubSpotMCPClient } from '@/lib/integrations/hubspot-mcp'
 // import { createGongMCPClient } from '@/lib/integrations/gong-mcp'
@@ -100,14 +98,14 @@ export async function POST(request: NextRequest) {
           queryResult = await executeClayQuery(sanitizedQuery)
           break
         case 'snowflake':
-          queryResult = await executeSnowflakeQuery(sanitizedQuery)
-          break
+          // Snowflake queries are now handled by native MCP tools
+          throw new Error('Snowflake queries should be handled by native MCP tools in Cursor chat')
         case 'supabase':
           queryResult = await executeSupabaseQuery(sanitizedQuery)
           break
         default:
-          // Try Snowflake as default
-          queryResult = await executeSnowflakeQuery(sanitizedQuery)
+          // Default to Supabase for now
+          queryResult = await executeSupabaseQuery(sanitizedQuery)
       }
       
       executionTime = (Date.now() - startTime) / 1000
@@ -224,10 +222,6 @@ async function callAIForQueryGeneration(prompt: string): Promise<any> {
   }
 }
 
-async function executeSnowflakeQuery(query: string): Promise<any> {
-  const snowflakeClient = createSnowflakeMCPClient()
-  return await snowflakeClient.executeQuery(query)
-}
 
 async function executeSupabaseQuery(query: string): Promise<any> {
   // For Supabase, we'll use the Supabase client directly
