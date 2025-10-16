@@ -9,13 +9,8 @@ const nextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
-  // Force CSS generation
-  generateBuildId: async () => {
-    return 'build-' + Date.now()
-  },
   // Ensure CSS is properly handled in Vercel
   trailingSlash: false,
-  poweredByHeader: false,
   images: {
     remotePatterns: [
       {
