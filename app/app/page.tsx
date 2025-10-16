@@ -22,12 +22,12 @@ export default function AppPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-wl-bg">
-        <Card className="w-full max-w-md p-8">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Card className="w-full max-w-md p-8 bg-white shadow-lg rounded-xl border">
           <div className="text-center space-y-4">
             <Logo size="lg" />
-            <h2 className="text-xl font-semibold text-wl-text">Access Denied</h2>
-            <p className="text-wl-muted">Please sign in to access the application.</p>
+            <h2 className="text-xl font-semibold text-gray-900">Access Denied</h2>
+            <p className="text-gray-600">Please sign in to access the application.</p>
             <Link href="/auth/login">
               <Button className="w-full">Sign In</Button>
             </Link>
@@ -38,16 +38,16 @@ export default function AppPage() {
   }
 
   return (
-    <div className="min-h-screen bg-wl-bg">
+    <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <Logo size="lg" />
-          <h1 className="text-3xl font-bold text-wl-text mt-4">Welcome to GTM AI Hub</h1>
-          <p className="text-wl-muted mt-2">Centralize AI templates, GTM playbooks, intake, run history, and metrics</p>
+          <h1 className="text-3xl font-bold text-gray-900 mt-4">Welcome to GTM AI Hub</h1>
+          <p className="text-gray-600 mt-2">Centralize AI templates, GTM playbooks, intake, run history, and metrics</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Card className="wl-card-hover">
+          <Card className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
             <CardHeader>
               <CardTitle>Templates</CardTitle>
               <CardDescription>Manage and execute AI templates</CardDescription>
@@ -59,7 +59,7 @@ export default function AppPage() {
             </CardContent>
           </Card>
 
-          <Card className="wl-card-hover">
+          <Card className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
             <CardHeader>
               <CardTitle>Intake Requests</CardTitle>
               <CardDescription>Review and manage automation requests</CardDescription>
@@ -71,7 +71,7 @@ export default function AppPage() {
             </CardContent>
           </Card>
 
-          <Card className="wl-card-hover">
+          <Card className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
             <CardHeader>
               <CardTitle>Data Assistant</CardTitle>
               <CardDescription>AI-powered data analysis and insights</CardDescription>
@@ -83,7 +83,7 @@ export default function AppPage() {
             </CardContent>
           </Card>
 
-          <Card className="wl-card-hover">
+          <Card className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
             <CardHeader>
               <CardTitle>GPT Agents</CardTitle>
               <CardDescription>Manage and execute GPT agents</CardDescription>
@@ -95,7 +95,7 @@ export default function AppPage() {
             </CardContent>
           </Card>
 
-          <Card className="wl-card-hover">
+          <Card className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
             <CardHeader>
               <CardTitle>Playbooks</CardTitle>
               <CardDescription>GTM playbooks and workflows</CardDescription>
@@ -107,7 +107,7 @@ export default function AppPage() {
             </CardContent>
           </Card>
 
-          <Card className="wl-card-hover">
+          <Card className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
             <CardHeader>
               <CardTitle>HR University</CardTitle>
               <CardDescription>Learning modules and training</CardDescription>
