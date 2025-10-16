@@ -30,7 +30,7 @@ const navigation = [
   { name: 'Prompts', href: '/prompts', icon: MessageSquare, badge: 'Coming Soon' },
   { name: 'GPT Agents', href: '/gpt-agents', icon: Bot },
   { name: 'Data Assistant', href: '/data-assistant', icon: Database, badge: 'Soon' },
-  { name: 'HR University', href: '/app/hr-university', icon: GraduationCap, badge: 'Coming Soon' },
+  { name: 'HR University', href: '/hr-university', icon: GraduationCap, badge: 'Soon' },
   { name: 'Admin', href: '/admin', icon: Settings },
 ]
 

@@ -19,10 +19,18 @@ export default function AppPage() {
     return <CardSkeleton />
   }
 
+  // Extract and format the user's name from email
+  const getUserName = () => {
+    if (!user?.email) return 'User'
+    const emailName = user.email.split('@')[0]
+    const firstName = emailName.split('.')[0]
+    return firstName.charAt(0).toUpperCase() + firstName.slice(1)
+  }
+
   return (
     <div className="p-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Welcome back, {user?.email?.split('@')[0] || 'User'}! 👋</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Welcome back, {getUserName()}! 👋</h1>
         <p className="text-gray-600 mt-2">Here's what's happening with your GTM automation today.</p>
       </div>
 
