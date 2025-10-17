@@ -112,7 +112,7 @@ export default function GPTAgentsPage() {
       // Use direct Supabase client instead of API route
       const supabase = createClient()
       
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('gpt_agent')
         .update({
           name: updatedAgent.name,
@@ -389,7 +389,7 @@ export default function GPTAgentsPage() {
                     usageCount: agent.usage_count || 0
                   }}
                   databaseAgent={agent}
-                  currentUser={currentUser}
+                  currentUser={currentUser || undefined}
                   onAgentUsed={handleAgentUsed}
                   onAgentEdited={handleAgentEdit}
                 />
