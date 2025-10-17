@@ -6,10 +6,10 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Sidebar } from '@/components/sidebar'
-import { 
-  Settings, 
-  Users, 
-  Key, 
+import {
+  Settings,
+  Users,
+  Key,
   Database,
   Shield,
   AlertTriangle,
@@ -84,7 +84,7 @@ export default function AdminPage() {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card className="wl-card">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
@@ -96,7 +96,7 @@ export default function AdminPage() {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card className="wl-card">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
@@ -108,7 +108,7 @@ export default function AdminPage() {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card className="wl-card">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
@@ -219,15 +219,15 @@ export default function AdminPage() {
                   <Input type="email" defaultValue="admin@workleap.com" />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <label className="text-sm font-medium text-wl-text">System Message</label>
-                <Textarea 
+                <Textarea
                   placeholder="Enter a system-wide message for users..."
                   rows={3}
                 />
               </div>
-              
+
               <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                 <div className="text-sm text-wl-muted">
                   Changes are saved automatically

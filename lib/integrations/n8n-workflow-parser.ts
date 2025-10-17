@@ -83,16 +83,16 @@ export class N8NWorkflowParser {
    */
   analyzeWorkflow(): WorkflowAnalysis {
     this.detectedVariables.clear()
-    
+
     // Find webhook nodes (entry points)
     const webhookNodes = this.findWebhookNodes()
-    
+
     // Extract variables from webhook parameters
     webhookNodes.forEach((node: any) => this.extractWebhookVariables(node))
-    
+
     // Scan all nodes for variable expressions
     this.workflow.nodes.forEach((node: any) => this.scanNodeForVariables(node))
-    
+
     // Analyze workflow complexity and systems
     const systems = this.detectSystems()
     const complexity = this.assessComplexity()
@@ -100,7 +100,7 @@ export class N8NWorkflowParser {
     const hasEmailNotification = this.detectEmailNotification()
     const hasSlackNotification = this.detectSlackNotification()
     const errorHandling = this.detectErrorHandling()
-    
+
     return {
       variables: Array.from(this.detectedVariables.values()),
       systems,
@@ -118,8 +118,8 @@ export class N8NWorkflowParser {
    * Find all webhook nodes in the workflow
    */
   private findWebhookNodes(): N8NNode[] {
-    return this.workflow.nodes.filter(node => 
-      node.type === 'n8n-nodes-base.webhook' || 
+    return this.workflow.nodes.filter(node =>
+      node.type === 'n8n-nodes-base.webhook' ||
       node.type === 'n8n-nodes-base.webhookResponse'
     )
   }
@@ -153,7 +153,7 @@ export class N8NWorkflowParser {
   private scanNodeForVariables(node: N8NNode): void {
     const nodeParams = JSON.stringify(node.parameters)
     const variableMatches = nodeParams.match(/\{\{\s*\$json\.(\w+)\s*\}\}/g)
-    
+
     if (variableMatches) {
       variableMatches.forEach((match: string) => {
         const variableName = match.match(/\{\{\s*\$json\.(\w+)\s*\}\}/)?.[1]
@@ -161,7 +161,7 @@ export class N8NWorkflowParser {
           const type = this.inferVariableType(variableName, node)
           const required = this.isVariableRequired(variableName, node)
           const description = this.generateVariableDescription(variableName, node)
-          
+
           this.addVariable(variableName, type, required, description, 'expression', node)
         }
       })
@@ -208,7 +208,7 @@ export class N8NWorkflowParser {
         })
       }
     }
-    
+
     if (node.parameters.resource === 'segment') {
       this.addVariable('segment_id', 'string', true, 'HubSpot segment ID', 'parameter', node)
     }
@@ -271,37 +271,37 @@ export class N8NWorkflowParser {
    */
   private inferVariableType(variableName: string, node: N8NNode): DetectedVariable['type'] {
     const name = variableName.toLowerCase()
-    
+
     // Email patterns
     if (name.includes('email') || name.includes('mail')) {
       return 'email'
     }
-    
+
     // URL patterns
     if (name.includes('url') || name.includes('link') || name.includes('endpoint')) {
       return 'url'
     }
-    
+
     // Date patterns
     if (name.includes('date') || name.includes('time') || name.includes('timestamp')) {
       return 'date'
     }
-    
+
     // Boolean patterns
     if (name.includes('enabled') || name.includes('active') || name.includes('notify') || name.includes('send')) {
       return 'boolean'
     }
-    
+
     // Number patterns
     if (name.includes('count') || name.includes('limit') || name.includes('size') || name.includes('number')) {
       return 'number'
     }
-    
+
     // File patterns
     if (name.includes('file') || name.includes('upload') || name.includes('attachment')) {
       return 'file'
     }
-    
+
     // Default to string
     return 'string'
   }
@@ -327,10 +327,10 @@ export class N8NWorkflowParser {
    * Add a variable to the detected variables map
    */
   private addVariable(
-    name: string, 
-    type: DetectedVariable['type'], 
-    required: boolean, 
-    description: string, 
+    name: string,
+    type: DetectedVariable['type'],
+    required: boolean,
+    description: string,
     source: DetectedVariable['source'],
     node: N8NNode
   ): void {
@@ -358,7 +358,7 @@ export class N8NWorkflowParser {
    */
   private detectSystems(): string[] {
     const systems = new Set<string>()
-    
+
     this.workflow.nodes.forEach((node: any) => {
       switch (node.type) {
         case 'n8n-nodes-base.hubspot':
@@ -390,7 +390,7 @@ export class N8NWorkflowParser {
           break
       }
     })
-    
+
     return Array.from(systems)
   }
 
@@ -399,11 +399,11 @@ export class N8NWorkflowParser {
    */
   private assessComplexity(): 'beginner' | 'intermediate' | 'advanced' {
     const nodeCount = this.workflow.nodes.length
-    const hasConditionals = this.workflow.nodes.some(node => 
-      node.type === 'n8n-nodes-base.if' || 
+    const hasConditionals = this.workflow.nodes.some(node =>
+      node.type === 'n8n-nodes-base.if' ||
       node.type === 'n8n-nodes-base.switch'
     )
-    const hasLoops = this.workflow.nodes.some(node => 
+    const hasLoops = this.workflow.nodes.some(node =>
       node.type === 'n8n-nodes-base.splitInBatches' ||
       node.type === 'n8n-nodes-base.merge'
     )
@@ -423,7 +423,7 @@ export class N8NWorkflowParser {
    * Detect if workflow has file upload capabilities
    */
   private detectFileUpload(): boolean {
-    return this.workflow.nodes.some(node => 
+    return this.workflow.nodes.some(node =>
       node.type === 'n8n-nodes-base.readBinaryFile' ||
       node.type === 'n8n-nodes-base.readBinaryFiles' ||
       node.type === 'n8n-nodes-base.googleDrive' ||
@@ -435,7 +435,7 @@ export class N8NWorkflowParser {
    * Detect if workflow has email notification
    */
   private detectEmailNotification(): boolean {
-    return this.workflow.nodes.some(node => 
+    return this.workflow.nodes.some(node =>
       node.type === 'n8n-nodes-base.emailSend' ||
       node.type === 'n8n-nodes-base.gmail'
     )
@@ -445,7 +445,7 @@ export class N8NWorkflowParser {
    * Detect if workflow has Slack notification
    */
   private detectSlackNotification(): boolean {
-    return this.workflow.nodes.some(node => 
+    return this.workflow.nodes.some(node =>
       node.type === 'n8n-nodes-base.slack'
     )
   }
@@ -454,7 +454,7 @@ export class N8NWorkflowParser {
    * Detect if workflow has error handling
    */
   private detectErrorHandling(): boolean {
-    return this.workflow.nodes.some(node => 
+    return this.workflow.nodes.some(node =>
       node.type === 'n8n-nodes-base.if' ||
       node.type === 'n8n-nodes-base.switch' ||
       node.continueOnFail === true ||
@@ -467,25 +467,25 @@ export class N8NWorkflowParser {
    */
   private estimateDuration(): number {
     const nodeCount = this.workflow.nodes.length
-    const hasExternalAPIs = this.workflow.nodes.some(node => 
-      node.type.includes('httpRequest') || 
+    const hasExternalAPIs = this.workflow.nodes.some(node =>
+      node.type.includes('httpRequest') ||
       node.type.includes('hubspot') ||
       node.type.includes('slack')
     )
-    
+
     // Base time: 1 minute per node
     let duration = nodeCount
-    
+
     // Add time for external API calls
     if (hasExternalAPIs) {
       duration += 2
     }
-    
+
     // Add time for file operations
     if (this.detectFileUpload()) {
       duration += 3
     }
-    
+
     return Math.max(duration, 1) // Minimum 1 minute
   }
 
@@ -508,20 +508,20 @@ export class N8NWorkflowParser {
    */
   validateWorkflow(): { isValid: boolean; errors: string[] } {
     const errors: string[] = []
-    
+
     if (!this.workflow.nodes || !Array.isArray(this.workflow.nodes)) {
       errors.push('Workflow must have a nodes array')
     }
-    
+
     if (!this.workflow.connections) {
       errors.push('Workflow must have connections')
     }
-    
+
     const webhookNodes = this.findWebhookNodes()
     if (webhookNodes.length === 0) {
       errors.push('Workflow must have at least one webhook node')
     }
-    
+
     return {
       isValid: errors.length === 0,
       errors

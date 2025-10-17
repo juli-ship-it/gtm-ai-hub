@@ -14,13 +14,13 @@ interface KPIStatProps {
   className?: string
 }
 
-export function KPIStat({ 
-  title, 
-  value, 
-  change, 
-  icon: Icon, 
+export function KPIStat({
+  title,
+  value,
+  change,
+  icon: Icon,
   description,
-  className 
+  className
 }: KPIStatProps) {
   return (
     <Card className={cn("wl-card-hover", className)}>

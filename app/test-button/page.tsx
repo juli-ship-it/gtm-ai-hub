@@ -15,7 +15,7 @@ export default function TestButtonPage() {
   return (
     <div className="p-8">
       <h1 className="text-2xl font-bold mb-4">Test Create Template Button</h1>
-      
+
       <Button className="wl-button-primary" onClick={handleCreateTemplate}>
         <Plus className="mr-2 h-4 w-4" />
         Create Template

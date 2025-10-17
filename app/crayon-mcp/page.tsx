@@ -37,7 +37,7 @@ export default function CrayonMCPPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [results, setResults] = useState<CrayonResponse | null>(null)
-  
+
   // Form states
   const [operation, setOperation] = useState('get_battlecard')
   const [competitor, setCompetitor] = useState('')
@@ -83,47 +83,47 @@ export default function CrayonMCPPage() {
           options.product = product
           options.useCase = useCase
           break
-        
+
         case 'get_competitor_profile':
           params.competitor = competitor
           options.include = ['products', 'pricing', 'recent_news']
           break
-        
+
         case 'get_win_loss_stories':
           options.competitor = competitor
           options.timeRange = timeRange
           break
-        
+
         case 'get_objection_handling':
           options.competitor = competitor
           options.objection = objection
           options.context = context
           break
-        
+
         case 'get_competitive_positioning':
           options.yourProduct = product
           options.competitor = competitor
           options.market = market
           break
-        
+
         case 'get_deal_intelligence':
           options.prospect = prospect
           options.competitors = competitor ? [competitor] : []
           options.dealStage = dealStage
           break
-        
+
         case 'get_market_alerts':
           options.competitors = competitor ? [competitor] : []
           options.alertTypes = ['product_launch', 'pricing_change']
           options.timeRange = timeRange
           break
-        
+
         case 'get_competitor_news':
           options.competitor = competitor
           options.timeRange = timeRange
           options.categories = ['product', 'funding', 'partnership']
           break
-        
+
         case 'get_market_trends':
           options.market = market
           options.timeRange = timeRange
@@ -374,8 +374,8 @@ export default function CrayonMCPPage() {
                 </div>
               </div>
 
-              <Button 
-                onClick={executeQuery} 
+              <Button
+                onClick={executeQuery}
                 disabled={loading}
                 className="w-full"
               >
@@ -413,7 +413,7 @@ export default function CrayonMCPPage() {
                     <Badge variant="outline">{results.operation}</Badge>
                     <span>Executed at: {new Date(results.timestamp).toLocaleString()}</span>
                   </div>
-                  
+
                   <div className="bg-muted p-4 rounded-lg">
                     <pre className="text-sm overflow-auto">
                       {JSON.stringify(results.data, null, 2)}

@@ -190,7 +190,7 @@ export default function HRReportingPage() {
             <span className="text-sm text-gray-600">{mockUserStats.completion_rate}%</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-3">
-            <div 
+            <div
               className="bg-blue-600 h-3 rounded-full transition-all duration-300"
               style={{ width: `${mockUserStats.completion_rate}%` }}
             ></div>
@@ -252,7 +252,7 @@ export default function HRReportingPage() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center space-x-2">
                       <div className="w-16 bg-gray-200 rounded-full h-2">
-                        <div 
+                        <div
                           className="bg-blue-600 h-2 rounded-full"
                           style={{ width: `${module.completion_rate}%` }}
                         ></div>

@@ -9,12 +9,12 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
-import { 
-  X, 
-  Save, 
-  Settings, 
-  Variable, 
-  Key, 
+import {
+  X,
+  Save,
+  Settings,
+  Variable,
+  Key,
   FileText,
   Plus,
   Trash2,
@@ -98,7 +98,7 @@ export function TemplateEditForm({ template, onSuccess, onCancel }: TemplateEdit
 
     try {
       const supabase = createClient()
-      
+
       // Get current user
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
@@ -198,7 +198,7 @@ export function TemplateEditForm({ template, onSuccess, onCancel }: TemplateEdit
   const getVariableTypeIcon = (type: string) => {
     switch (type) {
       case 'password': return <Key className="h-4 w-4" />
-      case 'select': 
+      case 'select':
       case 'multiselect': return <Settings className="h-4 w-4" />
       default: return <Variable className="h-4 w-4" />
     }
@@ -262,7 +262,7 @@ export function TemplateEditForm({ template, onSuccess, onCancel }: TemplateEdit
               </Select>
             </div>
           </div>
-          
+
           <div>
             <Label htmlFor="description">Description</Label>
             <Textarea
@@ -347,12 +347,12 @@ export function TemplateEditForm({ template, onSuccess, onCancel }: TemplateEdit
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <Label>Type</Label>
-                      <Select 
-                        value={variable.type} 
+                      <Select
+                        value={variable.type}
                         onValueChange={(value) => updateVariable(index, 'type', value)}
                       >
                         <SelectTrigger>
@@ -382,7 +382,7 @@ export function TemplateEditForm({ template, onSuccess, onCancel }: TemplateEdit
                       />
                     </div>
                   </div>
-                  
+
                   <div>
                     <Label>Description</Label>
                     <Input
@@ -454,8 +454,8 @@ export function TemplateEditForm({ template, onSuccess, onCancel }: TemplateEdit
                   {/* Category */}
                   <div>
                     <Label>Category</Label>
-                    <Select 
-                      value={variable.category || 'configuration'} 
+                    <Select
+                      value={variable.category || 'configuration'}
                       onValueChange={(value) => updateVariable(index, 'category', value)}
                     >
                       <SelectTrigger>
@@ -514,7 +514,7 @@ export function TemplateEditForm({ template, onSuccess, onCancel }: TemplateEdit
                       </div>
                     </div>
                   )}
-                  
+
                   <div className="flex items-center space-x-2">
                     <input
                       type="checkbox"
@@ -543,8 +543,8 @@ export function TemplateEditForm({ template, onSuccess, onCancel }: TemplateEdit
               </div>
               <div>
                 <Label>Type</Label>
-                <Select 
-                  value={newVariable.type || 'text'} 
+                <Select
+                  value={newVariable.type || 'text'}
                   onValueChange={(value) => setNewVariable({ ...newVariable, type: value as any })}
                 >
                   <SelectTrigger>
@@ -581,8 +581,8 @@ export function TemplateEditForm({ template, onSuccess, onCancel }: TemplateEdit
                 <Label>n8n Enum Values (comma-separated)</Label>
                 <Input
                   value={newVariable.n8n_enum?.join(', ') || ''}
-                  onChange={(e) => setNewVariable({ 
-                    ...newVariable, 
+                  onChange={(e) => setNewVariable({
+                    ...newVariable,
                     n8n_enum: e.target.value.split(',').map(v => v.trim()).filter(v => v)
                   })}
                   placeholder="e.g., Seconds, Minutes, Hours, Days, Weeks, Months"
@@ -596,8 +596,8 @@ export function TemplateEditForm({ template, onSuccess, onCancel }: TemplateEdit
                 <Label>Options (comma-separated)</Label>
                 <Input
                   value={newVariable.options?.join(', ') || ''}
-                  onChange={(e) => setNewVariable({ 
-                    ...newVariable, 
+                  onChange={(e) => setNewVariable({
+                    ...newVariable,
                     options: e.target.value.split(',').map(v => v.trim()).filter(v => v)
                   })}
                   placeholder="e.g., Option 1, Option 2, Option 3"
@@ -608,8 +608,8 @@ export function TemplateEditForm({ template, onSuccess, onCancel }: TemplateEdit
             {/* Category for new variable */}
             <div>
               <Label>Category</Label>
-              <Select 
-                value={newVariable.category || 'configuration'} 
+              <Select
+                value={newVariable.category || 'configuration'}
                 onValueChange={(value) => setNewVariable({ ...newVariable, category: value as any })}
               >
                 <SelectTrigger>

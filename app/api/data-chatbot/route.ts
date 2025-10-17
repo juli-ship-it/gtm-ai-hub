@@ -6,11 +6,11 @@ import { createClient } from '@/lib/supabase/server'
 import { createMixpanelMCPClient } from '@/lib/integrations/mixpanel-mcp'
 // import { createCrayonMCPClient } from '@/lib/integrations/crayon-mcp'
 // import { createClayMCPClient } from '@/lib/integrations/clay-mcp'
-import { 
-  createEnhancedAIPrompt, 
-  validateQuery, 
-  sanitizeQuery, 
-  getDataSourceFromQuery 
+import {
+  createEnhancedAIPrompt,
+  validateQuery,
+  sanitizeQuery,
+  getDataSourceFromQuery
 } from '@/lib/integrations/ai-query-engine'
 
 interface ChatMessage {
@@ -30,7 +30,7 @@ interface ChatRequest {
 export async function POST(request: NextRequest) {
   try {
     const { message, dataSource, messageHistory }: ChatRequest = await request.json()
-    
+
     if (!message) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 })
     }
@@ -39,10 +39,10 @@ export async function POST(request: NextRequest) {
 
     // Create enhanced AI prompt for query generation
     const aiPrompt = createEnhancedAIPrompt(message, dataSource, messageHistory)
-    
+
     // Call AI to generate SQL query
     const aiResponse = await callAIForQueryGeneration(aiPrompt)
-    
+
     if (!aiResponse.success) {
       return NextResponse.json({
         response: "I'm sorry, I couldn't understand your request. Could you please rephrase it?",
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
 
     // Sanitize and validate the generated query
     const sanitizedQuery = sanitizeQuery(query)
-    
+
     if (!validateQuery(sanitizedQuery, detectedSource)) {
       return NextResponse.json({
         response: "I'm sorry, I can't execute that type of query for security reasons. Please try asking for data analysis or reporting instead.",
@@ -107,12 +107,12 @@ export async function POST(request: NextRequest) {
           // Default to Supabase for now
           queryResult = await executeSupabaseQuery(sanitizedQuery)
       }
-      
+
       executionTime = (Date.now() - startTime) / 1000
-      
+
       // Format the response
       const response = formatQueryResponse(queryResult, explanation, executionTime)
-      
+
       return NextResponse.json({
         response,
         query: sanitizedQuery,
@@ -121,10 +121,10 @@ export async function POST(request: NextRequest) {
         rowCount: queryResult?.rowCount || 0,
         confidence
       })
-      
+
     } catch (queryError) {
       console.error('❌ Query execution error:', queryError)
-      
+
       return NextResponse.json({
         response: `I encountered an error while querying the data: ${queryError}. Could you try rephrasing your question?`,
         query: sanitizedQuery,
@@ -147,9 +147,9 @@ async function callAIForQueryGeneration(prompt: string): Promise<any> {
   try {
     // Simple rule-based query generation (no external dependencies)
     // This prevents the Edge Function error and provides basic functionality
-    
+
     const lowerPrompt = prompt.toLowerCase()
-    
+
     // Simple data source detection
     let dataSource = 'snowflake' // default
     if (lowerPrompt.includes('intercom') || lowerPrompt.includes('conversation') || lowerPrompt.includes('support')) {
@@ -165,11 +165,11 @@ async function callAIForQueryGeneration(prompt: string): Promise<any> {
     } else if (lowerPrompt.includes('clay') || lowerPrompt.includes('prospect') || lowerPrompt.includes('enrichment')) {
       dataSource = 'clay'
     }
-    
+
     // Generate a simple query based on the prompt
     let query = 'SELECT * FROM data LIMIT 10'
     let explanation = 'Retrieved data based on your request'
-    
+
     if (dataSource === 'intercom') {
       if (lowerPrompt.includes('conversation')) {
         query = 'SELECT id, topic, status, created_at FROM conversations ORDER BY created_at DESC LIMIT 10'
@@ -202,7 +202,7 @@ async function callAIForQueryGeneration(prompt: string): Promise<any> {
       query = 'SELECT customer_name, revenue, created_at FROM customers ORDER BY revenue DESC LIMIT 10'
       explanation = 'Retrieved customer data from Snowflake'
     }
-    
+
     return {
       success: true,
       data: {
@@ -227,15 +227,15 @@ async function executeSupabaseQuery(query: string): Promise<any> {
   // For Supabase, we'll use the Supabase client directly
   // This is a simplified implementation - in production you'd want more sophisticated query handling
   const supabase = createClient()
-  
+
   // Extract table name from query (simplified)
   const tableMatch = query.match(/FROM\s+(\w+)/i)
   if (!tableMatch) {
     throw new Error('Could not determine table name from query')
   }
-  
+
   const tableName = tableMatch[1]
-  
+
   // For now, return mock data - in production you'd execute the actual query
   return {
     data: [
@@ -264,7 +264,7 @@ async function executeHubSpotQuery(query: string): Promise<any> {
 async function executeMixpanelQuery(query: string): Promise<any> {
   // Use Mixpanel MCP client for real data
   const mixpanelClient = createMixpanelMCPClient()
-  
+
   try {
     // Parse query to determine which Mixpanel data to fetch
     if (query.toLowerCase().includes('events')) {
@@ -375,9 +375,9 @@ function formatQueryResponse(queryResult: any, explanation: string, executionTim
   }
 
   const { data, columns, rowCount } = queryResult
-  
+
   let response = `${explanation}\n\n`
-  
+
   if (rowCount === 1) {
     response += "Here's the result:\n"
   } else {

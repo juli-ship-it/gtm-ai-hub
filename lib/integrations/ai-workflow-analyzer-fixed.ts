@@ -45,14 +45,14 @@ export interface AIVariable {
 
 export async function analyzeWorkflowWithAI(workflowJson: string): Promise<AIWorkflowAnalysis> {
   const workflow: N8NWorkflow = JSON.parse(workflowJson)
-  
+
   // Create a detailed prompt for AI analysis
   const analysisPrompt = createAnalysisPrompt(workflow)
-  
+
   try {
     // Call AI service to analyze the workflow
     const aiResponse = await callAIAnalysis(workflowJson)
-    
+
     return parseAIResponse(aiResponse, workflow)
   } catch (error) {
     console.error('AI analysis failed, falling back to rule-based analysis:', error)
@@ -63,7 +63,7 @@ export async function analyzeWorkflowWithAI(workflowJson: string): Promise<AIWor
 function createAnalysisPrompt(workflow: N8NWorkflow): string {
   const nodes = workflow.nodes || []
   const connections = workflow.connections || {}
-  
+
   // Create a detailed prompt for AI analysis
   return `
 Analyze this n8n workflow and extract business-relevant variables that users would need to configure.
@@ -139,7 +139,7 @@ For each interval type, use n8n's exact parameter names:
 Return your analysis as a JSON object with this exact structure:
 {
   "workflowName": "string",
-  "workflowDescription": "string", 
+  "workflowDescription": "string",
   "businessLogic": "string",
   "detectedVariables": [
     {
@@ -181,10 +181,10 @@ Return your analysis as a JSON object with this exact structure:
 
 async function callAIAnalysis(workflowJson: string): Promise<string> {
   console.log('🤖 Starting AI analysis...')
-  
+
   try {
     console.log('📤 Sending request to AI analysis API...')
-    
+
     const response = await fetch('/api/analyze-workflow', {
       method: 'POST',
       headers: {
@@ -192,7 +192,7 @@ async function callAIAnalysis(workflowJson: string): Promise<string> {
       },
       body: JSON.stringify({ workflowJson })
     })
-    
+
     if (response.ok) {
       const result = await response.json()
       console.log('✅ AI analysis successful:', {
@@ -215,7 +215,7 @@ async function callAIAnalysis(workflowJson: string): Promise<string> {
 function parseAIResponse(aiResponse: string, workflow: N8NWorkflow): AIWorkflowAnalysis {
   try {
     const parsed = JSON.parse(aiResponse)
-    
+
     // Convert the AI response to our expected format
     return {
       workflowName: parsed.workflowName || workflow.name || 'Unnamed Workflow',
@@ -240,7 +240,7 @@ function parseAIResponse(aiResponse: string, workflow: N8NWorkflow): AIWorkflowA
 
 function fallbackAnalysis(workflow: N8NWorkflow): AIWorkflowAnalysis {
   console.log('Using fallback analysis for workflow:', workflow.name)
-  
+
   return {
     workflowName: workflow.name || 'Unnamed Workflow',
     workflowDescription: 'Workflow analysis unavailable',

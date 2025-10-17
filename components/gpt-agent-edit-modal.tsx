@@ -41,10 +41,10 @@ export function GPTAgentEditModal({ isOpen, onClose, agent, onSave }: GPTAgentEd
   // Auto-save when form data changes
   const handleFormChange = async (field: string, value: string) => {
     console.log('🔄 Form field changed:', field, 'to:', value)
-    
+
     const newFormData = { ...formData, [field]: value }
     setFormData(newFormData)
-    
+
     // Auto-save immediately with the new data
     setSaveStatus('saving')
     try {
@@ -63,13 +63,13 @@ export function GPTAgentEditModal({ isOpen, onClose, agent, onSave }: GPTAgentEd
       await onSave(updatedAgent)
       console.log('✅ Auto-save completed successfully')
       setSaveStatus('saved')
-      
+
       // Reset status after 2 seconds
       setTimeout(() => setSaveStatus('idle'), 2000)
     } catch (error) {
       console.error('❌ Error auto-saving agent:', error)
       setSaveStatus('error')
-      
+
       // Reset status after 3 seconds
       setTimeout(() => setSaveStatus('idle'), 3000)
     }
@@ -79,7 +79,7 @@ export function GPTAgentEditModal({ isOpen, onClose, agent, onSave }: GPTAgentEd
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-lg max-h-[95vh] sm:max-h-[90vh] overflow-y-auto mx-2 sm:mx-0">
         <DialogHeader>
           <DialogTitle>Edit GPT Agent</DialogTitle>
           <DialogDescription>

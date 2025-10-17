@@ -434,7 +434,7 @@ export class N8NWorkflowParameterizer {
    */
   private analyzeGenericNode(node: any): void {
     const params = node.parameters || {}
-    
+
     // Look for common hardcoded patterns
     this.findHardcodedValuesInObject(params, `nodes[${this.getNodeIndex(node.id)}].parameters`, node)
   }
@@ -511,8 +511,8 @@ export class N8NWorkflowParameterizer {
    */
   private addHardcodedValue(value: Omit<HardcodedValue, 'path'> & { path: string }): void {
     // Check if we already have a similar value
-    const existing = this.hardcodedValues.find(v => 
-      v.nodeId === value.nodeId && 
+    const existing = this.hardcodedValues.find(v =>
+      v.nodeId === value.nodeId &&
       v.parameterName === value.parameterName
     )
 
@@ -527,7 +527,7 @@ export class N8NWorkflowParameterizer {
   private generateVariableName(path: string, value: string): string {
     const parts = path.split('.')
     const lastPart = parts[parts.length - 1]
-    
+
     // Clean up the name
     let name = lastPart
       .replace(/\[.*?\]/g, '') // Remove array indices

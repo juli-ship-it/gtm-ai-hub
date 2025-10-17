@@ -7,7 +7,7 @@ export async function PUT(
 ) {
   try {
     console.log('🔍 GPT Agent API: Starting PUT request')
-    
+
     const agentId = params.id
     const body = await request.json()
 
@@ -49,24 +49,24 @@ export async function PUT(
     if (updateError) {
       console.error('❌ Error updating GPT agent:', updateError)
       console.error('❌ Error details:', JSON.stringify(updateError, null, 2))
-      return NextResponse.json({ 
-        error: 'Failed to update agent', 
+      return NextResponse.json({
+        error: 'Failed to update agent',
         details: updateError.message,
-        code: updateError.code 
+        code: updateError.code
       }, { status: 500 })
     }
 
     console.log('✅ Successfully updated agent:', updatedAgent)
 
-    return NextResponse.json({ 
-      success: true, 
-      data: updatedAgent 
+    return NextResponse.json({
+      success: true,
+      data: updatedAgent
     })
 
   } catch (error) {
     console.error('❌ Error in GPT agent update:', error)
-    return NextResponse.json({ 
-      error: 'Internal server error', 
+    return NextResponse.json({
+      error: 'Internal server error',
       details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 })
   }

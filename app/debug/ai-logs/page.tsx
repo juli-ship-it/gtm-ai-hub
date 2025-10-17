@@ -18,7 +18,7 @@ export default function AILogsPage() {
   const testAIAnalysis = async () => {
     try {
       console.log('🧪 Testing AI analysis...')
-      
+
       // Test with a simple workflow
       const testWorkflow = {
         name: 'Test Workflow',
@@ -35,7 +35,7 @@ export default function AILogsPage() {
         ],
         connections: {}
       }
-      
+
       const response = await fetch('/api/analyze-workflow', {
         method: 'POST',
         headers: {
@@ -46,7 +46,7 @@ export default function AILogsPage() {
           workflow: testWorkflow
         })
       })
-      
+
       if (response.ok) {
         const result = await response.json()
         console.log('✅ Test successful:', result)
@@ -80,7 +80,7 @@ export default function AILogsPage() {
                 {process.env.OPENAI_API_KEY ? "OpenAI Configured" : "OpenAI Not Configured"}
               </Badge>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <Badge variant={process.env.ANTHROPIC_API_KEY ? "default" : "secondary"}>
                 {process.env.ANTHROPIC_API_KEY ? "Claude Configured" : "Claude Not Configured"}
@@ -106,7 +106,7 @@ export default function AILogsPage() {
                 Look for logs starting with [requestId] 🚀
               </p>
             </div>
-            
+
             <div>
               <h4 className="font-medium mb-2">Terminal/Server Logs</h4>
               <p className="text-sm text-gray-600">

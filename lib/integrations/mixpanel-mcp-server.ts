@@ -483,7 +483,7 @@ export class MixpanelMCPServer {
     // Implementation for tracking events in Mixpanel
     // This would use the Mixpanel API to track events
     console.log(`Tracking event: ${event}`, { properties, distinctId })
-    
+
     // Mock implementation - replace with actual Mixpanel API call
     return {
       event,
@@ -496,7 +496,7 @@ export class MixpanelMCPServer {
   private async getInsightsFromMixpanel(options: any) {
     // Implementation for getting insights from Mixpanel
     console.log('Getting insights from Mixpanel:', options)
-    
+
     // Mock implementation - replace with actual Mixpanel API call
     return {
       series: [
@@ -511,7 +511,7 @@ export class MixpanelMCPServer {
   private async getFunnelsFromMixpanel(options: any) {
     // Implementation for getting funnel data from Mixpanel
     console.log('Getting funnels from Mixpanel:', options)
-    
+
     // Mock implementation - replace with actual Mixpanel API call
     return {
       steps: [
@@ -527,7 +527,7 @@ export class MixpanelMCPServer {
   private async getRetentionFromMixpanel(options: any) {
     // Implementation for getting retention data from Mixpanel
     console.log('Getting retention from Mixpanel:', options)
-    
+
     // Mock implementation - replace with actual Mixpanel API call
     return {
       cohorts: [
@@ -541,7 +541,7 @@ export class MixpanelMCPServer {
   private async getCohortsFromMixpanel(options: any) {
     // Implementation for getting cohorts from Mixpanel
     console.log('Getting cohorts from Mixpanel:', options)
-    
+
     // Mock implementation - replace with actual Mixpanel API call
     return {
       cohorts: [
@@ -555,7 +555,7 @@ export class MixpanelMCPServer {
   private async getEventsFromMixpanel(options: any) {
     // Implementation for getting events from Mixpanel
     console.log('Getting events from Mixpanel:', options)
-    
+
     // Mock implementation - replace with actual Mixpanel API call
     return {
       events: [
@@ -569,7 +569,7 @@ export class MixpanelMCPServer {
   private async getUsersFromMixpanel(options: any) {
     // Implementation for getting users from Mixpanel
     console.log('Getting users from Mixpanel:', options)
-    
+
     // Mock implementation - replace with actual Mixpanel API call
     return {
       users: [

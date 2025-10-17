@@ -32,7 +32,7 @@ export function formatRelativeTime(date: string | Date) {
   if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`
   if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`
   if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`
-  
+
   return formatDate(date)
 }
 
@@ -60,22 +60,22 @@ export function getInitials(name: string) {
 
 export function convertLoomUrlToEmbed(loomUrl: string): string | null {
   if (!loomUrl) return null
-  
+
   // Handle different Loom URL formats
   // https://loom.com/share/VIDEO_ID
   // https://www.loom.com/share/VIDEO_ID
   // https://loom.com/embed/VIDEO_ID (already an embed URL)
-  
+
   const shareMatch = loomUrl.match(/loom\.com\/share\/([a-zA-Z0-9]+)/)
   if (shareMatch) {
     return `https://loom.com/embed/${shareMatch[1]}`
   }
-  
+
   const embedMatch = loomUrl.match(/loom\.com\/embed\/([a-zA-Z0-9]+)/)
   if (embedMatch) {
     return loomUrl // Already an embed URL
   }
-  
+
   // If it doesn't match expected patterns, return null
   return null
 }

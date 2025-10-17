@@ -41,7 +41,7 @@ export function GPTAgentCard({
   const { agentInfo, loading: infoLoading } = useGPTAgentInfo(agent.iframeUrl, databaseAgent)
   const [isEditingName, setIsEditingName] = useState(false)
   const [editingName, setEditingName] = useState('')
-  
+
   const handleOpenAgent = () => {
     // Open GPT Agent in new tab/window
     window.open(agent.iframeUrl, '_blank', 'noopener,noreferrer')
@@ -84,18 +84,18 @@ export function GPTAgentCard({
   const createdByUser = databaseAgent?.configuration?.created_by_user
   // For now, we'll use a simple admin check - in production you'd want to check the user's role from the database
   const isAdmin = currentUser && (
-    currentUser.includes('admin') || 
+    currentUser.includes('admin') ||
     currentUser.includes('@workleap.com') // Assuming workleap emails are admins
   )
   const canEdit = currentUser && (
     isAdmin || // Admin can edit any agent
     (createdByUser && (
-      createdByUser === currentUser || 
+      createdByUser === currentUser ||
       createdByUser === currentUser.split('@')[0] ||
       createdByUser.split('@')[0] === currentUser.split('@')[0]
     ))
   )
-  
+
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -155,7 +155,7 @@ export function GPTAgentCard({
                   </Button>
                 </div>
               ) : (
-                <CardTitle 
+                <CardTitle
                   className={`text-lg ${canEdit ? 'cursor-pointer hover:text-wl-accent transition-colors' : ''}`}
                   onClick={canEdit ? handleStartEditName : undefined}
                   title={canEdit ? 'Click to edit name' : undefined}
@@ -176,10 +176,10 @@ export function GPTAgentCard({
           {showControls && (
             <div className="flex items-center space-x-1">
               {canEdit && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleEditAgent} 
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleEditAgent}
                   title="Edit GPT Agent"
                   className="text-wl-accent border-wl-accent/20 hover:bg-wl-accent/10"
                 >
@@ -194,14 +194,14 @@ export function GPTAgentCard({
           )}
         </div>
       </CardHeader>
-      
+
           <CardContent className="space-y-4">
             {/* Rich Description */}
             <div className="space-y-2">
               <CardDescription className="text-sm">
                 {agentInfo?.description || agent.description}
               </CardDescription>
-              
+
               {/* Creator Info */}
               {agentInfo?.creator && (
                 <div className="space-y-1">
@@ -250,21 +250,21 @@ export function GPTAgentCard({
               <div>
                 <p className="text-wl-muted">Last Used</p>
                 <p className="font-semibold text-wl-text">
-                  {agent.lastUsed 
+                  {agent.lastUsed
                     ? new Date(agent.lastUsed).toLocaleDateString()
                     : 'Never'
                   }
                 </p>
               </div>
             </div>
-        
+
         <div className="flex items-center justify-between pt-4 border-t border-gray-100">
           <div className="flex items-center text-sm text-wl-muted">
             <Clock className="h-4 w-4 mr-1" />
             <span>Opens in new tab</span>
           </div>
-          <Button 
-            size="sm" 
+          <Button
+            size="sm"
             className="wl-button-primary group-hover:shadow-lg transition-all duration-200"
             onClick={handleOpenAgent}
           >

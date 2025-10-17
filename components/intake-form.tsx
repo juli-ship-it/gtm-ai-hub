@@ -7,12 +7,12 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { 
-  X, 
-  Send, 
-  AlertCircle, 
-  CheckCircle, 
-  MessageSquare, 
+import {
+  X,
+  Send,
+  AlertCircle,
+  CheckCircle,
+  MessageSquare,
   Star,
   Zap,
   FileText,
@@ -25,14 +25,15 @@ interface IntakeFormProps {
   isOpen: boolean
   onClose: () => void
   onSuccess?: (intakeId: string) => void
+  userId?: string
 }
 
 const categoryIcons = {
-  campaign_execution: Target,
-  content_creation: FileText,
-  lead_management: Users,
-  reporting: BarChart3,
-  other: Zap
+  mkt_campaign_execution: Target,
+  mkt_content_creation: FileText,
+  mkt_lead_nurturing: Users,
+  mkt_reporting_analytics: BarChart3,
+  mkt_other: Zap
 }
 
 const requestTypeInfo = {
@@ -52,19 +53,19 @@ const requestTypeInfo = {
   }
 }
 
-export function IntakeForm({ isOpen, onClose, onSuccess }: IntakeFormProps) {
+export function IntakeForm({ isOpen, onClose, onSuccess, userId }: IntakeFormProps) {
   const [formData, setFormData] = useState({
     request_type: 'real' as 'real' | 'showcase',
     title: '',
     problem_statement: '',
     automation_idea: '',
-    category: 'other' as 'campaign_execution' | 'content_creation' | 'lead_management' | 'reporting' | 'other',
+    category: 'mkt_other' as 'mkt_campaign_execution' | 'mkt_content_creation' | 'mkt_lead_nurturing' | 'mkt_reporting_analytics' | 'mkt_other',
     current_process: '',
     pain_points: '',
-    frequency: 'ad_hoc' as 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'ad_hoc',
+    frequency: 'adhoc' as 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'adhoc',
     time_friendly: '',
     systems: [] as string[],
-    sensitivity: 'low' as 'low' | 'medium' | 'high' | 'confidential',
+    sensitivity: 'low' as 'low' | 'med' | 'high' | 'confidential',
     links: '',
     priority: 'medium' as 'low' | 'medium' | 'high' | 'urgent',
     ethics_considerations: ''
@@ -101,7 +102,10 @@ export function IntakeForm({ isOpen, onClose, onSuccess }: IntakeFormProps) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          user_id: userId
+        }),
       })
 
       const result = await response.json()
@@ -127,10 +131,10 @@ export function IntakeForm({ isOpen, onClose, onSuccess }: IntakeFormProps) {
       title: '',
       problem_statement: '',
       automation_idea: '',
-      category: 'other',
+      category: 'mkt_other',
       current_process: '',
       pain_points: '',
-      frequency: 'ad_hoc',
+      frequency: 'adhoc',
       time_friendly: '',
       systems: [],
       sensitivity: 'low',
@@ -151,8 +155,8 @@ export function IntakeForm({ isOpen, onClose, onSuccess }: IntakeFormProps) {
 
   if (submitted) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <Card className="w-full max-w-md mx-4">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+        <Card className="w-full max-w-md">
           <CardContent className="p-8 text-center">
             <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-wl-text mb-2">Request Submitted!</h3>
@@ -163,8 +167,8 @@ export function IntakeForm({ isOpen, onClose, onSuccess }: IntakeFormProps) {
               <Button onClick={handleClose} className="w-full">
                 Close
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => {
                   resetForm()
                   setSubmitted(false)
@@ -184,8 +188,8 @@ export function IntakeForm({ isOpen, onClose, onSuccess }: IntakeFormProps) {
   const CategoryIcon = categoryIcons[formData.request_type === 'showcase' ? 'other' : formData.category]
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+      <Card className="w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle className="flex items-center space-x-2">
@@ -214,8 +218,8 @@ export function IntakeForm({ isOpen, onClose, onSuccess }: IntakeFormProps) {
                     <div
                       key={key}
                       className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                        isSelected 
-                          ? 'border-wl-accent bg-wl-accent/5' 
+                        isSelected
+                          ? 'border-wl-accent bg-wl-accent/5'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
                       onClick={() => handleInputChange('request_type', key)}
@@ -256,11 +260,11 @@ export function IntakeForm({ isOpen, onClose, onSuccess }: IntakeFormProps) {
                     </div>
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="campaign_execution">Campaign Execution</SelectItem>
-                    <SelectItem value="content_creation">Content Creation</SelectItem>
-                    <SelectItem value="lead_management">Lead Management</SelectItem>
-                    <SelectItem value="reporting">Reporting</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
+                    <SelectItem value="mkt_campaign_execution">Campaign Execution</SelectItem>
+                    <SelectItem value="mkt_content_creation">Content Creation</SelectItem>
+                    <SelectItem value="mkt_lead_nurturing">Lead Management</SelectItem>
+                    <SelectItem value="mkt_reporting_analytics">Reporting</SelectItem>
+                    <SelectItem value="mkt_other">Other</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -325,7 +329,7 @@ export function IntakeForm({ isOpen, onClose, onSuccess }: IntakeFormProps) {
                     <SelectItem value="weekly">Weekly</SelectItem>
                     <SelectItem value="monthly">Monthly</SelectItem>
                     <SelectItem value="quarterly">Quarterly</SelectItem>
-                    <SelectItem value="ad_hoc">Ad Hoc</SelectItem>
+                    <SelectItem value="adhoc">Ad Hoc</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -383,7 +387,7 @@ export function IntakeForm({ isOpen, onClose, onSuccess }: IntakeFormProps) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="low">Low - Public data</SelectItem>
-                  <SelectItem value="medium">Medium - Internal data</SelectItem>
+                  <SelectItem value="med">Medium - Internal data</SelectItem>
                   <SelectItem value="high">High - Sensitive data</SelectItem>
                   <SelectItem value="confidential">Confidential - Restricted data</SelectItem>
                 </SelectContent>

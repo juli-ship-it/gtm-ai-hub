@@ -349,7 +349,7 @@ export function N8NScheduleTriggerForm({ onValuesChange, initialValues = {} }: S
         <div className="bg-blue-50 p-4 rounded-lg">
           <h4 className="font-medium text-blue-900 mb-2">n8n Schedule Trigger</h4>
           <p className="text-sm text-blue-800">
-            This configuration matches n8n's Schedule Trigger node exactly. 
+            This configuration matches n8n's Schedule Trigger node exactly.
             The values will be properly formatted for n8n import.
           </p>
         </div>

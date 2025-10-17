@@ -5,7 +5,7 @@ export async function GET(request: NextRequest) {
   try {
     const client = createGPTAgentClient()
     const agents = await client.listAgents()
-    
+
     return NextResponse.json({ success: true, data: agents })
   } catch (error) {
     console.error('Error fetching GPT agents:', error)

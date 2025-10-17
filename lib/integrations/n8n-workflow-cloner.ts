@@ -25,32 +25,32 @@ export class N8NWorkflowCloner {
    */
   async cloneWorkflow(options: N8NCloneOptions): Promise<N8NCloneResult> {
     const { workflowJson, variables, n8nInstanceUrl } = options
-    
+
     // Clone workflow with variable injection
-    
+
     // Create a deep copy of the workflow
     const clonedWorkflow = JSON.parse(JSON.stringify(workflowJson))
-    
+
     // Clean credentials and sensitive data for security
     this.cleanCredentials(clonedWorkflow)
-    
+
     // Inject variables into the workflow
     const variablesInjected = this.injectVariables(clonedWorkflow, variables)
-    
+
     // Variables injected successfully
-    
+
     // Update workflow metadata
     this.updateWorkflowMetadata(clonedWorkflow, variables)
-    
+
     // Generate multiple import options
     const baseUrl = n8nInstanceUrl || this.defaultN8nUrl
     const encodedWorkflow = this.encodeWorkflowForUrl(clonedWorkflow)
     const dataUrl = this.generateDataUrl(clonedWorkflow)
-    
+
     // Try different URL formats
     const importUrl = `${baseUrl}/workflows/new?import=${encodedWorkflow}`
     const alternativeUrl = `${baseUrl}/workflows/new`
-    
+
     return {
       importUrl,
       alternativeUrl,
@@ -67,9 +67,9 @@ export class N8NWorkflowCloner {
    */
   private injectVariables(workflow: any, variables: Record<string, any>): number {
     let injectedCount = 0
-    
+
     // Inject variables into workflow nodes
-    
+
     if (!workflow.nodes || !Array.isArray(workflow.nodes)) {
       return 0
     }
@@ -98,7 +98,7 @@ export class N8NWorkflowCloner {
    */
   private cleanCredentials(workflow: any): void {
     console.log('🔒 CLEANING CREDENTIALS: Removing sensitive data for security')
-    
+
     if (!workflow.nodes || !Array.isArray(workflow.nodes)) {
       return
     }
@@ -133,7 +133,7 @@ export class N8NWorkflowCloner {
 
     Object.keys(params).forEach(key => {
       const lowerKey = key.toLowerCase()
-      
+
       if (sensitiveKeys.some(sensitive => lowerKey.includes(sensitive))) {
         console.log(`🔒 Removing sensitive parameter from node: ${nodeName}`)
         params[key] = '[CONFIGURE_MANUALLY_IN_N8N]'
@@ -148,16 +148,16 @@ export class N8NWorkflowCloner {
    */
   private createDynamicVariableMappings(workflow: any, variables: Record<string, any>): any {
     const mappings: any = {}
-    
+
     // Count HubSpot HTTP Request nodes
-    const hubspotNodes = workflow.nodes.filter((node: any) => 
-      node.type === 'n8n-nodes-base.httpRequest' && 
+    const hubspotNodes = workflow.nodes.filter((node: any) =>
+      node.type === 'n8n-nodes-base.httpRequest' &&
       node.parameters?.url?.includes('api.hubspot.com')
     )
-    
+
     // Count Excel nodes
-    const excelNodes = workflow.nodes.filter((node: any) => 
-      node.type === 'n8n-nodes-base.microsoftExcel' || 
+    const excelNodes = workflow.nodes.filter((node: any) =>
+      node.type === 'n8n-nodes-base.microsoftExcel' ||
       node.type === 'n8n-nodes-base.excel'
     )
 
@@ -165,10 +165,10 @@ export class N8NWorkflowCloner {
 
     // Create mappings for HubSpot lists
     if (hubspotNodes.length > 0) {
-      const hubspotListVars = Object.keys(variables).filter(key => 
+      const hubspotListVars = Object.keys(variables).filter(key =>
         key.startsWith('HubSpot List ') && key.length <= 15
       ).sort()
-      
+
       hubspotListVars.forEach((varName, index) => {
         if (index < hubspotNodes.length) {
           mappings[varName] = {
@@ -182,10 +182,10 @@ export class N8NWorkflowCloner {
 
     // Create mappings for Excel sheets
     if (excelNodes.length > 0) {
-      const excelSheetVars = Object.keys(variables).filter(key => 
+      const excelSheetVars = Object.keys(variables).filter(key =>
         key.startsWith('Excel Sheet ') && key.length <= 15
       ).sort()
-      
+
       excelSheetVars.forEach((varName, index) => {
         if (index < excelNodes.length) {
           mappings[varName] = {
@@ -268,7 +268,7 @@ export class N8NWorkflowCloner {
       'Schedule Trigger Hour': 'triggerAtHour',
       'Trigger at Hour': 'triggerAtHour',
       'triggerAtHour': 'triggerAtHour',
-      'Schedule Trigger Minute': 'triggerAtMinute', 
+      'Schedule Trigger Minute': 'triggerAtMinute',
       'Trigger at Minute': 'triggerAtMinute',
       'triggerAtMinute': 'triggerAtMinute',
       'Trigger Interval': 'interval',
@@ -283,7 +283,7 @@ export class N8NWorkflowCloner {
       if (variables[aiName]) {
         const value = variables[aiName]
         console.log(`🔍 Found variable: "${aiName}" = "${value}"`)
-        
+
         if (paramPath === 'triggerAtHour' && params.rule?.interval) {
           // Handle the specific structure: rule.interval[0].triggerAtHour
           if (Array.isArray(params.rule.interval) && params.rule.interval[0]) {
@@ -331,27 +331,27 @@ export class N8NWorkflowCloner {
     console.log('Node parameters before:', JSON.stringify(params, null, 2))
 
     // Handle generic HubSpot List variables (HubSpot List A, B, C, etc.)
-    const hubspotListVars = Object.keys(variables).filter(key => 
+    const hubspotListVars = Object.keys(variables).filter(key =>
       key.startsWith('HubSpot List ') && key.length <= 15 // A, B, C, etc.
     )
-    
+
     // Also handle generic list ID variables
-    const genericListVars = Object.keys(variables).filter(key => 
+    const genericListVars = Object.keys(variables).filter(key =>
       key.toLowerCase().includes('list') && key.toLowerCase().includes('id')
     )
 
     // Process both HubSpot list variables and generic list variables
     const allListVars = [...hubspotListVars, ...genericListVars]
-    
+
     for (const varName of allListVars) {
       const value = variables[varName]
       console.log(`🔍 Found list variable: "${varName}" = "${value}"`)
-      
+
       // Check if this variable should be applied to this specific node
-      const shouldApplyToThisNode = dynamicMappings && dynamicMappings[varName] 
+      const shouldApplyToThisNode = dynamicMappings && dynamicMappings[varName]
         ? dynamicMappings[varName].nodeId === node.id
         : true // If no dynamic mappings, apply to all nodes (legacy behavior)
-      
+
       if (shouldApplyToThisNode) {
         // Update the URL and query parameter value with n8n expressions
         if (params.url && params.queryParameters?.parameters) {
@@ -377,7 +377,7 @@ export class N8NWorkflowCloner {
     // Handle legacy specific names for backward compatibility
     const legacyMappings = {
       'HubSpot List ID for Demo Requests': 'demoListId',
-      'HubSpot List ID for Signups': 'signupListId', 
+      'HubSpot List ID for Signups': 'signupListId',
       'hubspotListId': 'listId',
       'hubspot_segment_id': 'segmentId',
       'hubspot_object_type': 'resource'
@@ -387,7 +387,7 @@ export class N8NWorkflowCloner {
       if (variables[aiName]) {
         const value = variables[aiName]
         console.log(`🔍 Found legacy variable: "${aiName}" = "${value}"`)
-        
+
         if (paramKey === 'demoListId' || paramKey === 'signupListId') {
           // Update the URL and query parameter value with n8n expressions
           if (params.url && params.queryParameters?.parameters) {
@@ -499,11 +499,11 @@ export class N8NWorkflowCloner {
     console.log('Node parameters before:', JSON.stringify(params, null, 2))
 
     // Handle generic Excel variables (Excel Workbook, Excel Sheet A, B, C, etc.)
-    const excelWorkbookVars = Object.keys(variables).filter(key => 
+    const excelWorkbookVars = Object.keys(variables).filter(key =>
       key === 'Excel Workbook' || key === 'Excel Workbook ID' || key === 'workbook'
     )
-    
-    const excelSheetVars = Object.keys(variables).filter(key => 
+
+    const excelSheetVars = Object.keys(variables).filter(key =>
       key.startsWith('Excel Sheet ') && key.length <= 15 || key === 'worksheet' // A, B, C, etc.
     )
 
@@ -511,7 +511,7 @@ export class N8NWorkflowCloner {
     for (const varName of excelWorkbookVars) {
       const value = variables[varName]
       console.log(`🔍 Found Excel workbook variable: "${varName}" = "${value}"`)
-      
+
       if (params.workbook !== undefined) {
         params.workbook = value
         injectedCount++
@@ -523,12 +523,12 @@ export class N8NWorkflowCloner {
     for (const varName of excelSheetVars) {
       const value = variables[varName]
       console.log(`🔍 Found Excel sheet variable: "${varName}" = "${value}"`)
-      
+
       // Check if this variable should be applied to this specific node
-      const shouldApplyToThisNode = dynamicMappings && dynamicMappings[varName] 
+      const shouldApplyToThisNode = dynamicMappings && dynamicMappings[varName]
         ? dynamicMappings[varName].nodeId === node.id
         : true // If no dynamic mappings, apply to all nodes (legacy behavior)
-      
+
       if (shouldApplyToThisNode && params.worksheet !== undefined) {
         params.worksheet = parseInt(value)
         injectedCount++
@@ -552,7 +552,7 @@ export class N8NWorkflowCloner {
       if (variables[aiName]) {
         const value = variables[aiName]
         console.log(`🔍 Found legacy variable: "${aiName}" = "${value}"`)
-        
+
         if (paramKey === 'workbook' && params.workbook !== undefined) {
           params.workbook = value
           injectedCount++
@@ -678,7 +678,7 @@ export class N8NWorkflowCloner {
     Object.keys(variables).forEach(variableName => {
       const variableValue = variables[variableName]
       console.log(`\n🔍 Looking for variable: "${variableName}" = "${variableValue}"`)
-      
+
       if (this.findAndReplaceInObject(params, variableName, variables)) {
         injectedCount++
         console.log(`✅ Successfully injected variable: ${variableName}`)
@@ -753,7 +753,7 @@ export class N8NWorkflowCloner {
 
     const valueLower = value.toLowerCase()
     const variableLower = variableName.toLowerCase()
-    
+
     // Check for direct matches
     if (valueLower === variableLower) {
       return true
@@ -762,8 +762,8 @@ export class N8NWorkflowCloner {
     // Check for partial matches
     const valueWords = valueLower.split(/[^a-z0-9]+/).filter(w => w.length > 2)
     const variableWords = variableLower.split(/[^a-z0-9]+/).filter(w => w.length > 2)
-    
-    const hasCommonWords = valueWords.some(vw => 
+
+    const hasCommonWords = valueWords.some(vw =>
       variableWords.some(vrw => vw.includes(vrw) || vrw.includes(vw))
     )
 
@@ -783,7 +783,7 @@ export class N8NWorkflowCloner {
     if (!workflow.meta) {
       workflow.meta = {}
     }
-    
+
     workflow.meta.templateCloned = true
     workflow.meta.clonedAt = new Date().toISOString()
     workflow.meta.variablesInjected = Object.keys(variables).length
@@ -826,7 +826,7 @@ export class N8NWorkflowCloner {
   generateWorkflowPreview(workflow: any, variables: Record<string, any>): string {
     const clonedWorkflow = JSON.parse(JSON.stringify(workflow))
     this.injectVariables(clonedWorkflow, variables)
-    
+
     return JSON.stringify(clonedWorkflow, null, 2)
   }
 
@@ -865,13 +865,13 @@ export class N8NWorkflowCloner {
     // For each variable, try to find where it should be injected
     Object.entries(variables).forEach(([variableName, variableValue]) => {
       console.log(`\n🔍 Analyzing variable: "${variableName}" = "${variableValue}"`)
-      
+
       // Skip if this variable was already injected by other methods
       if (this.wasVariableAlreadyInjected(params, variableName)) {
         console.log(`⏭️ Variable "${variableName}" already injected, skipping`)
         return
       }
-      
+
       // Skip if the parameter already has a non-expression value
       if (this.hasNonExpressionValue(params, variableName, variableValue)) {
         console.log(`⏭️ Variable "${variableName}" already has actual value, skipping`)
@@ -918,20 +918,20 @@ export class N8NWorkflowCloner {
    */
   private hasNonExpressionValue(params: any, variableName: string, variableValue: any): boolean {
     const paramString = JSON.stringify(params)
-    
+
     // Check if the parameter already contains the actual value (not an expression)
     const valueFormats = [
       `"${variableValue}"`,  // String format
       `${variableValue}`,    // Number format
       `"${String(variableValue)}"`  // Convert to string
     ]
-    
+
     for (const format of valueFormats) {
       if (paramString.includes(format) && !paramString.includes(`{{ $json.${variableName} }}`)) {
         return true
       }
     }
-    
+
     return false
   }
 
@@ -943,7 +943,7 @@ export class N8NWorkflowCloner {
     if (params.url && typeof params.url === 'string') {
       const numericIdPattern = /\/(\d+)\//
       const match = params.url.match(numericIdPattern)
-      
+
       if (match && this.isNumericVariable(variableValue)) {
         const oldId = match[1]
         params.url = params.url.replace(`/${oldId}/`, `/={{ $json.${variableName} }}/`)
@@ -978,17 +978,17 @@ export class N8NWorkflowCloner {
    */
   private tryInjectByParameterName(params: any, variableName: string, variableValue: any): { injected: boolean, description: string } {
     const variableLower = variableName.toLowerCase()
-    
+
     // Look for parameter names that match the variable name
     for (const [key, value] of Object.entries(params)) {
       const keyLower = key.toLowerCase()
-      
+
       // Direct name match
       if (keyLower === variableLower) {
         params[key] = variableValue
         return { injected: true, description: `Direct name match: ${key} → ${variableValue}` }
       }
-      
+
       // Partial name match
       if (keyLower.includes(variableLower) || variableLower.includes(keyLower)) {
         params[key] = variableValue
@@ -1005,14 +1005,14 @@ export class N8NWorkflowCloner {
   private tryInjectByValueMatching(params: any, variableName: string, variableValue: any): { injected: boolean, description: string } {
     // Look for exact value matches
     const paramString = JSON.stringify(params)
-    
+
     // Try different value formats
     const valueFormats = [
       `"${variableValue}"`,  // String format
       `${variableValue}`,    // Number format
       `"${String(variableValue)}"`  // Convert to string
     ]
-    
+
     for (const format of valueFormats) {
       if (paramString.includes(format)) {
         // Replace the exact value with the actual variable value
@@ -1030,12 +1030,12 @@ export class N8NWorkflowCloner {
    */
   private tryInjectByGenericPatterns(params: any, variableName: string, variableValue: any, node: any): { injected: boolean, description: string } {
     const variableLower = variableName.toLowerCase()
-    
+
     // Generic patterns for common variable types
     const patterns = [
       // List ID patterns
       { pattern: /listId|list_id|listid/i, paths: ['queryParameters.parameters[].value', 'listId', 'id'] },
-      // Workbook patterns  
+      // Workbook patterns
       { pattern: /workbook|work_book|workbookid/i, paths: ['workbook', 'fileId', 'spreadsheetId'] },
       // Worksheet patterns
       { pattern: /worksheet|work_sheet|sheet/i, paths: ['worksheet', 'sheetName', 'range'] },
@@ -1044,7 +1044,7 @@ export class N8NWorkflowCloner {
       // URL patterns
       { pattern: /url|endpoint|api/i, paths: ['url', 'endpoint', 'apiUrl'] }
     ]
-    
+
     for (const { pattern, paths } of patterns) {
       if (pattern.test(variableName)) {
         for (const path of paths) {
@@ -1055,10 +1055,10 @@ export class N8NWorkflowCloner {
         }
       }
     }
-    
+
     return { injected: false, description: 'No generic pattern match found' }
   }
-  
+
   /**
    * Try to inject at a specific path in the parameters
    */
@@ -1066,7 +1066,7 @@ export class N8NWorkflowCloner {
     try {
       const pathParts = path.split('.')
       let current = params
-      
+
       // Navigate to the parent object
       for (let i = 0; i < pathParts.length - 1; i++) {
         const part = pathParts[i]
@@ -1097,7 +1097,7 @@ export class N8NWorkflowCloner {
           current = current[part]
         }
       }
-      
+
       // Set the variable at the final path
       const finalPart = pathParts[pathParts.length - 1]
       if (current && current.hasOwnProperty(finalPart)) {
@@ -1111,7 +1111,7 @@ export class N8NWorkflowCloner {
     } catch (error) {
       console.log(`Error injecting at path ${path}:`, (error as Error).message)
     }
-    
+
     return { injected: false, description: `Path not found or not injectable: ${path}` }
   }
 
@@ -1165,7 +1165,7 @@ export class N8NWorkflowCloner {
  * Utility function to clone a workflow to n8n
  */
 export async function cloneWorkflowToN8N(
-  workflowJson: any, 
+  workflowJson: any,
   variables: Record<string, any>,
   n8nInstanceUrl?: string
 ): Promise<N8NCloneResult> {

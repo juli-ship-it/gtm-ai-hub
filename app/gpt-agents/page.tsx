@@ -12,11 +12,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Sidebar } from '@/components/sidebar'
 import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/database'
-import { 
-  Search, 
-  Filter, 
-  Grid, 
-  List, 
+import {
+  Search,
+  Filter,
+  Grid,
+  List,
   Settings,
   BarChart3,
   Users,
@@ -79,7 +79,7 @@ export default function GPTAgentsPage() {
                          agent.description?.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesCategory = categoryFilter === 'all' || agent.category === categoryFilter
     const matchesStatus = statusFilter === 'all' || agent.status === statusFilter
-    
+
     return matchesSearch && matchesCategory && matchesStatus
   })
 
@@ -111,7 +111,7 @@ export default function GPTAgentsPage() {
 
       // Use direct Supabase client instead of API route
       const supabase = createClient()
-      
+
       const { data, error } = await (supabase as any)
         .from('gpt_agent')
         .update({
@@ -134,8 +134,8 @@ export default function GPTAgentsPage() {
       console.log('✅ Supabase Success:', data)
 
       // Update the local state
-      setAgents(prevAgents => 
-        prevAgents.map(agent => 
+      setAgents(prevAgents =>
+        prevAgents.map(agent =>
           agent.id === updatedAgent.id ? { ...agent, ...data } : agent
         )
       )
@@ -152,7 +152,7 @@ export default function GPTAgentsPage() {
 
   const fetchGPTAgents = async () => {
     const supabase = createClient()
-    
+
     try {
       console.log('🔍 Fetching GPT agents from database...')
       const { data, error } = await supabase
@@ -190,7 +190,7 @@ export default function GPTAgentsPage() {
       <div className="min-h-screen bg-wl-bg">
         <div className="flex">
           <Sidebar />
-          <div className="flex-1 p-8">
+          <div className="flex-1 p-4 lg:p-8">
             <PageHeader
               title="GPT Agents"
               description="Manage and interact with your custom AI agents"
@@ -216,7 +216,7 @@ export default function GPTAgentsPage() {
             description="Manage and interact with your custom AI agents"
           >
             <div className="flex gap-2">
-              <Button 
+              <Button
                 variant="outline"
                 onClick={() => {
                   setLoading(true)
@@ -236,7 +236,7 @@ export default function GPTAgentsPage() {
 
 
           {/* Stats */}
-          <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="mb-6 lg:mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center">
@@ -279,7 +279,7 @@ export default function GPTAgentsPage() {
 
 
           {/* Filters */}
-          <div className="mb-8 flex flex-col sm:flex-row gap-4">
+          <div className="mb-6 lg:mb-8 flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-wl-muted" />
@@ -292,7 +292,7 @@ export default function GPTAgentsPage() {
               </div>
             </div>
             <Select value={categoryFilter} onValueChange={(value) => setCategoryFilter(value as CategoryFilter)}>
-              <SelectTrigger className="w-48">
+              <SelectTrigger className="w-full sm:w-48">
                 <Filter className="mr-2 h-4 w-4" />
                 <SelectValue placeholder="Filter by category" />
               </SelectTrigger>
@@ -305,7 +305,7 @@ export default function GPTAgentsPage() {
               </SelectContent>
             </Select>
             <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as StatusFilter)}>
-              <SelectTrigger className="w-48">
+              <SelectTrigger className="w-full sm:w-48">
                 <Filter className="mr-2 h-4 w-4" />
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
@@ -316,7 +316,7 @@ export default function GPTAgentsPage() {
                 <SelectItem value="maintenance">Maintenance</SelectItem>
               </SelectContent>
             </Select>
-            <div className="flex border border-gray-200 rounded-lg">
+            <div className="flex border border-gray-200 rounded-lg w-full sm:w-auto">
               <Button
                 variant={viewMode === 'grid' ? 'default' : 'ghost'}
                 size="sm"
@@ -342,8 +342,8 @@ export default function GPTAgentsPage() {
               <Bot className="h-12 w-12 text-red-500 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-wl-text mb-2">Database Error</h3>
               <p className="text-wl-muted mb-4">{error}</p>
-              <Button 
-                className="wl-button-primary" 
+              <Button
+                className="wl-button-primary"
                 onClick={() => {
                   setError(null)
                   setLoading(true)
@@ -371,8 +371,8 @@ export default function GPTAgentsPage() {
             </div>
           ) : (
             <div className={
-              viewMode === 'grid' 
-                ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' 
+              viewMode === 'grid'
+                ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6'
                 : 'space-y-4'
             }>
               {filteredAgents.map((agent) => (

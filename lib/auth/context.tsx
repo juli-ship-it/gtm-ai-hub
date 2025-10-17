@@ -38,16 +38,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const refreshUser = async () => {
     try {
       // Add timeout to prevent infinite loading
-      const timeoutPromise = new Promise((_, reject) => 
+      const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error('Auth timeout')), 10000)
       )
-      
+
       const sessionPromise = supabaseClient.auth.getSession()
       const { data: { session }, error: sessionError } = await Promise.race([
         sessionPromise,
         timeoutPromise
       ]) as any
-      
+
       if (sessionError) {
         setLoading(false)
         return
@@ -73,10 +73,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Mark as mounted to prevent hydration mismatch
     setMounted(true)
-    
+
     // Only run on client
     if (typeof window === 'undefined') return
-    
+
     refreshUser()
 
     const { data: { subscription } } = supabaseClient.auth.onAuthStateChange(
@@ -97,11 +97,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email,
         password,
       })
-      
+
       if (error) {
         return { error }
       }
-      
+
       return { error: null }
     } catch (error) {
       return { error }
@@ -114,10 +114,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (RESTRICT_TO_DOMAINS && ALLOWED_DOMAINS.length > 0) {
         const emailDomain = email.split('@')[1]
         if (!ALLOWED_DOMAINS.includes(emailDomain)) {
-          return { 
-            error: { 
-              message: `Signup is restricted to workleap.com email addresses only.` 
-            } 
+          return {
+            error: {
+              message: `Signup is restricted to workleap.com email addresses only.`
+            }
           }
         }
       }

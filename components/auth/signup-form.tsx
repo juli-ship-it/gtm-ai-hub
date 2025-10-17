@@ -47,7 +47,7 @@ export function SignupForm() {
 
     try {
       const { error } = await signUp(email, password)
-      
+
       if (error) {
         setError(error.message || 'An error occurred during signup')
       } else {

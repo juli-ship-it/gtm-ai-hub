@@ -72,33 +72,33 @@
 @layer components {
   /* Workleap-inspired component styles */
   .wl-card {
-    @apply bg-wl-card rounded-2xl shadow-wl border border-gray-100;
+    @apply bg-wl-card rounded-xl lg:rounded-2xl shadow-wl border border-gray-100;
   }
-  
+
   .wl-card-hover {
     @apply wl-card transition-all duration-200 hover:shadow-wl-lg hover:-translate-y-0.5;
   }
-  
+
   .wl-button-primary {
-    @apply bg-wl-accent hover:opacity-90 text-white font-medium px-6 py-3 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-wl-accent focus:ring-opacity-50 focus:ring-offset-2;
+    @apply bg-wl-accent hover:opacity-90 text-white font-medium px-4 lg:px-6 py-2 lg:py-3 rounded-lg lg:rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-wl-accent focus:ring-opacity-50 focus:ring-offset-2;
   }
-  
+
   .wl-button-secondary {
-    @apply bg-white hover:bg-gray-50 text-wl-accent border border-wl-accent font-medium px-6 py-3 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-wl-accent focus:ring-opacity-50 focus:ring-offset-2;
+    @apply bg-white hover:bg-gray-50 text-wl-accent border border-wl-accent font-medium px-4 lg:px-6 py-2 lg:py-3 rounded-lg lg:rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-wl-accent focus:ring-opacity-50 focus:ring-offset-2;
   }
-  
+
   .wl-input {
-    @apply w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-wl-accent focus:ring-opacity-50 focus:border-wl-accent transition-colors duration-200;
+    @apply w-full px-3 lg:px-4 py-2 lg:py-3 border border-gray-200 rounded-lg lg:rounded-xl focus:outline-none focus:ring-2 focus:ring-wl-accent focus:ring-opacity-50 focus:border-wl-accent transition-colors duration-200;
   }
-  
+
   .wl-text-gradient {
     @apply bg-gradient-to-r from-wl-accent to-wl-accent-2 bg-clip-text text-transparent;
   }
-  
+
   .wl-hand-drawn {
     @apply relative;
   }
-  
+
   .wl-hand-drawn::after {
     content: '';
     @apply absolute -top-1 -right-1 w-2 h-2 bg-wl-accent-2 rounded-full opacity-60;
@@ -108,63 +108,63 @@
   .hr-university-card {
     @apply bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-1;
   }
-  
+
   .hr-university-badge {
     @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
   }
-  
+
   .hr-university-badge-beginner {
     @apply bg-green-100 text-green-800;
   }
-  
+
   .hr-university-badge-intermediate {
     @apply bg-yellow-100 text-yellow-800;
   }
-  
+
   .hr-university-badge-advanced {
     @apply bg-red-100 text-red-800;
   }
-  
+
   .hr-university-badge-ethics {
     @apply bg-purple-100 text-purple-800;
   }
-  
+
   .hr-university-progress {
     @apply w-full bg-gray-200 rounded-full h-2 overflow-hidden;
   }
-  
+
   .hr-university-progress-bar {
     @apply h-full bg-gradient-to-r from-wl-accent to-wl-accent-2 transition-all duration-500 ease-out;
   }
-  
+
   .hr-university-lesson-card {
     @apply flex items-center space-x-3 p-4 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors duration-200;
   }
-  
+
   .hr-university-lesson-card-completed {
     @apply bg-green-50 border-green-200;
   }
-  
+
   .hr-university-quiz-option {
     @apply flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors duration-200;
   }
-  
+
   .hr-university-quiz-option-selected {
     @apply border-wl-accent bg-blue-50;
   }
-  
+
   .hr-university-quiz-option-correct {
     @apply border-green-500 bg-green-50;
   }
-  
+
   .hr-university-quiz-option-incorrect {
     @apply border-red-500 bg-red-50;
   }
-  
+
   .hr-university-stats-card {
     @apply bg-white rounded-xl p-6 shadow-sm border border-gray-100;
   }
-  
+
   .hr-university-hero {
     @apply bg-gradient-to-br from-wl-accent/5 via-wl-accent-2/5 to-transparent rounded-3xl p-8;
   }
@@ -199,4 +199,24 @@
 
 .animate-slide-in {
   animation: slide-in 0.3s ease-out;
+}
+
+/* Mobile-specific utilities */
+@media (max-width: 640px) {
+  .mobile-scroll {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mobile-text-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+
+  .mobile-p-2 {
+    padding: 0.5rem;
+  }
+
+  .mobile-gap-2 {
+    gap: 0.5rem;
+  }
 }

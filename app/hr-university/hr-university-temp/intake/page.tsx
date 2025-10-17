@@ -59,7 +59,7 @@ export default function HRIntakePage() {
             <CheckCircle className="h-16 w-16 text-green-600 mx-auto" />
             <h3 className="text-2xl font-semibold text-gray-900">Request Submitted Successfully!</h3>
             <p className="text-gray-600 max-w-md mx-auto">
-              Your module request has been received and will be reviewed by our team. 
+              Your module request has been received and will be reviewed by our team.
               We'll notify you when we start working on it or if we need more information.
             </p>
             <div className="flex space-x-4 justify-center">

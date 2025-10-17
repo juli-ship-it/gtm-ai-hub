@@ -8,12 +8,12 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { 
-  Upload, 
-  FileText, 
-  Settings, 
-  Play, 
-  CheckCircle, 
+import {
+  Upload,
+  FileText,
+  Settings,
+  Play,
+  CheckCircle,
   AlertCircle,
   X,
   Plus,
@@ -109,7 +109,7 @@ export function TemplateCreationForm({ template, onSuccess, onCancel }: Template
         howToUseVideoUrl: template.how_to_use_video_url || '',
         howItWasBuiltVideoUrl: template.how_it_was_built_video_url || ''
       })
-      
+
       // If template has workflow data, populate it
       if (template.n8n_workflow_json) {
         setOriginalWorkflowJson(template.n8n_workflow_json as any)
@@ -130,16 +130,16 @@ export function TemplateCreationForm({ template, onSuccess, onCancel }: Template
     try {
       const content = await file.text()
       const originalWorkflow = JSON.parse(content)
-      
+
       setWorkflowFile(file)
       setOriginalWorkflowJson(originalWorkflow)
-      
+
       // Run basic analysis for immediate feedback
       const analysis = parseN8NWorkflow(content)
       const smartAnalysis = parseSmartWorkflow(content)
       setWorkflowAnalysis(analysis)
       setSmartAnalysis(smartAnalysis)
-      
+
       // Auto-populate basic form data
       setFormData(prev => ({
         ...prev,
@@ -150,7 +150,7 @@ export function TemplateCreationForm({ template, onSuccess, onCancel }: Template
         tags: [],
         executionInstructions: 'Upload your workflow and click "Analyze with AI" to get detailed instructions and variable extraction.'
       }))
-      
+
       setError(null)
     } catch (err) {
       setError('Invalid n8n workflow file. Please check the JSON format.')
@@ -169,12 +169,12 @@ export function TemplateCreationForm({ template, onSuccess, onCancel }: Template
 
     try {
       const content = JSON.stringify(originalWorkflowJson)
-      
+
       // Run AI analysis
       const aiAnalysis = await analyzeWorkflowWithAI(content)
       setAiAnalysis(aiAnalysis)
       setDetectedVariables(aiAnalysis.detectedVariables.map(convertAIVariable))
-      
+
       // Auto-populate form data from AI analysis
       setFormData(prev => ({
         ...prev,
@@ -185,7 +185,7 @@ export function TemplateCreationForm({ template, onSuccess, onCancel }: Template
         tags: aiAnalysis.systems,
         executionInstructions: `Step-by-Step Instructions:\n\n1. Initial Setup\n• Review the workflow requirements and variables\n• Ensure you have access to all required systems\n• Gather necessary credentials and API keys\n\n2. Configuration\n• Configure schedule settings (if applicable)\n• Set up data source connections (${aiAnalysis.systems.filter(s => s !== 'scheduler').join(', ')})\n• Configure data destination settings (Excel, Google Sheets, etc.)\n• Set up notification preferences\n\n3. Variable Configuration\n• Fill in all required template variables\n• Test connections to external systems\n• Verify data mapping and transformations\n\n4. Testing & Deployment\n• Run the workflow in test mode\n• Verify data output and format\n• Set up monitoring and alerts\n• Deploy to production environment\n\n5. Maintenance\n• Monitor workflow performance\n• Update credentials as needed\n• Review and optimize data processing\n• Keep documentation up to date\n\nBusiness Logic:\n${aiAnalysis.businessLogic}\n\nAI Insights:\n${aiAnalysis.aiInsights.map(insight => `• ${insight}`).join('\n')}\n\nSystems Used: ${aiAnalysis.systems.join(', ')}`
       }))
-      
+
     } catch (err) {
       setError('AI analysis failed. Please try again.')
       console.error('AI analysis error:', err)
@@ -221,8 +221,8 @@ export function TemplateCreationForm({ template, onSuccess, onCancel }: Template
   }
 
   const updateCustomVariable = (index: number, field: keyof DetectedVariable, value: any) => {
-    setCustomVariables(prev => 
-      prev.map((variable, i) => 
+    setCustomVariables(prev =>
+      prev.map((variable, i) =>
         i === index ? { ...variable, [field]: value } : variable
       )
     )
@@ -261,7 +261,7 @@ export function TemplateCreationForm({ template, onSuccess, onCancel }: Template
 
     try {
       const supabase = createClient()
-      
+
       // Get current user
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
@@ -379,7 +379,7 @@ export function TemplateCreationForm({ template, onSuccess, onCancel }: Template
             validation_rules: variable.validation || null,
             order_index: index
           }))
-          
+
 
           const { error: variablesError } = await (supabase as any)
             .from('template_variable')
@@ -424,14 +424,14 @@ export function TemplateCreationForm({ template, onSuccess, onCancel }: Template
               <FileText className="h-8 w-8 text-green-500" />
               <span className="font-medium">{workflowFile.name}</span>
             </div>
-            
+
             {isAnalyzing && (
               <div className="flex items-center justify-center space-x-2 text-blue-600">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
                 <span className="text-sm">AI is analyzing your workflow...</span>
               </div>
             )}
-            
+
             {aiAnalysis && !isAnalyzing && (
               <div className="flex items-center justify-center space-x-2 text-green-600">
                 <CheckCircle className="h-4 w-4" />
@@ -546,7 +546,7 @@ export function TemplateCreationForm({ template, onSuccess, onCancel }: Template
                     aiAnalysis.businessLogic.split('\n').map((line, index) => {
                       const trimmedLine = line.trim()
                       if (!trimmedLine) return null
-                      
+
                       if (trimmedLine.startsWith('•') || trimmedLine.startsWith('-')) {
                         return (
                           <div key={index} className="flex items-start">
@@ -706,7 +706,7 @@ export function TemplateCreationForm({ template, onSuccess, onCancel }: Template
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="col-span-2">
+                <div className="lg:col-span-2">
                   <label className="text-sm font-medium">Description</label>
                   <Input
                     value={variable.description}
@@ -748,7 +748,7 @@ export function TemplateCreationForm({ template, onSuccess, onCancel }: Template
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
         <div>
           <label className="text-sm font-medium">Template Name</label>
           <Input
@@ -774,7 +774,7 @@ export function TemplateCreationForm({ template, onSuccess, onCancel }: Template
             </SelectContent>
           </Select>
         </div>
-        <div className="col-span-2">
+        <div className="lg:col-span-2">
           <label className="text-sm font-medium">Description</label>
           <Textarea
             value={formData.description}
@@ -808,7 +808,7 @@ export function TemplateCreationForm({ template, onSuccess, onCancel }: Template
             min="1"
           />
         </div>
-        <div className="col-span-2">
+        <div className="lg:col-span-2">
           <label className="text-sm font-medium">Execution Instructions</label>
           <Textarea
             value={formData.executionInstructions}
@@ -817,7 +817,7 @@ export function TemplateCreationForm({ template, onSuccess, onCancel }: Template
             rows={3}
           />
         </div>
-        <div className="col-span-2">
+        <div className="lg:col-span-2">
           <label className="text-sm font-medium">Tags</label>
           <div className="space-y-2">
             <div className="flex space-x-2">
@@ -846,7 +846,7 @@ export function TemplateCreationForm({ template, onSuccess, onCancel }: Template
             </div>
           </div>
         </div>
-        <div className="col-span-2">
+        <div className="lg:col-span-2">
           <label className="text-sm font-medium">How to Use Video URL (Loom)</label>
           <Input
             value={formData.howToUseVideoUrl}
@@ -858,7 +858,7 @@ export function TemplateCreationForm({ template, onSuccess, onCancel }: Template
             Add a Loom video showing how to use this template
           </p>
         </div>
-        <div className="col-span-2">
+        <div className="lg:col-span-2">
           <label className="text-sm font-medium">How it was Built Video URL (Loom)</label>
           <Input
             value={formData.howItWasBuiltVideoUrl}
@@ -925,7 +925,7 @@ export function TemplateCreationForm({ template, onSuccess, onCancel }: Template
               <p className="text-sm font-medium">Duration</p>
               <p className="text-sm">{formData.estimatedDuration} minutes</p>
             </div>
-            <div className="col-span-2">
+            <div className="lg:col-span-2">
               <p className="text-sm font-medium">Description</p>
               <p className="text-sm">{formData.description}</p>
             </div>
@@ -948,10 +948,10 @@ export function TemplateCreationForm({ template, onSuccess, onCancel }: Template
   )
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto p-2 sm:p-0">
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold">{template ? 'Edit Template' : 'Create Template'}</h2>
+          <h2 className="text-xl sm:text-2xl font-bold">{template ? 'Edit Template' : 'Create Template'}</h2>
           <div className="text-sm text-gray-500">
             Step {currentStep} of {totalSteps}
           </div>
@@ -973,14 +973,14 @@ export function TemplateCreationForm({ template, onSuccess, onCancel }: Template
         </CardContent>
       </Card>
 
-      <div className="flex justify-between mt-6">
+      <div className="flex flex-col sm:flex-row justify-between gap-4 mt-6">
         <Button
           variant="outline"
           onClick={() => currentStep > 1 ? setCurrentStep(currentStep - 1) : onCancel?.()}
         >
           {currentStep > 1 ? 'Previous' : 'Cancel'}
         </Button>
-        <div className="flex space-x-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           {currentStep < totalSteps ? (
             <Button
               onClick={() => setCurrentStep(currentStep + 1)}

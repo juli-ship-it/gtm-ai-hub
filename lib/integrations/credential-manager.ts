@@ -74,7 +74,7 @@ export class CredentialManager {
    */
   private createCredentialTemplate(credType: string, credName: string, node: any): CredentialTemplate {
     const template = this.getCredentialTemplateDefinition(credType)
-    
+
     return {
       id: `${node.id}-${credType}`,
       name: credName,
@@ -382,13 +382,13 @@ export class CredentialManager {
 
     // Apply credentials to workflow
     const workflowWithCredentials = JSON.parse(JSON.stringify(workflow))
-    
+
     workflowWithCredentials.nodes?.forEach((node: any) => {
       if (node.credentials) {
         Object.keys(node.credentials).forEach(credType => {
           const credentialKey = `${node.id}-${credType}`
           const credentialValues = credentialMap.get(credentialKey)
-          
+
           if (credentialValues) {
             // Replace credential reference with actual values
             node.credentials[credType] = credentialValues

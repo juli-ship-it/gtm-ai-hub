@@ -14,12 +14,12 @@ interface EmptyStateProps {
   className?: string
 }
 
-export function EmptyState({ 
-  icon: Icon, 
-  title, 
-  description, 
+export function EmptyState({
+  icon: Icon,
+  title,
+  description,
   action,
-  className 
+  className
 }: EmptyStateProps) {
   return (
     <Card className={cn("wl-card", className)}>

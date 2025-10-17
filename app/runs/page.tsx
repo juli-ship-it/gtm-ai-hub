@@ -9,10 +9,10 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { StatusBadge } from '@/components/status-badge'
 import { Sidebar } from '@/components/sidebar'
-import { 
-  Search, 
-  Filter, 
-  Download, 
+import {
+  Search,
+  Filter,
+  Download,
   RefreshCw,
   Clock,
   User,
@@ -36,7 +36,7 @@ export default function RunsPage() {
   useEffect(() => {
     const fetchRuns = async () => {
       const supabase = createClient()
-      
+
       try {
         const { data, error } = await supabase
           .from('template_run')
@@ -66,24 +66,24 @@ export default function RunsPage() {
   }, [])
 
   const filteredRuns = runs.filter(run => {
-    const matchesSearch = 
+    const matchesSearch =
       run.template?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       run.triggered_by_user?.email?.toLowerCase().includes(searchTerm.toLowerCase())
-    
+
     const matchesStatus = statusFilter === 'all' || run.status === statusFilter
-    
+
     return matchesSearch && matchesStatus
   })
 
   const formatDuration = (startedAt: string, finishedAt: string | null) => {
     if (!finishedAt) return 'Running...'
-    
+
     const start = new Date(startedAt)
     const end = new Date(finishedAt)
     const diffMs = end.getTime() - start.getTime()
     const diffMins = Math.floor(diffMs / 60000)
     const diffSecs = Math.floor((diffMs % 60000) / 1000)
-    
+
     return `${diffMins}m ${diffSecs}s`
   }
 
@@ -193,7 +193,7 @@ export default function RunsPage() {
                             <FileText className="h-5 w-5 text-wl-accent" />
                           </div>
                         </div>
-                        
+
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center space-x-3 mb-1">
                             <h4 className="font-medium text-wl-text truncate">
@@ -201,7 +201,7 @@ export default function RunsPage() {
                             </h4>
                             <StatusBadge status={run.status} />
                           </div>
-                          
+
                           <div className="flex items-center space-x-4 text-sm text-wl-muted">
                             <div className="flex items-center space-x-1">
                               <User className="h-4 w-4" />
@@ -216,13 +216,13 @@ export default function RunsPage() {
                             <span>•</span>
                             <span>{formatDuration(run.started_at, run.finished_at)}</span>
                           </div>
-                          
+
                           {run.error_message && (
                             <div className="mt-2 text-sm text-red-600 bg-red-50 p-2 rounded-lg">
                               {run.error_message}
                             </div>
                           )}
-                          
+
                           {run.artifacts && (
                             <div className="mt-2 flex items-center space-x-2">
                               <Badge variant="outline" className="text-xs">
@@ -247,7 +247,7 @@ export default function RunsPage() {
                           )}
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center space-x-2">
                         <Button variant="ghost" size="sm">
                           <Eye className="h-4 w-4" />
