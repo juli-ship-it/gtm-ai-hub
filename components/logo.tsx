@@ -11,7 +11,7 @@ interface LogoProps {
 export function Logo({ size = 'md', showText = true, className = '' }: LogoProps) {
   const sizeClasses = {
     sm: 'w-8 h-8',
-    md: 'w-12 h-12', 
+    md: 'w-12 h-12',
     lg: 'w-16 h-16',
     xl: 'w-20 h-20'
   }
@@ -19,24 +19,24 @@ export function Logo({ size = 'md', showText = true, className = '' }: LogoProps
   const textSizeClasses = {
     sm: 'text-lg',
     md: 'text-xl',
-    lg: 'text-2xl', 
+    lg: 'text-2xl',
     xl: 'text-3xl'
   }
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
   const logoUrl = supabaseUrl ? `${supabaseUrl}/storage/v1/object/public/assets/Workleap_Symbol_blue_4x.png` : '/logo-placeholder.png'
-  
+
   return (
     <div className={`flex items-center space-x-3 ${className}`}>
       {/* Workleap Logo */}
       <div className={`${sizeClasses[size]} relative`}>
-        <img 
+        <img
           src={logoUrl}
           alt="Workleap Logo"
           className="w-full h-full object-contain"
         />
       </div>
-      
+
       {/* Logo Text */}
       {showText && (
         <div className="flex flex-col">

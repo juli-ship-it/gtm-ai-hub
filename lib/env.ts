@@ -13,7 +13,7 @@ export function validateEnv() {
   ]
 
   const missing = required.filter(key => !process.env[key])
-  
+
   if (missing.length > 0) {
     console.warn(`Missing environment variables: ${missing.join(', ')}`)
     // Don't throw in production to allow builds to complete

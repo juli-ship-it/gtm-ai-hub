@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { 
+import {
   ExternalLink,
   Copy,
   CheckCircle,
@@ -36,9 +36,9 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
 
   // Initialize user variables with defaults
   useEffect(() => {
-    
+
     const initialVariables: Record<string, any> = {}
-    
+
     if (template.template_variables && template.template_variables.length > 0) {
       template.template_variables.forEach(variable => {
         console.log('Processing variable:', variable.name, 'type:', variable.type, 'category:', (variable as any).category)
@@ -68,7 +68,7 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
         }
       })
     }
-    
+
     setUserVariables(initialVariables)
   }, [template.template_variables])
 
@@ -105,10 +105,10 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
     setCloneResult(null)
 
     try {
-      
+
       // Clone the workflow with user's variables
       const result = await cloneWorkflowToN8N(template.n8n_workflow_json, userVariables)
-      
+
       console.log('Clone result:', result)
       setCloneResult(result)
     } catch (err) {
@@ -163,7 +163,7 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
                       <Badge variant="outline">{variable.type}</Badge>
                       {varWithExtras.category && <Badge variant="secondary">{varWithExtras.category}</Badge>}
                     </div>
-                    
+
                     {variable.description && (
                       <p className="text-sm text-gray-600">{variable.description}</p>
                     )}
@@ -395,7 +395,7 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
                 </p>
               </div>
             </div>
-            
+
             <div className="bg-blue-50 p-4 rounded-lg">
               <h4 className="font-medium text-blue-900 mb-2">What happens next:</h4>
               <ul className="text-sm text-blue-800 space-y-1">
@@ -405,7 +405,7 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
                 <li>• You can modify values in n8n if needed</li>
               </ul>
             </div>
-            
+
             <div className="flex justify-end space-x-2">
               <Button variant="outline" onClick={() => setCloneResult(null)}>
                 Configure Again

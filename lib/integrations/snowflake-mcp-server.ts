@@ -207,10 +207,10 @@ export class SnowflakeMCPServer {
 
     // Execute query (mock implementation)
     const startTime = Date.now()
-    
+
     // Simulate query execution
     await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000))
-    
+
     const executionTime = Date.now() - startTime
 
     return {
@@ -265,7 +265,7 @@ export class SnowflakeMCPServer {
 
   private async handleListDatabases() {
     const databases = ['PROD_DB', 'STAGING_DB', 'DEV_DB', 'ANALYTICS_DB']
-    
+
     return {
       content: [
         {
@@ -279,7 +279,7 @@ export class SnowflakeMCPServer {
   private async handleListSchemas(args: any) {
     const { database } = args
     const schemas = ['PUBLIC', 'ANALYTICS', 'STAGING', 'RAW']
-    
+
     return {
       content: [
         {
@@ -293,7 +293,7 @@ export class SnowflakeMCPServer {
   private async handleListTables(args: any) {
     const { database, schema } = args
     const tables = ['CUSTOMERS', 'ORDERS', 'PRODUCTS', 'INVENTORY', 'SALES']
-    
+
     return {
       content: [
         {

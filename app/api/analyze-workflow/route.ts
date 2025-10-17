@@ -11,12 +11,12 @@ if (process.env.NODE_ENV === 'development') {
 function createAnalysisPrompt(workflow: any): string {
   const nodes = workflow.nodes || []
   const connections = workflow.connections || {}
-  
+
   return `You are an expert n8n workflow analyst. Analyze this n8n workflow and extract ALL configurable business variables that users need to set up. Return ONLY a JSON object with this exact structure:
 
 {
   "workflowName": "string",
-  "workflowDescription": "string", 
+  "workflowDescription": "string",
   "businessLogic": "string",
   "detectedVariables": [
     {
@@ -106,7 +106,7 @@ Extract ALL configurable variables that users need to set up. Use the actual par
 export async function POST(request: NextRequest) {
   try {
     const { workflowJson } = await request.json()
-    
+
     if (!workflowJson) {
       return NextResponse.json({ error: 'Workflow JSON is required' }, { status: 400 })
     }
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
     // Check Supabase configuration
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-    
+
     if (!supabaseUrl || !supabaseServiceKey) {
       console.error('❌ Supabase configuration missing')
       return NextResponse.json({ error: 'Supabase configuration missing' }, { status: 500 })
@@ -132,13 +132,13 @@ export async function POST(request: NextRequest) {
 
     // Create Supabase client - try without custom fetch first
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
-    
+
     // Create the analysis prompt using structured approach
     const analysisPrompt = createAnalysisPrompt(workflow)
-    
-    
+
+
     const { data, error } = await supabase.functions.invoke('analyze-workflow', {
-      body: { 
+      body: {
         prompt: analysisPrompt,
         workflow: workflow
       }

@@ -5,10 +5,10 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Sidebar } from '@/components/sidebar'
-import { 
-  Search, 
-  Filter, 
-  Play, 
+import {
+  Search,
+  Filter,
+  Play,
   Clock,
   Users,
   Target,
@@ -138,7 +138,7 @@ export default function PlaybooksPage() {
                     </Badge>
                   </div>
                 </CardHeader>
-                
+
                 <CardContent className="space-y-6">
                   {/* Templates Included */}
                   <div>
@@ -152,7 +152,7 @@ export default function PlaybooksPage() {
                       ))}
                     </div>
                   </div>
-                  
+
                   {/* Human Steps */}
                   <div>
                     <h4 className="font-medium text-wl-text mb-2">Human Checkpoints</h4>
@@ -164,7 +164,7 @@ export default function PlaybooksPage() {
                       <span>{playbook.estimatedTime}</span>
                     </div>
                   </div>
-                  
+
                   {/* KPIs */}
                   <div>
                     <h4 className="font-medium text-wl-text mb-2">Key Metrics</h4>
@@ -179,7 +179,7 @@ export default function PlaybooksPage() {
                       ))}
                     </div>
                   </div>
-                  
+
                   {/* Stats */}
                   <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-100">
                     <div className="text-center">
@@ -197,7 +197,7 @@ export default function PlaybooksPage() {
                       <p className="text-xs text-wl-muted">Last Run</p>
                     </div>
                   </div>
-                  
+
                   {/* Actions */}
                   <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                     <div className="flex items-center text-sm text-wl-muted">
@@ -208,8 +208,8 @@ export default function PlaybooksPage() {
                       <Button variant="ghost" size="sm">
                         View Details
                       </Button>
-                      <Button 
-                        size="sm" 
+                      <Button
+                        size="sm"
                         className="wl-button-primary group-hover:shadow-lg transition-all duration-200"
                       >
                         <Play className="mr-2 h-4 w-4" />

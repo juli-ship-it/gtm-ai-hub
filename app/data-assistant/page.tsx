@@ -18,7 +18,7 @@ export default function DataAssistantPage() {
             title="Data Assistant"
             description="Ask questions about your data in natural language. Query across 8 connected data sources including Intercom, HubSpot, Gong, Mixpanel, Crayon, Clay, and Snowflake."
           />
-          
+
           <div className="h-[calc(100vh-200px)]">
             <DataChatbot />
           </div>

@@ -20,10 +20,10 @@ const statusConfig = {
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {
   const config = statusConfig[status]
-  
+
   return (
-    <Badge 
-      variant={config.variant} 
+    <Badge
+      variant={config.variant}
       className={cn("font-medium", className)}
     >
       {config.label}

@@ -3,9 +3,9 @@ import { N8NWorkflow } from './n8n-workflow-parser'
 
 export async function analyzeWorkflowWithOpenAI(workflowJson: string): Promise<any> {
   const workflow: N8NWorkflow = JSON.parse(workflowJson)
-  
+
   const prompt = createOpenAIPrompt(workflow)
-  
+
   try {
     const response = await fetch('/api/analyze-workflow', {
       method: 'POST',
@@ -17,11 +17,11 @@ export async function analyzeWorkflowWithOpenAI(workflowJson: string): Promise<a
         workflow: workflow
       })
     })
-    
+
     if (!response.ok) {
       throw new Error(`OpenAI API error: ${response.status}`)
     }
-    
+
     const result = await response.json()
     return result
   } catch (error) {
@@ -33,7 +33,7 @@ export async function analyzeWorkflowWithOpenAI(workflowJson: string): Promise<a
 function createOpenAIPrompt(workflow: N8NWorkflow): string {
   const nodes = workflow.nodes || []
   const connections = workflow.connections || {}
-  
+
   return `
 You are an expert workflow analyst. Analyze this n8n workflow and extract business-relevant variables that users would need to configure.
 
@@ -53,7 +53,7 @@ Analyze this workflow and identify business-relevant variables that users would 
 
 Focus on:
 - Schedule settings (when to run)
-- Data source identifiers (list IDs, API endpoints) 
+- Data source identifiers (list IDs, API endpoints)
 - Data destination settings (file paths, sheet names)
 - Filtering criteria (what data to include)
 - Mapping settings (how to transform data)

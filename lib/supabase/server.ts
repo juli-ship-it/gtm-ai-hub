@@ -1,4 +1,5 @@
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import type { Database } from '@/types/database'
@@ -22,5 +23,8 @@ export const createServiceSupabase = () => {
   })
 }
 
-// Export createClient for backward compatibility
-export const createClient = createServiceSupabase
+// For API routes that need user authentication
+export const createClient = () => {
+  const cookieStore = cookies()
+  return createRouteHandlerClient<Database>({ cookies: () => cookieStore })
+}

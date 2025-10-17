@@ -101,12 +101,12 @@ export default function HRModulesPage() {
   }
 
   const filteredModules = mockModules.filter(module => {
-    const matchesSearch = !searchTerm || 
+    const matchesSearch = !searchTerm ||
       module.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       module.description.toLowerCase().includes(searchTerm.toLowerCase())
-    
+
     const matchesDifficulty = difficultyFilter === 'all' || module.difficulty === difficultyFilter
-    const matchesStatus = statusFilter === 'all' || 
+    const matchesStatus = statusFilter === 'all' ||
       (statusFilter === 'completed' && module.progress === 100) ||
       (statusFilter === 'in_progress' && module.progress > 0 && module.progress < 100) ||
       (statusFilter === 'not_started' && module.progress === 0)
@@ -135,7 +135,7 @@ export default function HRModulesPage() {
               />
             </div>
           </div>
-          
+
           <div className="flex gap-4">
             <Select value={difficultyFilter} onValueChange={setDifficultyFilter}>
               <SelectTrigger className="w-40">
@@ -221,7 +221,7 @@ export default function HRModulesPage() {
                 <Link href={`/app/hr-university/modules/${module.id}`}>
                   <Button className="w-full flex items-center justify-center space-x-2">
                     <span>
-                      {module.progress === 100 ? 'Review Module' : 
+                      {module.progress === 100 ? 'Review Module' :
                        module.progress > 0 ? 'Continue Learning' : 'Start Module'}
                     </span>
                     <ArrowRight className="h-4 w-4" />

@@ -367,7 +367,7 @@ export class MixpanelMCPSecurity {
       if (typeof key !== 'string' || key.length > 255) {
         return false
       }
-      
+
       if (typeof value === 'object' && value !== null) {
         return false // No nested objects allowed
       }
@@ -382,17 +382,17 @@ export class MixpanelMCPSecurity {
 
   static sanitizeProperties(properties: Record<string, any>): Record<string, any> {
     const sanitized: Record<string, any> = {}
-    
+
     for (const [key, value] of Object.entries(properties)) {
       const sanitizedKey = key.replace(/[^a-zA-Z0-9_\-\.]/g, '_').substring(0, 255)
-      
+
       if (typeof value === 'object' && value !== null) {
         continue // Skip nested objects
       }
-      
+
       sanitized[sanitizedKey] = value
     }
-    
+
     return sanitized
   }
 }

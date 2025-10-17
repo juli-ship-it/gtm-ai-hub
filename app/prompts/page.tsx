@@ -5,10 +5,10 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Sidebar } from '@/components/sidebar'
-import { 
-  Search, 
-  Filter, 
-  Plus, 
+import {
+  Search,
+  Filter,
+  Plus,
   Copy,
   Edit,
   MessageSquare,
@@ -164,19 +164,19 @@ export default function PromptsPage() {
                     </div>
                   </div>
                 </CardHeader>
-                
+
                 <CardContent className="space-y-4">
                   {/* Prompt Body */}
                   <div>
                     <h4 className="font-medium text-wl-text mb-2">Prompt</h4>
                     <div className="bg-gray-50 rounded-lg p-3 text-sm text-wl-muted font-mono">
-                      {prompt.body.length > 200 
-                        ? `${prompt.body.substring(0, 200)}...` 
+                      {prompt.body.length > 200
+                        ? `${prompt.body.substring(0, 200)}...`
                         : prompt.body
                       }
                     </div>
                   </div>
-                  
+
                   {/* Tags */}
                   <div>
                     <h4 className="font-medium text-wl-text mb-2">Tags</h4>
@@ -189,7 +189,7 @@ export default function PromptsPage() {
                       ))}
                     </div>
                   </div>
-                  
+
                   {/* Stats */}
                   <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-100">
                     <div className="text-center">
@@ -203,7 +203,7 @@ export default function PromptsPage() {
                       <p className="text-xs text-wl-muted">Created</p>
                     </div>
                   </div>
-                  
+
                   {/* Metadata */}
                   <div className="flex items-center justify-between pt-4 border-t border-gray-100 text-sm text-wl-muted">
                     <div className="flex items-center space-x-1">
@@ -215,7 +215,7 @@ export default function PromptsPage() {
                       <span>Updated 2 days ago</span>
                     </div>
                   </div>
-                  
+
                   {/* Actions */}
                   <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                     <Button variant="ghost" size="sm">

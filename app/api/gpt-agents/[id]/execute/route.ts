@@ -8,9 +8,9 @@ export async function POST(
   try {
     const body = await request.json()
     const client = createGPTAgentClient()
-    
+
     const response = await client.executeAgent(params.id, body)
-    
+
     return NextResponse.json(response)
   } catch (error) {
     console.error('Error executing GPT agent:', error)

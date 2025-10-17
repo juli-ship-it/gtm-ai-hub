@@ -560,23 +560,23 @@ export const DATA_SOURCE_SCHEMAS: Record<string, DataSourceSchema> = {
 }
 
 export function createEnhancedAIPrompt(
-  message: string, 
-  dataSource: string, 
+  message: string,
+  dataSource: string,
   messageHistory: any[]
 ): string {
-  const context = messageHistory.slice(-3).map(msg => 
+  const context = messageHistory.slice(-3).map(msg =>
     `${msg.type}: ${msg.content}`
   ).join('\n')
 
   const schemaInfo = Object.entries(DATA_SOURCE_SCHEMAS)
     .map(([key, schema]) => {
       const tablesInfo = schema.tables.map(table => {
-        const columnsInfo = table.columns.map(col => 
+        const columnsInfo = table.columns.map(col =>
           `    - ${col.name} (${col.type}): ${col.description}${col.examples ? ` - Examples: ${col.examples.join(', ')}` : ''}`
         ).join('\n')
         return `  ${table.name}: ${table.description}\n${columnsInfo}`
       }).join('\n\n')
-      
+
       return `${key.toUpperCase()}:\n${schema.description}\n\n${tablesInfo}`
     }).join('\n\n')
 
@@ -665,22 +665,22 @@ export function sanitizeQuery(query: string): string {
 export function getDataSourceFromQuery(query: string): string {
   // Try to infer data source from query content
   const queryLower = query.toLowerCase()
-  
+
   if (queryLower.includes('customers') || queryLower.includes('orders') || queryLower.includes('revenue')) {
     return 'snowflake'
   }
-  
+
   if (queryLower.includes('templates') || queryLower.includes('intakes') || queryLower.includes('gpt_agents')) {
     return 'supabase'
   }
-  
+
   if (queryLower.includes('contacts') || queryLower.includes('deals') || queryLower.includes('hubspot')) {
     return 'hubspot'
   }
-  
+
   if (queryLower.includes('events') || queryLower.includes('mixpanel') || queryLower.includes('signup')) {
     return 'mixpanel'
   }
-  
+
   return 'snowflake' // Default fallback
 }

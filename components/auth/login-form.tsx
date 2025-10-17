@@ -23,7 +23,7 @@ export function LoginForm() {
 
     try {
       const { error } = await signIn(email, password)
-      
+
       if (error) {
         setError(error.message || 'An error occurred during login')
       } else {

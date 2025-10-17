@@ -8,11 +8,11 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { 
-  Play, 
-  CheckCircle, 
-  AlertCircle, 
-  Clock, 
+import {
+  Play,
+  CheckCircle,
+  AlertCircle,
+  Clock,
   FileText,
   Upload,
   Loader2,
@@ -85,7 +85,7 @@ export function TemplateExecutionForm({ template, onSuccess, onCancel }: Templat
       if (variable.required && (!formData[variable.name] || formData[variable.name] === '')) {
         return `${variable.name} is required`
       }
-      
+
       // Validate based on type
       if (formData[variable.name]) {
         switch (variable.type) {
@@ -126,7 +126,7 @@ export function TemplateExecutionForm({ template, onSuccess, onCancel }: Templat
 
     try {
       const supabase = createClient()
-      
+
       // Get current user
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
@@ -186,10 +186,10 @@ export function TemplateExecutionForm({ template, onSuccess, onCancel }: Templat
       const pollInterval = setInterval(async () => {
         try {
           const status = await n8nClient.getWorkflowStatus(n8nResponse.executionId)
-          
+
           if (status.status === 'succeeded') {
             clearInterval(pollInterval)
-            
+
             // Update template run with success
             await (supabase as any)
               .from('template_run')
@@ -212,7 +212,7 @@ export function TemplateExecutionForm({ template, onSuccess, onCancel }: Templat
             onSuccess?.(templateRun.id)
           } else if (status.status === 'failed') {
             clearInterval(pollInterval)
-            
+
             // Update template run with failure
             await (supabase as any)
               .from('template_run')

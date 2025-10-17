@@ -6,14 +6,14 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 // import { ScrollArea } from '@/components/ui/scroll-area' // Component not available
-import { 
-  Send, 
-  Bot, 
-  User, 
-  Database, 
-  Loader2, 
-  AlertCircle, 
-  CheckCircle, 
+import {
+  Send,
+  Bot,
+  User,
+  Database,
+  Loader2,
+  AlertCircle,
+  CheckCircle,
   BarChart3,
   Table,
   MessageSquare,
@@ -184,7 +184,7 @@ export default function DataChatbot({ className }: DataChatbotProps) {
       }
 
       const result = await response.json()
-      
+
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
@@ -264,7 +264,7 @@ export default function DataChatbot({ className }: DataChatbotProps) {
             <span className="text-sm">AI Powered</span>
           </Badge>
         </div>
-        
+
         {/* Data Source Selector */}
         <div className="flex items-center space-x-3">
           <span className="text-sm font-medium text-gray-700">Query Source:</span>
@@ -324,7 +324,7 @@ export default function DataChatbot({ className }: DataChatbotProps) {
               <div className="flex-1">
                 <div className={`rounded-xl p-4 ${getMessageStyle(message.type)}`}>
                   <p className="whitespace-pre-wrap">{message.content}</p>
-                  
+
                   {/* Message Metadata */}
                   {message.metadata && (
                     <div className="mt-3 pt-3 border-t border-gray-200">
@@ -348,7 +348,7 @@ export default function DataChatbot({ className }: DataChatbotProps) {
                           </div>
                         )}
                       </div>
-                      
+
                       {/* Show SQL Query */}
                       {message.metadata.query && (
                         <div className="mt-3 p-3 bg-gray-800 text-green-400 rounded-lg text-sm font-mono">
@@ -356,7 +356,7 @@ export default function DataChatbot({ className }: DataChatbotProps) {
                           {message.metadata.query}
                         </div>
                       )}
-                      
+
                       {/* Show Error */}
                       {message.metadata.error && (
                         <div className="mt-3 p-3 bg-red-50 text-red-800 rounded-lg text-sm border border-red-200">
@@ -375,7 +375,7 @@ export default function DataChatbot({ className }: DataChatbotProps) {
               </div>
             </div>
           ))}
-          
+
           {/* Loading Indicator */}
           {isLoading && (
             <div className="flex items-start space-x-4">
@@ -390,7 +390,7 @@ export default function DataChatbot({ className }: DataChatbotProps) {
               </div>
             </div>
           )}
-          
+
           <div ref={messagesEndRef} />
         </div>
       </div>
@@ -406,7 +406,7 @@ export default function DataChatbot({ className }: DataChatbotProps) {
             className="flex-1 h-12 text-base"
             disabled={isLoading}
           />
-          <Button 
+          <Button
             onClick={handleSendMessage}
             disabled={!inputValue.trim() || isLoading}
             className="px-6 h-12"
@@ -419,7 +419,7 @@ export default function DataChatbot({ className }: DataChatbotProps) {
             )}
           </Button>
         </div>
-        
+
         {/* Example Queries - Simplified */}
         <div className="mt-3">
           <p className="text-xs text-gray-500 mb-2">Quick examples:</p>

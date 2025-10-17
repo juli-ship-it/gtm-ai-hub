@@ -11,11 +11,11 @@ import { Sidebar } from '@/components/sidebar'
 import { TemplateCreationForm } from '@/components/template-creation-form'
 import { TemplateEditForm } from '@/components/template-edit-form'
 import { TemplateCloneForm } from '@/components/template-clone-form'
-import { 
-  Search, 
-  Filter, 
-  Play, 
-  Clock, 
+import {
+  Search,
+  Filter,
+  Play,
+  Clock,
   Star,
   FileText,
   BarChart3,
@@ -64,10 +64,10 @@ export default function TemplatesPage() {
   useEffect(() => {
     const fetchTemplates = async () => {
       const supabase = createClient()
-      
+
       try {
         setLoading(true)
-        
+
         // Get current user
         const { data: { user } } = await supabase.auth.getUser()
         setUser(user)
@@ -152,13 +152,13 @@ export default function TemplatesPage() {
 
   const formatDuration = (startedAt: string, finishedAt: string | null) => {
     if (!finishedAt) return 'Running...'
-    
+
     const start = new Date(startedAt)
     const end = new Date(finishedAt)
     const diffMs = end.getTime() - start.getTime()
     const diffMins = Math.floor(diffMs / 60000)
     const diffSecs = Math.floor((diffMs % 60000) / 1000)
-    
+
     return `${diffMins}m ${diffSecs}s`
   }
 
@@ -251,8 +251,8 @@ export default function TemplatesPage() {
     // Check if n8n_workflow_json contains analysis data (old format) or actual workflow
     const workflowData = template.n8n_workflow_json as any
     const isAnalysisData = workflowData && (
-      workflowData.systems || 
-      workflowData.variables || 
+      workflowData.systems ||
+      workflowData.variables ||
       workflowData.complexity ||
       workflowData.estimatedDuration
     )
@@ -307,14 +307,14 @@ export default function TemplatesPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-wl-bg">
-        <div className="flex">
-          <Sidebar />
-          <div className="flex-1 p-8">
+          <div className="flex">
+            <Sidebar />
+            <div className="flex-1 p-4 lg:p-8">
             <PageHeader
               title="Template Catalog"
               description="Discover and run AI-powered automation templates for your GTM workflows."
             />
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
               {[...Array(6)].map((_, i) => (
                 <div key={i} className="h-64 bg-gray-200 rounded-lg animate-pulse" />
               ))}
@@ -328,7 +328,7 @@ export default function TemplatesPage() {
     <div className="min-h-screen bg-wl-bg">
       <div className="flex">
         <Sidebar />
-        <div className="flex-1 p-8">
+        <div className="flex-1 p-4 lg:p-8">
           <PageHeader
             title="Template Catalog"
             description="Discover and run AI-powered automation templates for your GTM workflows."
@@ -340,7 +340,7 @@ export default function TemplatesPage() {
           </PageHeader>
 
           {/* Filters */}
-          <div className="mb-8 flex flex-col sm:flex-row gap-4">
+          <div className="mb-6 lg:mb-8 flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-wl-muted" />
@@ -353,7 +353,7 @@ export default function TemplatesPage() {
               </div>
             </div>
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-48">
+              <SelectTrigger className="w-full sm:w-48">
                 <Filter className="mr-2 h-4 w-4" />
                 <SelectValue placeholder="Filter by category" />
               </SelectTrigger>
@@ -373,7 +373,7 @@ export default function TemplatesPage() {
               <FileText className="h-12 w-12 text-wl-muted mx-auto mb-4" />
               <h3 className="text-lg font-medium text-wl-text mb-2">No templates found</h3>
               <p className="text-wl-muted mb-4">
-                {searchTerm || categoryFilter !== 'all' 
+                {searchTerm || categoryFilter !== 'all'
                   ? 'Try adjusting your search or filter criteria.'
                   : 'Get started by creating your first template.'
                 }
@@ -384,14 +384,14 @@ export default function TemplatesPage() {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
               {filteredTemplates.map((template) => {
                 const CategoryIcon = categoryIcons[template.category as keyof typeof categoryIcons]
                 const categoryColor = categoryColors[template.category as keyof typeof categoryColors]
                 const runCount = template.template_runs?.[0]?.count || 0
                 const isNew = new Date(template.created_at) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // Created within last 7 days
                 const isPopular = runCount > 10
-                
+
                 return (
                   <Card key={template.id} className="wl-card-hover group">
                     <CardHeader className="pb-4">
@@ -427,14 +427,14 @@ export default function TemplatesPage() {
                         </div>
                       </div>
                     </CardHeader>
-                    
+
                     <CardContent className="space-y-4">
                       <CardDescription className="text-sm">
                         {template.description}
                       </CardDescription>
-                      
-                      
-                      <div className="grid grid-cols-2 gap-4 text-sm">
+
+
+                      <div className="grid grid-cols-2 gap-2 lg:gap-4 text-sm">
                         <div>
                           <p className="text-wl-muted">Runs</p>
                           <p className="font-semibold text-wl-text">{runCount}</p>
@@ -452,23 +452,23 @@ export default function TemplatesPage() {
                         <div>
                           <p className="text-wl-muted">Last Run</p>
                           <p className="font-semibold text-wl-text">
-                            {template.last_run 
+                            {template.last_run
                               ? new Date(template.last_run.started_at).toLocaleDateString()
                               : 'Never'
                             }
                           </p>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                         <div className="flex items-center text-sm text-wl-muted">
                           <Clock className="h-4 w-4 mr-1" />
                           Updated {new Date(template.created_at).toLocaleDateString()}
                         </div>
-                        <div className="flex items-center gap-2 flex-wrap">
+                        <div className="flex items-center gap-1 lg:gap-2 flex-wrap">
                           {template.n8n_workflow_json ? (
-                            <Button 
-                              size="sm" 
+                            <Button
+                              size="sm"
                               onClick={() => handleCloneToN8N(template)}
                               className="bg-wl-accent hover:bg-wl-accent/90 text-white text-xs px-4 py-2 min-w-[80px]"
                             >
@@ -476,8 +476,8 @@ export default function TemplatesPage() {
                               Clone
                             </Button>
                           ) : (
-                            <Button 
-                              size="sm" 
+                            <Button
+                              size="sm"
                               variant="outline"
                               disabled
                               className="text-xs px-4 py-2 min-w-[80px]"
@@ -485,8 +485,8 @@ export default function TemplatesPage() {
                               No Workflow
                             </Button>
                           )}
-                          <Button 
-                            size="sm" 
+                          <Button
+                            size="sm"
                             variant="outline"
                             onClick={() => handleViewTemplate(template)}
                             className="text-xs px-3 py-2"
@@ -495,8 +495,8 @@ export default function TemplatesPage() {
                             View
                           </Button>
                           {(template as any).is_owner && (
-                            <Button 
-                              size="sm" 
+                            <Button
+                              size="sm"
                               variant="outline"
                               onClick={() => {
                                 console.log('Edit button clicked for template:', template)
@@ -521,8 +521,8 @@ export default function TemplatesPage() {
 
       {/* Template Creation Modal */}
       {showCreateForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
+          <div className="bg-white rounded-lg max-w-6xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto p-2 sm:p-4">
             <TemplateCreationForm
               onSuccess={handleTemplateCreated}
               onCancel={handleCloseModals}
@@ -533,8 +533,8 @@ export default function TemplatesPage() {
 
             {/* Template Edit Modal */}
             {editingTemplate && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
+                <div className="bg-white rounded-lg max-w-4xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto p-2 sm:p-6">
                   <TemplateEditForm
                     template={editingTemplate as any}
                     onSuccess={handleTemplateUpdated as any}
@@ -547,8 +547,8 @@ export default function TemplatesPage() {
 
       {/* Template View Modal */}
       {viewingTemplate && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold">{viewingTemplate.name}</h2>
@@ -556,7 +556,7 @@ export default function TemplatesPage() {
                   Close
                 </Button>
               </div>
-              
+
               <div className="space-y-6">
                 <div>
                   <h3 className="text-lg font-semibold mb-2">Description</h3>
@@ -617,7 +617,7 @@ export default function TemplatesPage() {
                           if (section.trim().startsWith('Step-by-Step Instructions:')) {
                             return null // Skip the header
                           }
-                          
+
                           if (section.trim().startsWith('Business Logic:')) {
                             return (
                               <div key={sectionIndex} className="mt-6">
@@ -637,7 +637,7 @@ export default function TemplatesPage() {
                               </div>
                             )
                           }
-                          
+
                           if (section.trim().startsWith('AI Insights:')) {
                             return (
                               <div key={sectionIndex} className="mt-6">
@@ -657,7 +657,7 @@ export default function TemplatesPage() {
                               </div>
                             )
                           }
-                          
+
                           if (section.trim().startsWith('Systems Used:')) {
                             return (
                               <div key={sectionIndex} className="mt-6">
@@ -666,7 +666,7 @@ export default function TemplatesPage() {
                               </div>
                             )
                           }
-                          
+
                           // Handle numbered steps
                           if (section.match(/^\d+\./)) {
                             return (
@@ -674,7 +674,7 @@ export default function TemplatesPage() {
                                 {section.split('\n').map((line, lineIndex) => {
                                   const trimmedLine = line.trim()
                                   if (!trimmedLine) return null
-                                  
+
                                   if (trimmedLine.match(/^\d+\./)) {
                                     return (
                                       <h4 key={lineIndex} className="font-semibold text-blue-800 text-base">
@@ -694,7 +694,7 @@ export default function TemplatesPage() {
                               </div>
                             )
                           }
-                          
+
                           return null
                         })}
                       </div>
@@ -730,9 +730,9 @@ export default function TemplatesPage() {
                         <div className="aspect-video rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
                           <div className="text-center">
                             <p className="text-gray-600 mb-2">Invalid Loom URL</p>
-                            <a 
-                              href={viewingTemplate.how_to_use_video_url} 
-                              target="_blank" 
+                            <a
+                              href={viewingTemplate.how_to_use_video_url}
+                              target="_blank"
                               rel="noopener noreferrer"
                               className="text-blue-600 hover:text-blue-800 underline"
                             >
@@ -776,9 +776,9 @@ export default function TemplatesPage() {
                         <div className="aspect-video rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
                           <div className="text-center">
                             <p className="text-gray-600 mb-2">Invalid Loom URL</p>
-                            <a 
-                              href={viewingTemplate.how_it_was_built_video_url} 
-                              target="_blank" 
+                            <a
+                              href={viewingTemplate.how_it_was_built_video_url}
+                              target="_blank"
                               rel="noopener noreferrer"
                               className="text-blue-600 hover:text-blue-800 underline"
                             >
@@ -799,7 +799,7 @@ export default function TemplatesPage() {
                     Close
                   </Button>
                   {viewingTemplate.n8n_workflow_json && (
-                    <Button 
+                    <Button
                       variant="outline"
                       onClick={() => handleCloneToN8N(viewingTemplate)}
                       className="border-green-500 text-green-500 hover:bg-green-50"
@@ -817,10 +817,10 @@ export default function TemplatesPage() {
 
       {/* Template Clone Modal */}
       {cloningTemplate && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto p-6">
-            <TemplateCloneForm 
-              template={cloningTemplate} 
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
+          <div className="bg-white rounded-lg max-w-6xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto p-2 sm:p-6">
+            <TemplateCloneForm
+              template={cloningTemplate}
               onClose={handleCloseModals}
             />
           </div>

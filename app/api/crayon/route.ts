@@ -20,7 +20,7 @@ function checkRateLimit(ip: string): boolean {
   const windowStart = now - RATE_LIMIT.windowMs
 
   const current = rateLimitStore.get(key)
-  
+
   if (!current || current.resetTime < windowStart) {
     rateLimitStore.set(key, { count: 1, resetTime: now })
     return true
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
     // Validate operation
     if (!operation || !SUPPORTED_OPERATIONS.includes(operation)) {
       return NextResponse.json(
-        { 
+        {
           error: 'Invalid or unsupported operation',
           supportedOperations: SUPPORTED_OPERATIONS
         },
@@ -125,9 +125,9 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Crayon MCP API error:', error)
-    
+
     return NextResponse.json(
-      { 
+      {
         error: 'Internal server error',
         message: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : 'Unknown error') : 'Something went wrong'
       },
@@ -162,7 +162,7 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('Crayon MCP API info error:', error)
-    
+
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -177,13 +177,13 @@ function validateOperationParams(operation: string, params: any): string | null 
         return 'competitor parameter is required and must be a string'
       }
       break
-    
+
     case 'get_competitor_profile':
       if (!params.competitor || typeof params.competitor !== 'string') {
         return 'competitor parameter is required and must be a string'
       }
       break
-    
+
     case 'get_win_loss_stories':
     case 'get_objection_handling':
     case 'get_competitive_positioning':
@@ -193,7 +193,7 @@ function validateOperationParams(operation: string, params: any): string | null 
     case 'get_market_trends':
       // These operations have optional parameters
       break
-    
+
     default:
       return 'Unknown operation'
   }
@@ -203,17 +203,17 @@ function validateOperationParams(operation: string, params: any): string | null 
     if (typeof params.options !== 'object') {
       return 'options parameter must be an object'
     }
-    
+
     // Validate timeRange if provided
     if (params.options.timeRange && typeof params.options.timeRange !== 'string') {
       return 'timeRange must be a string'
     }
-    
+
     // Validate limit if provided
     if (params.options.limit && (typeof params.options.limit !== 'number' || params.options.limit <= 0)) {
       return 'limit must be a positive number'
     }
-    
+
     // Validate include array if provided
     if (params.options.include && !Array.isArray(params.options.include)) {
       return 'include must be an array'

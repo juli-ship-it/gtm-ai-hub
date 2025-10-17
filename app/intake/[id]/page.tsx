@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { StatusBadge } from '@/components/status-badge'
 import { Sidebar } from '@/components/sidebar'
-import { 
+import {
   ArrowLeft,
   MessageSquare,
   Clock,
@@ -81,7 +81,10 @@ export default function IntakeDetailPage() {
   const router = useRouter()
   const intakeId = params.id as string
   const { user, loading: authLoading } = useAuth()
-  
+
+  // Check if current user is the admin user who can modify intake stages
+  const canModifyStages = user?.email === 'juliana.reyes@workleap.com'
+
   const [intakeRequest, setIntakeRequest] = useState<IntakeRequest | null>(null)
   const [comments, setComments] = useState<IntakeComment[]>([])
   const [loading, setLoading] = useState(true)
@@ -107,7 +110,7 @@ export default function IntakeDetailPage() {
 
   const fetchIntakeRequest = async () => {
     const supabase = createClient()
-    
+
     try {
       // First try with the join
       const { data, error } = await supabase
@@ -130,12 +133,12 @@ export default function IntakeDetailPage() {
           .select('*')
           .eq('id', intakeId)
           .single()
-        
+
         if (simpleError) {
           console.error('Simple query also failed:', simpleError)
           throw simpleError
         }
-        
+
         setIntakeRequest(simpleData)
         setEditableFields({
           status: (simpleData as any).status,
@@ -168,10 +171,10 @@ export default function IntakeDetailPage() {
 
   const fetchComments = async () => {
     const supabase = createClient()
-    
+
     try {
       console.log('Fetching comments for request:', intakeId)
-      
+
       const { data, error } = await supabase
         .from('intake_comment')
         .select(`
@@ -190,7 +193,7 @@ export default function IntakeDetailPage() {
         setComments([])
         return
       }
-      
+
       console.log('Comments fetched successfully:', data?.length || 0, 'comments')
       setComments(data || [])
     } catch (error) {
@@ -201,21 +204,21 @@ export default function IntakeDetailPage() {
 
   const handleStatusUpdate = async (newStatus: string) => {
     if (!intakeRequest) return
-    
+
     setIsUpdatingStatus(true)
     const supabase = createClient()
-    
+
     try {
       const { error } = await (supabase as any)
         .from('intake_request')
-        .update({ 
+        .update({
           status: newStatus as any,
           updated_at: new Date().toISOString()
         })
         .eq('id', intakeId)
 
       if (error) throw error
-      
+
       setIntakeRequest(prev => prev ? { ...prev, status: newStatus as any } : null)
       setEditableFields(prev => ({ ...prev, status: newStatus }))
     } catch (error) {
@@ -227,9 +230,9 @@ export default function IntakeDetailPage() {
 
   const handleSaveChanges = async () => {
     if (!intakeRequest) return
-    
+
     const supabase = createClient()
-    
+
     try {
       const { error } = await (supabase as any)
         .from('intake_request')
@@ -240,7 +243,7 @@ export default function IntakeDetailPage() {
         .eq('id', intakeId)
 
       if (error) throw error
-      
+
       setIntakeRequest(prev => prev ? { ...prev, ...editableFields } as any : null)
       setIsEditing(false)
     } catch (error) {
@@ -250,10 +253,10 @@ export default function IntakeDetailPage() {
 
   const handleAddComment = async () => {
     if (!newComment.trim() || !intakeRequest) return
-    
+
     setIsSubmittingComment(true)
     const supabase = createClient()
-    
+
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
@@ -285,7 +288,7 @@ export default function IntakeDetailPage() {
         alert(`Failed to add comment: ${error.message}`)
         return
       }
-      
+
       console.log('Comment added successfully:', data)
       setComments(prev => [...prev, data])
       setNewComment('')
@@ -420,8 +423,8 @@ export default function IntakeDetailPage() {
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center space-x-4">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 onClick={() => router.push('/intake')}
               >
@@ -486,12 +489,12 @@ export default function IntakeDetailPage() {
                         const isActive = index === currentStepIndex
                         const isCompleted = index < currentStepIndex
                         const isUpcoming = index > currentStepIndex
-                        
+
                         return (
                           <div key={step.key} className="flex flex-col items-center space-y-2">
                             <div className={`
                               w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors
-                              ${isActive ? 'bg-wl-accent border-wl-accent text-white' : 
+                              ${isActive ? 'bg-wl-accent border-wl-accent text-white' :
                                 isCompleted ? 'bg-green-500 border-green-500 text-white' :
                                 'bg-gray-100 border-gray-300 text-gray-400'}
                             `}>
@@ -507,13 +510,13 @@ export default function IntakeDetailPage() {
                         )
                       })}
                     </div>
-                    
+
                     {/* Status Update */}
                     <div className="pt-4 border-t border-gray-100">
                       <div className="flex items-center space-x-4">
                         <span className="text-sm font-medium text-wl-text">Update Status:</span>
-                        <Select 
-                          value={editableFields.status} 
+                        <Select
+                          value={editableFields.status}
                           onValueChange={(value) => {
                             setEditableFields(prev => ({ ...prev, status: value }))
                             if (!isEditing) {
@@ -740,8 +743,8 @@ export default function IntakeDetailPage() {
                     <div className="text-center py-4 border-2 border-dashed border-wl-muted/30 rounded-lg">
                       <MessageSquare className="h-8 w-8 text-wl-muted mx-auto mb-2" />
                       <p className="text-wl-muted text-sm mb-2">Sign in to add comments</p>
-                      <Button 
-                        size="sm" 
+                      <Button
+                        size="sm"
                         variant="outline"
                         onClick={() => router.push('/auth/login')}
                       >
@@ -790,13 +793,13 @@ export default function IntakeDetailPage() {
                     <div>
                       <p className="text-sm font-medium text-wl-text">Requester</p>
                       <p className="text-sm text-wl-muted">
-                        {intakeRequest.requester_user?.email || 
-                         intakeRequest.slack_username || 
+                        {intakeRequest.requester_user?.email ||
+                         intakeRequest.slack_username ||
                          'Unknown User'}
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     <Calendar className="h-4 w-4 text-wl-muted" />
                     <div>
@@ -806,7 +809,7 @@ export default function IntakeDetailPage() {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     <Clock className="h-4 w-4 text-wl-muted" />
                     <div>
@@ -839,63 +842,65 @@ export default function IntakeDetailPage() {
                 </CardContent>
               </Card>
 
-              {/* Quick Actions */}
-              <Card className="wl-card">
-                <CardHeader>
-                  <CardTitle className="text-lg">Quick Actions</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {intakeRequest.request_type === 'real' ? (
-                    <>
-                      <Button 
-                        variant="outline" 
-                        className="w-full justify-start"
-                        onClick={() => handleStatusUpdate('triaged')}
-                        disabled={intakeRequest.status === 'triaged' || isUpdatingStatus}
-                      >
-                        <AlertCircle className="h-4 w-4 mr-2" />
-                        Mark as Triaged
-                      </Button>
-                      
-                      <Button 
-                        variant="outline" 
-                        className="w-full justify-start"
-                        onClick={() => handleStatusUpdate('building')}
-                        disabled={intakeRequest.status === 'building' || isUpdatingStatus}
-                      >
-                        <Zap className="h-4 w-4 mr-2" />
-                        Start Building
-                      </Button>
-                      
-                      <Button 
-                        variant="outline" 
-                        className="w-full justify-start"
-                        onClick={() => handleStatusUpdate('shipped')}
-                        disabled={intakeRequest.status === 'shipped' || isUpdatingStatus}
-                      >
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                        Mark as Shipped
-                      </Button>
-                      
-                      <Button 
-                        variant="outline" 
-                        className="w-full justify-start text-red-600 hover:text-red-700"
-                        onClick={() => handleStatusUpdate('declined')}
-                        disabled={intakeRequest.status === 'declined' || isUpdatingStatus}
-                      >
-                        <X className="h-4 w-4 mr-2" />
-                        Decline Request
-                      </Button>
-                    </>
-                  ) : (
-                    <div className="text-center py-4">
-                      <p className="text-wl-muted text-sm">
-                        Quick actions are not available for {requestTypeInfo.label.toLowerCase()} requests.
-                      </p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              {/* Quick Actions - Only show for admin users */}
+              {canModifyStages && (
+                <Card className="wl-card">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Quick Actions</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {intakeRequest.request_type === 'real' ? (
+                      <>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start"
+                          onClick={() => handleStatusUpdate('triaged')}
+                          disabled={intakeRequest.status === 'triaged' || isUpdatingStatus}
+                        >
+                          <AlertCircle className="h-4 w-4 mr-2" />
+                          Mark as Triaged
+                        </Button>
+
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start"
+                          onClick={() => handleStatusUpdate('building')}
+                          disabled={intakeRequest.status === 'building' || isUpdatingStatus}
+                        >
+                          <Zap className="h-4 w-4 mr-2" />
+                          Start Building
+                        </Button>
+
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start"
+                          onClick={() => handleStatusUpdate('shipped')}
+                          disabled={intakeRequest.status === 'shipped' || isUpdatingStatus}
+                        >
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Mark as Shipped
+                        </Button>
+
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start text-red-600 hover:text-red-700"
+                          onClick={() => handleStatusUpdate('declined')}
+                          disabled={intakeRequest.status === 'declined' || isUpdatingStatus}
+                        >
+                          <X className="h-4 w-4 mr-2" />
+                          Decline Request
+                        </Button>
+                      </>
+                    ) : (
+                      <div className="text-center py-4">
+                        <p className="text-wl-muted text-sm">
+                          Quick actions are not available for {requestTypeInfo.label.toLowerCase()} requests.
+                        </p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Tags */}
               <Card className="wl-card">
