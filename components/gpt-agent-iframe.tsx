@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { ExternalLink, Settings, Play, Bot, Users, Clock, BarChart3, User, Sparkles } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { ExternalLink, Settings, Play, Bot, Users, Clock, BarChart3, User, Sparkles, Edit, Check, X } from 'lucide-react'
 import { useGPTAgentInfo } from '@/hooks/useGPTAgentInfo'
 
 interface GPTAgent {
@@ -23,21 +24,78 @@ interface GPTAgentCardProps {
   className?: string
   showControls?: boolean
   onAgentUsed?: (agentId: string) => void
+  onAgentEdited?: (agentId: string, updatedAgent?: any) => void
+  databaseAgent?: any // Add database agent data
+  currentUser?: string // Current user for permission checking
 }
 
 export function GPTAgentCard({
   agent,
   className = '',
   showControls = true,
-  onAgentUsed
+  onAgentUsed,
+  onAgentEdited,
+  databaseAgent,
+  currentUser
 }: GPTAgentCardProps) {
-  const { agentInfo, loading: infoLoading } = useGPTAgentInfo(agent.iframeUrl)
+  const { agentInfo, loading: infoLoading } = useGPTAgentInfo(agent.iframeUrl, databaseAgent)
+  const [isEditingName, setIsEditingName] = useState(false)
+  const [editingName, setEditingName] = useState('')
   
   const handleOpenAgent = () => {
     // Open GPT Agent in new tab/window
     window.open(agent.iframeUrl, '_blank', 'noopener,noreferrer')
     onAgentUsed?.(agent.id)
   }
+
+  const handleEditAgent = () => {
+    // Trigger edit modal
+    onAgentEdited?.(agent.id)
+  }
+
+  const handleStartEditName = () => {
+    setEditingName(agentInfo?.name || agent.name)
+    setIsEditingName(true)
+  }
+
+  const handleSaveName = async () => {
+    if (editingName.trim() && editingName !== (agentInfo?.name || agent.name)) {
+      // Quick save just the name
+      const updatedAgent = {
+        ...agent,
+        name: editingName.trim()
+      }
+      try {
+        await onAgentEdited?.(agent.id, updatedAgent)
+      } catch (error) {
+        console.error('Error saving name:', error)
+      }
+    }
+    setIsEditingName(false)
+  }
+
+  const handleCancelEditName = () => {
+    setEditingName('')
+    setIsEditingName(false)
+  }
+
+  // Check if current user can edit this agent
+  // Admins can edit any agent, regular users can only edit their own
+  const createdByUser = databaseAgent?.configuration?.created_by_user
+  // For now, we'll use a simple admin check - in production you'd want to check the user's role from the database
+  const isAdmin = currentUser && (
+    currentUser.includes('admin') || 
+    currentUser.includes('@workleap.com') // Assuming workleap emails are admins
+  )
+  const canEdit = currentUser && (
+    isAdmin || // Admin can edit any agent
+    (createdByUser && (
+      createdByUser === currentUser || 
+      createdByUser === currentUser.split('@')[0] ||
+      createdByUser.split('@')[0] === currentUser.split('@')[0]
+    ))
+  )
+  
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -76,9 +134,36 @@ export function GPTAgentCard({
             <div className="p-2 bg-wl-accent/10 rounded-xl">
               <Bot className="h-6 w-6 text-wl-accent" />
             </div>
-                        <div>
-                          <CardTitle className="text-lg">{agentInfo?.name || agent.name}</CardTitle>
-                          <div className="flex items-center space-x-2 mt-1">
+            <div>
+              {isEditingName ? (
+                <div className="flex items-center space-x-2">
+                  <Input
+                    value={editingName}
+                    onChange={(e) => setEditingName(e.target.value)}
+                    className="text-lg font-semibold h-8"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleSaveName()
+                      if (e.key === 'Escape') handleCancelEditName()
+                    }}
+                    autoFocus
+                  />
+                  <Button size="sm" variant="ghost" onClick={handleSaveName} className="h-8 w-8 p-0">
+                    <Check className="h-4 w-4 text-green-600" />
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={handleCancelEditName} className="h-8 w-8 p-0">
+                    <X className="h-4 w-4 text-red-600" />
+                  </Button>
+                </div>
+              ) : (
+                <CardTitle 
+                  className={`text-lg ${canEdit ? 'cursor-pointer hover:text-wl-accent transition-colors' : ''}`}
+                  onClick={canEdit ? handleStartEditName : undefined}
+                  title={canEdit ? 'Click to edit name' : undefined}
+                >
+                  {agentInfo?.name || agent.name}
+                </CardTitle>
+              )}
+              <div className="flex items-center space-x-2 mt-1">
                 <Badge variant="outline" className={getStatusColor(agent.status)}>
                   {agent.status}
                 </Badge>
@@ -89,9 +174,23 @@ export function GPTAgentCard({
             </div>
           </div>
           {showControls && (
-            <Button variant="ghost" size="sm" onClick={handleOpenAgent}>
-              <ExternalLink className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center space-x-1">
+              {canEdit && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleEditAgent} 
+                  title="Edit GPT Agent"
+                  className="text-wl-accent border-wl-accent/20 hover:bg-wl-accent/10"
+                >
+                  <Edit className="h-4 w-4 mr-1" />
+                  Edit
+                </Button>
+              )}
+              <Button variant="ghost" size="sm" onClick={handleOpenAgent} title="Open GPT Agent">
+                <ExternalLink className="h-4 w-4" />
+              </Button>
+            </div>
           )}
         </div>
       </CardHeader>
@@ -105,9 +204,17 @@ export function GPTAgentCard({
               
               {/* Creator Info */}
               {agentInfo?.creator && (
-                <div className="flex items-center text-xs text-wl-muted">
-                  <User className="h-3 w-3 mr-1" />
-                  <span>Created by {agentInfo.creator}</span>
+                <div className="space-y-1">
+                  <div className="flex items-center text-xs text-wl-muted">
+                    <User className="h-3 w-3 mr-1" />
+                    <span>Created by {agentInfo.creator}</span>
+                  </div>
+                  {agentInfo.uploader && agentInfo.uploader !== agentInfo.creator && (
+                    <div className="flex items-center text-xs text-wl-muted">
+                      <User className="h-3 w-3 mr-1" />
+                      <span>Uploaded by {agentInfo.uploader}</span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

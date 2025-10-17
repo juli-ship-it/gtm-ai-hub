@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 interface GPTAgentInfo {
   name: string
   creator: string
+  uploader?: string // Who uploaded it via Slack
   description: string
   capabilities: string[]
   category: string
@@ -23,10 +24,23 @@ const knownAgents: Record<string, GPTAgentInfo> = {
     ],
     category: 'content',
     tags: ['content-creation', 'translation', 'social-media', 'marketing']
+  },
+  'g-681b69671a748191ab093f497e233c8c-luke-the-paid-marketer-master': {
+    name: 'Luke The Paid Marketer Master',
+    creator: 'Kieran Flanagan',
+    description: 'An Elite Level Paid Marketer to Solve Hard Problems',
+    capabilities: [
+      'Paid marketing strategy',
+      'Campaign optimization',
+      'Performance analysis',
+      'Marketing automation'
+    ],
+    category: 'support',
+    tags: ['marketing', 'paid-media', 'automation', 'strategy']
   }
 }
 
-export function useGPTAgentInfo(gptAgentUrl: string | null) {
+export function useGPTAgentInfo(gptAgentUrl: string | null, databaseAgent?: any) {
   const [agentInfo, setAgentInfo] = useState<GPTAgentInfo | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -53,7 +67,34 @@ export function useGPTAgentInfo(gptAgentUrl: string | null) {
         // Check if we have known info for this agent
         const knownInfo = knownAgents[agentId]
         
-        if (knownInfo) {
+        if (databaseAgent) {
+          // Always prioritize database/scraped data over known agents
+          // Use scraped data from database if available
+          const scrapedData = databaseAgent.configuration?.scraped_data
+          if (scrapedData) {
+            setAgentInfo({
+              name: scrapedData.name || databaseAgent.name || 'Custom GPT Agent',
+              creator: scrapedData.creator || databaseAgent.configuration?.actual_creator || 'Unknown',
+              uploader: databaseAgent.configuration?.created_by_user || 'Unknown',
+              description: scrapedData.description || databaseAgent.description || 'A custom GPT agent created for specific tasks.',
+              capabilities: scrapedData.capabilities || ['Custom AI assistance'],
+              category: databaseAgent.category || 'support',
+              tags: ['custom', 'ai-assistant']
+            })
+          } else {
+            // Use database data without scraped info
+            setAgentInfo({
+              name: databaseAgent.name || 'Custom GPT Agent',
+              creator: databaseAgent.configuration?.actual_creator || databaseAgent.configuration?.created_by_user || 'Unknown',
+              uploader: databaseAgent.configuration?.created_by_user || 'Unknown',
+              description: databaseAgent.description || 'A custom GPT agent created for specific tasks.',
+              capabilities: ['Custom AI assistance'],
+              category: databaseAgent.category || 'support',
+              tags: ['custom', 'ai-assistant']
+            })
+          }
+        } else if (knownInfo) {
+          // Use known info if no database agent available
           setAgentInfo(knownInfo)
         } else {
           // For unknown agents, create basic info
@@ -82,7 +123,7 @@ export function useGPTAgentInfo(gptAgentUrl: string | null) {
     }
 
     extractAgentInfo()
-  }, [gptAgentUrl])
+  }, [gptAgentUrl, databaseAgent])
 
   return { agentInfo, loading, error }
 }

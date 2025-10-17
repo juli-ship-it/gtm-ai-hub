@@ -851,6 +851,56 @@ export interface Database {
           created_at?: string
         }
       }
+      gpt_agent: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          iframe_url: string | null
+          api_endpoint: string | null
+          category: 'content' | 'analysis' | 'automation' | 'support'
+          status: 'active' | 'inactive' | 'maintenance'
+          configuration: Json | null
+          permissions: Json | null
+          usage_count: number | null
+          last_used: string | null
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          description?: string | null
+          iframe_url?: string | null
+          api_endpoint?: string | null
+          category: 'content' | 'analysis' | 'automation' | 'support'
+          status?: 'active' | 'inactive' | 'maintenance'
+          configuration?: Json | null
+          permissions?: Json | null
+          usage_count?: number | null
+          last_used?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          description?: string | null
+          iframe_url?: string | null
+          api_endpoint?: string | null
+          category?: 'content' | 'analysis' | 'automation' | 'support'
+          status?: 'active' | 'inactive' | 'maintenance'
+          configuration?: Json | null
+          permissions?: Json | null
+          usage_count?: number | null
+          last_used?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never

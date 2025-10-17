@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { PageHeader } from '@/components/page-header'
 import { GPTAgentCard, mockGPTAgents } from '@/components/gpt-agent-iframe'
-import { AddGPTAgentForm } from '@/components/add-gpt-agent-form'
+import { GPTAgentEditModal } from '@/components/gpt-agent-edit-modal'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -15,7 +15,6 @@ import { Database } from '@/types/database'
 import { 
   Search, 
   Filter, 
-  Plus, 
   Grid, 
   List, 
   Settings,
@@ -39,14 +38,26 @@ export default function GPTAgentsPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null)
-  const [showAddForm, setShowAddForm] = useState(false)
   const [agents, setAgents] = useState<GPTAgent[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [editingAgent, setEditingAgent] = useState<any | null>(null)
+  const [currentUser, setCurrentUser] = useState<string | null>(null)
 
   useEffect(() => {
     fetchGPTAgents()
+    fetchCurrentUser()
   }, [])
+
+  const fetchCurrentUser = async () => {
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      setCurrentUser(user?.email || null)
+    } catch (error) {
+      console.error('Error fetching current user:', error)
+    }
+  }
 
   const filteredAgents = agents.filter(agent => {
     const matchesSearch = agent.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -62,13 +73,67 @@ export default function GPTAgentsPage() {
     console.log(`Agent ${agentId} was used`)
   }
 
-  const handleAgentAdded = (agent: any) => {
-    // In a real implementation, you would save to database here
-    console.log('New agent added:', agent)
-    setShowAddForm(false)
-    // Refresh the agents list
-    fetchGPTAgents()
+  const handleAgentEdit = async (agentId: string, updatedAgent?: any) => {
+    if (updatedAgent) {
+      // Quick save for inline editing
+      try {
+        await handleSaveAgent(updatedAgent)
+      } catch (error) {
+        console.error('Error saving agent:', error)
+      }
+    } else {
+      // Open edit modal
+      const agent = agents.find(a => a.id === agentId)
+      if (agent) {
+        setEditingAgent(agent)
+      }
+    }
   }
+
+  const handleSaveAgent = async (updatedAgent: any) => {
+    try {
+      console.log('🔄 Saving agent:', updatedAgent.id, 'with data:', updatedAgent)
+
+      // Use direct Supabase client instead of API route
+      const supabase = createClient()
+      
+      const { data, error } = await supabase
+        .from('gpt_agent')
+        .update({
+          name: updatedAgent.name,
+          description: updatedAgent.description,
+          category: updatedAgent.category,
+          status: updatedAgent.status,
+          configuration: updatedAgent.configuration,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', updatedAgent.id)
+        .select()
+        .single()
+
+      if (error) {
+        console.error('❌ Supabase Error:', error)
+        throw new Error(`Failed to update agent: ${error.message}`)
+      }
+
+      console.log('✅ Supabase Success:', data)
+
+      // Update the local state
+      setAgents(prevAgents => 
+        prevAgents.map(agent => 
+          agent.id === updatedAgent.id ? { ...agent, ...data } : agent
+        )
+      )
+
+      // Refresh the agents list
+      await fetchGPTAgents()
+      console.log('✅ Agent saved successfully and list refreshed')
+    } catch (error) {
+      console.error('❌ Error saving agent:', error)
+      throw error
+    }
+  }
+
 
   const fetchGPTAgents = async () => {
     const supabase = createClient()
@@ -147,13 +212,10 @@ export default function GPTAgentsPage() {
                 <Search className="mr-2 h-4 w-4" />
                 Refresh
               </Button>
-              <Button 
-                className="wl-button-primary"
-                onClick={() => setShowAddForm(!showAddForm)}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                {showAddForm ? 'Cancel' : 'Add Agent'}
-              </Button>
+              <div className="flex items-center space-x-2 text-sm text-wl-muted">
+                <Bot className="h-4 w-4" />
+                <span>Add agents via <code className="bg-wl-surface px-2 py-1 rounded text-wl-accent">/gtm-intake</code> in Slack</span>
+              </div>
             </div>
           </PageHeader>
 
@@ -199,12 +261,7 @@ export default function GPTAgentsPage() {
             </Card>
           </div>
 
-          {/* Add Agent Form */}
-          {showAddForm && (
-            <div className="mb-8">
-              <AddGPTAgentForm onAgentAdded={handleAgentAdded} />
-            </div>
-          )}
+
 
           {/* Filters */}
           <div className="mb-8 flex flex-col sm:flex-row gap-4">
@@ -289,13 +346,13 @@ export default function GPTAgentsPage() {
               <p className="text-wl-muted mb-4">
                 {searchQuery || categoryFilter !== 'all' || statusFilter !== 'all'
                   ? 'Try adjusting your search or filter criteria.'
-                  : 'Get started by adding your first GPT Agent.'
+                  : 'No GPT agents found. Add agents through the GTM-intake Slack command.'
                 }
               </p>
-              <Button className="wl-button-primary" onClick={() => setShowAddForm(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Your First Agent
-              </Button>
+              <div className="flex items-center justify-center space-x-2 text-sm text-wl-muted bg-wl-surface/50 p-4 rounded-lg">
+                <Bot className="h-5 w-5 text-wl-accent" />
+                <span>Use <code className="bg-wl-surface px-2 py-1 rounded text-wl-accent font-mono">/gtm-intake</code> in Slack to add GPT agents</span>
+              </div>
             </div>
           ) : (
             <div className={
@@ -316,13 +373,24 @@ export default function GPTAgentsPage() {
                     lastUsed: agent.last_used,
                     usageCount: agent.usage_count || 0
                   }}
+                  databaseAgent={agent}
+                  currentUser={currentUser}
                   onAgentUsed={handleAgentUsed}
+                  onAgentEdited={handleAgentEdit}
                 />
               ))}
             </div>
           )}
         </div>
       </div>
+
+      {/* Edit Modal */}
+      <GPTAgentEditModal
+        isOpen={!!editingAgent}
+        onClose={() => setEditingAgent(null)}
+        agent={editingAgent}
+        onSave={handleSaveAgent}
+      />
     </div>
   )
 }
