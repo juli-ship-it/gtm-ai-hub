@@ -80,8 +80,8 @@ export function TemplateEditForm({ template, onSuccess, onCancel }: TemplateEdit
     description: template.description,
     category: template.category,
     enabled: template.enabled,
-    howToUseVideoUrl: template.how_to_use_video_url || '',
-    howItWasBuiltVideoUrl: template.how_it_was_built_video_url || ''
+    howToUseVideoUrl: (template as any).how_to_use_video_url || '',
+    howItWasBuiltVideoUrl: (template as any).how_it_was_built_video_url || ''
   })
   const [variables, setVariables] = useState<TemplateVariable[]>(template.template_variables || [])
   const [newVariable, setNewVariable] = useState<Partial<TemplateVariable>>({
@@ -166,7 +166,7 @@ export function TemplateEditForm({ template, onSuccess, onCancel }: TemplateEdit
   }
 
   const addVariable = () => {
-    if (!newVariable.name.trim()) return
+    if (!newVariable.name?.trim()) return
 
     const variable: TemplateVariable = {
       ...newVariable,
@@ -610,7 +610,7 @@ export function TemplateEditForm({ template, onSuccess, onCancel }: TemplateEdit
               <Label>Category</Label>
               <Select 
                 value={newVariable.category || 'configuration'} 
-                onValueChange={(value) => setNewVariable({ ...newVariable, category: value })}
+                onValueChange={(value) => setNewVariable({ ...newVariable, category: value as any })}
               >
                 <SelectTrigger>
                   <SelectValue />

@@ -30,7 +30,22 @@ type ViewMode = 'grid' | 'list'
 type CategoryFilter = 'all' | 'content' | 'analysis' | 'automation' | 'support'
 type StatusFilter = 'all' | 'active' | 'inactive' | 'maintenance'
 
-type GPTAgent = Database['public']['Tables']['gpt_agent']['Row']
+type GPTAgent = {
+  id: string
+  name: string
+  description: string | null
+  category: 'content' | 'analysis' | 'automation' | 'support'
+  status: 'active' | 'inactive' | 'maintenance'
+  iframe_url?: string
+  last_used?: string
+  usage_count?: number
+  configuration?: {
+    source?: string
+    [key: string]: any
+  }
+  created_at: string
+  updated_at: string
+}
 
 export default function GPTAgentsPage() {
   const [searchQuery, setSearchQuery] = useState('')

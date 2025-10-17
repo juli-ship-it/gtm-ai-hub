@@ -138,22 +138,22 @@ export default function IntakeDetailPage() {
         
         setIntakeRequest(simpleData)
         setEditableFields({
-          status: simpleData.status,
-          priority: simpleData.priority,
-          title: simpleData.title || '',
-          problem_statement: simpleData.problem_statement || '',
-          automation_idea: simpleData.automation_idea || '',
-          ethics_considerations: simpleData.ethics_considerations || ''
+          status: (simpleData as any).status,
+          priority: (simpleData as any).priority,
+          title: (simpleData as any).title || '',
+          problem_statement: (simpleData as any).problem_statement || '',
+          automation_idea: (simpleData as any).automation_idea || '',
+          ethics_considerations: (simpleData as any).ethics_considerations || ''
         })
       } else {
         setIntakeRequest(data)
         setEditableFields({
-          status: data.status,
-          priority: data.priority,
-          title: data.title || '',
-          problem_statement: data.problem_statement || '',
-          automation_idea: data.automation_idea || '',
-          ethics_considerations: data.ethics_considerations || ''
+          status: (data as any).status,
+          priority: (data as any).priority,
+          title: (data as any).title || '',
+          problem_statement: (data as any).problem_statement || '',
+          automation_idea: (data as any).automation_idea || '',
+          ethics_considerations: (data as any).ethics_considerations || ''
         })
       }
     } catch (error) {
@@ -206,7 +206,7 @@ export default function IntakeDetailPage() {
     const supabase = createClient()
     
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('intake_request')
         .update({ 
           status: newStatus as any,
@@ -231,7 +231,7 @@ export default function IntakeDetailPage() {
     const supabase = createClient()
     
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('intake_request')
         .update({
           ...editableFields,
@@ -241,7 +241,7 @@ export default function IntakeDetailPage() {
 
       if (error) throw error
       
-      setIntakeRequest(prev => prev ? { ...prev, ...editableFields } : null)
+      setIntakeRequest(prev => prev ? { ...prev, ...editableFields } as any : null)
       setIsEditing(false)
     } catch (error) {
       console.error('Error updating intake request:', error)
@@ -264,7 +264,7 @@ export default function IntakeDetailPage() {
 
       console.log('Adding comment for user:', user.id, 'to request:', intakeId)
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('intake_comment')
         .insert({
           intake_request_id: intakeId,

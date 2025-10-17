@@ -296,7 +296,7 @@ export default function TemplatesPage() {
       }
 
       console.log('Template loaded for cloning:', fullTemplate)
-      console.log('Template variables:', fullTemplate.template_variables)
+      console.log('Template variables:', (fullTemplate as any).template_variables)
       setCloningTemplate(fullTemplate)
     } catch (error) {
       console.error('Error fetching template for cloning:', error)
@@ -466,11 +466,30 @@ export default function TemplatesPage() {
                           Updated {new Date(template.created_at).toLocaleDateString()}
                         </div>
                         <div className="flex items-center gap-2 flex-wrap">
+                          {template.n8n_workflow_json ? (
+                            <Button 
+                              size="sm" 
+                              onClick={() => handleCloneToN8N(template)}
+                              className="bg-wl-accent hover:bg-wl-accent/90 text-white text-xs px-4 py-2 min-w-[80px]"
+                            >
+                              <ExternalLink className="h-3 w-3 mr-1" />
+                              Clone
+                            </Button>
+                          ) : (
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              disabled
+                              className="text-xs px-4 py-2 min-w-[80px]"
+                            >
+                              No Workflow
+                            </Button>
+                          )}
                           <Button 
                             size="sm" 
                             variant="outline"
                             onClick={() => handleViewTemplate(template)}
-                            className="text-xs px-3 py-2 min-w-[80px]"
+                            className="text-xs px-3 py-2"
                           >
                             <Eye className="h-3 w-3 mr-1" />
                             View
@@ -483,21 +502,10 @@ export default function TemplatesPage() {
                                 console.log('Edit button clicked for template:', template)
                                 handleEditTemplate(template)
                               }}
-                              className="border-blue-500 text-blue-500 hover:bg-blue-50 text-xs px-3 py-2 min-w-[80px]"
+                              className="border-blue-500 text-blue-500 hover:bg-blue-50 text-xs px-3 py-2"
                             >
                               <Settings className="h-3 w-3 mr-1" />
                               Edit
-                            </Button>
-                          )}
-                          {template.n8n_workflow_json && (
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleCloneToN8N(template)}
-                              className="border-green-500 text-green-500 hover:bg-green-50 text-xs px-3 py-2 min-w-[80px]"
-                            >
-                              <ExternalLink className="h-3 w-3 mr-1" />
-                              Clone
                             </Button>
                           )}
                         </div>
@@ -528,8 +536,8 @@ export default function TemplatesPage() {
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                 <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
                   <TemplateEditForm
-                    template={editingTemplate}
-                    onSuccess={handleTemplateUpdated}
+                    template={editingTemplate as any}
+                    onSuccess={handleTemplateUpdated as any}
                     onCancel={handleCloseModals}
                   />
                 </div>
@@ -810,7 +818,7 @@ export default function TemplatesPage() {
       {/* Template Clone Modal */}
       {cloningTemplate && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto p-6">
             <TemplateCloneForm 
               template={cloningTemplate} 
               onClose={handleCloseModals}

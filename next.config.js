@@ -1,13 +1,21 @@
+const path = require('path')
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['@supabase/supabase-js']
   },
+  // Ensure CSS is properly processed in Vercel
+  // compiler: {
+  //   removeConsole: process.env.NODE_ENV === 'production',
+  // },
+  // Ensure CSS is properly handled in Vercel
+  trailingSlash: false,
   images: {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: process.env.NEXT_PUBLIC_SUPABASE_URL?.replace('https://', '').replace('http://', '') || 'your-project.supabase.co',
+        hostname: '*.supabase.co',
         port: '',
         pathname: '/storage/v1/object/public/**',
       },
@@ -18,6 +26,19 @@ const nextConfig = {
         pathname: '/**',
       }
     ]
+  },
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': path.resolve(__dirname),
+      '@/components': path.resolve(__dirname, 'components'),
+      '@/lib': path.resolve(__dirname, 'lib'),
+      '@/app': path.resolve(__dirname, 'app'),
+      '@/types': path.resolve(__dirname, 'types'),
+      '@/utils': path.resolve(__dirname, 'utils'),
+    }
+    
+    return config
   }
 }
 

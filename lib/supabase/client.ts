@@ -6,9 +6,16 @@ let supabaseClient: ReturnType<typeof createBrowserClient<Database>> | null = nu
 
 export const createClientSupabase = () => {
   if (!supabaseClient) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.warn('Supabase environment variables not found. Using placeholder values.')
+    }
+    
     supabaseClient = createBrowserClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key'
+      supabaseUrl || 'https://placeholder.supabase.co',
+      supabaseAnonKey || 'placeholder-key'
     )
   }
   return supabaseClient

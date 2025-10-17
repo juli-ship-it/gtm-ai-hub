@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { Database } from '@/types/database'
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
     ]
     
     for (const update of updates) {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('template_variable')
         .update({ name: update.to })
         .eq('name', update.from)
@@ -53,7 +54,7 @@ export async function POST(request: NextRequest) {
     ]
     
     for (const update of descriptionUpdates) {
-      await supabase
+      await (supabase as any)
         .from('template_variable')
         .update({ description: update.description })
         .eq('name', update.name)

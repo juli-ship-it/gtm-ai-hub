@@ -1,0 +1,499 @@
+import { Client } from '@modelcontextprotocol/sdk/client/index.js'
+import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
+import { spawn } from 'child_process'
+
+export interface ClayMCPConfig {
+  apiKey: string
+  readOnly?: boolean
+  maxResults?: number
+  timeout?: number
+  auditLogging?: boolean
+}
+
+export interface ClayQueryOptions {
+  timeRange?: string
+  include?: string[]
+  limit?: number
+  offset?: number
+  contactId?: string
+  companyId?: string
+  criteria?: Record<string, any>
+}
+
+export interface ClayEnrichedContact {
+  id: string
+  originalContactId: string
+  email: string
+  firstName?: string
+  lastName?: string
+  company: string
+  title?: string
+  linkedinUrl?: string
+  twitterHandle?: string
+  phone?: string
+  location?: string
+  companyData: ClayCompanyData
+  socialProfiles: ClaySocialProfile[]
+  enrichmentScore: number
+  lastEnriched: string
+}
+
+export interface ClayCompanyData {
+  name: string
+  domain: string
+  industry: string
+  employeeCount: number
+  annualRevenue?: number
+  fundingStage?: string
+  fundingAmount?: number
+  lastFundingDate?: string
+  headquarters: string
+  description?: string
+  technologies: string[]
+  socialProfiles: ClaySocialProfile[]
+  competitors: string[]
+}
+
+export interface ClaySocialProfile {
+  platform: 'linkedin' | 'twitter' | 'facebook' | 'instagram' | 'github'
+  url: string
+  username?: string
+  followers?: number
+  verified: boolean
+}
+
+export interface ClayProspect {
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+  title: string
+  company: string
+  companyDomain: string
+  industry: string
+  employeeCount: number
+  location: string
+  linkedinUrl?: string
+  phone?: string
+  score: number
+  matchReason: string
+  source: string
+}
+
+export interface ClayVerificationResult {
+  contactId: string
+  email: string
+  verificationStatus: 'valid' | 'invalid' | 'risky' | 'unknown'
+  deliverability: 'high' | 'medium' | 'low' | 'unknown'
+  bounceRisk: 'low' | 'medium' | 'high'
+  suggestions: string[]
+  updatedData?: Partial<ClayEnrichedContact>
+}
+
+export interface ClayLeadGenerationCriteria {
+  industry?: string[]
+  companySize?: {
+    min: number
+    max: number
+  }
+  location?: string[]
+  technologies?: string[]
+  fundingStage?: string[]
+  annualRevenue?: {
+    min: number
+    max: number
+  }
+  excludeDomains?: string[]
+  includeDomains?: string[]
+}
+
+export class ClayMCPClient {
+  private client!: Client
+  private config!: ClayMCPConfig
+  private isConnected: boolean = false
+
+  constructor(config: ClayMCPConfig) {
+    this.config = {
+      readOnly: true,
+      maxResults: 100,
+      timeout: 300,
+      auditLogging: false,
+      ...config
+    }
+  }
+
+  async connect(): Promise<void> {
+    if (this.isConnected) return
+
+    // In development mode or when using mock data, skip actual MCP connection
+    if (process.env.NODE_ENV === 'development' || !this.config.apiKey || this.config.apiKey === 'mock_api_key') {
+      this.isConnected = true
+      if (this.config.auditLogging) {
+        console.log('Clay MCP client connected in mock mode')
+      }
+      return
+    }
+
+    try {
+      // Spawn the Clay MCP server process
+      const serverProcess = spawn('npx', [
+        '-y',
+        '@clay/mcp-server',
+        '--api-key',
+        this.config.apiKey
+      ], {
+        stdio: ['pipe', 'pipe', 'pipe']
+      })
+
+      // Create transport and client
+      const transport = new StdioClientTransport({
+        reader: serverProcess.stdout!,
+        writer: serverProcess.stdin!
+      })
+
+      this.client = new Client({
+        name: 'clay-mcp-client',
+        version: '1.0.0'
+      }, {
+        capabilities: {}
+      })
+
+      await this.client.connect(transport)
+      this.isConnected = true
+
+      if (this.config.auditLogging) {
+        console.log('Clay MCP client connected successfully')
+      }
+    } catch (error) {
+      console.error('Failed to connect to Clay MCP server:', error)
+      throw error
+    }
+  }
+
+  async disconnect(): Promise<void> {
+    if (this.client && this.isConnected) {
+      await this.client.close()
+      this.isConnected = false
+    }
+  }
+
+  private async executeTool(toolName: string, args: any): Promise<any> {
+    if (!this.isConnected) {
+      await this.connect()
+    }
+
+    // In development mode or mock mode, return mock data
+    if (process.env.NODE_ENV === 'development' || !this.config.apiKey || this.config.apiKey === 'mock_api_key') {
+      if (this.config.auditLogging) {
+        console.log(`Clay MCP tool executed (mock): ${toolName}`, { args })
+      }
+      return [{ text: 'mock_data' }] // Return mock format
+    }
+
+    try {
+      const result = await this.client.callTool({
+        name: toolName,
+        arguments: args
+      })
+
+      if (this.config.auditLogging) {
+        console.log(`Clay MCP tool executed: ${toolName}`, { args, result })
+      }
+
+      return result.content
+    } catch (error) {
+      console.error(`Clay MCP tool execution failed: ${toolName}`, error)
+      throw error
+    }
+  }
+
+  // Contact Enrichment Methods
+
+  async enrichContacts(contacts: any[]): Promise<ClayEnrichedContact[]> {
+    const args = {
+      contacts,
+      include: ['company_data', 'social_profiles', 'contact_info'],
+      limit: this.config.maxResults
+    }
+
+    const result = await this.executeTool('enrich_contacts', args)
+    
+    // In mock mode, always return mock data
+    if (process.env.NODE_ENV === 'development' || !this.config.apiKey || this.config.apiKey === 'mock_api_key') {
+      return this.getMockEnrichedContacts()
+    }
+    
+    return result[0]?.text ? JSON.parse(result[0].text) : this.getMockEnrichedContacts()
+  }
+
+  async enrichContactById(contactId: string): Promise<ClayEnrichedContact | null> {
+    const args = { contactId }
+    const result = await this.executeTool('enrich_contact', args)
+    
+    if (process.env.NODE_ENV === 'development' || !this.config.apiKey || this.config.apiKey === 'mock_api_key') {
+      return this.getMockEnrichedContact(contactId)
+    }
+    
+    return result[0]?.text ? JSON.parse(result[0].text) : this.getMockEnrichedContact(contactId)
+  }
+
+  // Company Insights Methods
+
+  async getCompanyInsights(companyIds: string[]): Promise<ClayCompanyData[]> {
+    const args = {
+      companyIds,
+      include: ['funding', 'technologies', 'competitors', 'social_profiles'],
+      limit: this.config.maxResults
+    }
+
+    const result = await this.executeTool('get_company_insights', args)
+    
+    if (process.env.NODE_ENV === 'development' || !this.config.apiKey || this.config.apiKey === 'mock_api_key') {
+      return this.getMockCompanyInsights()
+    }
+    
+    return result[0]?.text ? JSON.parse(result[0].text) : this.getMockCompanyInsights()
+  }
+
+  async getCompanyInsightById(companyId: string): Promise<ClayCompanyData | null> {
+    const args = { companyId }
+    const result = await this.executeTool('get_company_insight', args)
+    
+    if (process.env.NODE_ENV === 'development' || !this.config.apiKey || this.config.apiKey === 'mock_api_key') {
+      return this.getMockCompanyInsight(companyId)
+    }
+    
+    return result[0]?.text ? JSON.parse(result[0].text) : this.getMockCompanyInsight(companyId)
+  }
+
+  // Lead Generation Methods
+
+  async findProspects(criteria: ClayLeadGenerationCriteria): Promise<ClayProspect[]> {
+    const args = {
+      criteria,
+      limit: this.config.maxResults,
+      include: ['contact_info', 'company_data', 'social_profiles']
+    }
+
+    const result = await this.executeTool('find_prospects', args)
+    
+    if (process.env.NODE_ENV === 'development' || !this.config.apiKey || this.config.apiKey === 'mock_api_key') {
+      return this.getMockProspects()
+    }
+    
+    return result[0]?.text ? JSON.parse(result[0].text) : this.getMockProspects()
+  }
+
+  // Data Verification Methods
+
+  async verifyContactData(contacts: any[]): Promise<ClayVerificationResult[]> {
+    const args = {
+      contacts,
+      include: ['email_verification', 'contact_validation', 'suggestions'],
+      limit: this.config.maxResults
+    }
+
+    const result = await this.executeTool('verify_contacts', args)
+    
+    if (process.env.NODE_ENV === 'development' || !this.config.apiKey || this.config.apiKey === 'mock_api_key') {
+      return this.getMockVerificationResults()
+    }
+    
+    return result[0]?.text ? JSON.parse(result[0].text) : this.getMockVerificationResults()
+  }
+
+  // Mock Data Methods (for development)
+
+  private getMockEnrichedContacts(): ClayEnrichedContact[] {
+    return [
+      {
+        id: 'enriched_1',
+        originalContactId: 'contact_1',
+        email: 'john@acme.com',
+        firstName: 'John',
+        lastName: 'Smith',
+        company: 'Acme Corp',
+        title: 'VP of Engineering',
+        linkedinUrl: 'https://linkedin.com/in/johnsmith',
+        twitterHandle: '@johnsmith',
+        phone: '+1-555-0123',
+        location: 'San Francisco, CA',
+        companyData: {
+          name: 'Acme Corp',
+          domain: 'acme.com',
+          industry: 'Technology',
+          employeeCount: 350,
+          annualRevenue: 10000000,
+          fundingStage: 'Series B',
+          fundingAmount: 50000000,
+          lastFundingDate: '2023-06-15',
+          headquarters: 'San Francisco, CA',
+          description: 'Leading provider of enterprise software solutions',
+          technologies: ['React', 'Node.js', 'AWS', 'PostgreSQL'],
+          socialProfiles: [
+            {
+              platform: 'linkedin',
+              url: 'https://linkedin.com/company/acme-corp',
+              username: 'acme-corp',
+              followers: 5000,
+              verified: true
+            }
+          ],
+          competitors: ['CompetitorX', 'CompetitorY', 'CompetitorZ']
+        },
+        socialProfiles: [
+          {
+            platform: 'linkedin',
+            url: 'https://linkedin.com/in/johnsmith',
+            username: 'johnsmith',
+            followers: 500,
+            verified: true
+          },
+          {
+            platform: 'twitter',
+            url: 'https://twitter.com/johnsmith',
+            username: 'johnsmith',
+            followers: 1200,
+            verified: false
+          }
+        ],
+        enrichmentScore: 0.95,
+        lastEnriched: new Date().toISOString()
+      }
+    ]
+  }
+
+  private getMockEnrichedContact(contactId: string): ClayEnrichedContact | null {
+    const contacts = this.getMockEnrichedContacts()
+    return contacts.find(c => c.originalContactId === contactId) || null
+  }
+
+  private getMockCompanyInsights(): ClayCompanyData[] {
+    return [
+      {
+        name: 'Acme Corp',
+        domain: 'acme.com',
+        industry: 'Technology',
+        employeeCount: 350,
+        annualRevenue: 10000000,
+        fundingStage: 'Series B',
+        fundingAmount: 50000000,
+        lastFundingDate: '2023-06-15',
+        headquarters: 'San Francisco, CA',
+        description: 'Leading provider of enterprise software solutions',
+        technologies: ['React', 'Node.js', 'AWS', 'PostgreSQL'],
+        socialProfiles: [
+          {
+            platform: 'linkedin',
+            url: 'https://linkedin.com/company/acme-corp',
+            username: 'acme-corp',
+            followers: 5000,
+            verified: true
+          }
+        ],
+        competitors: ['CompetitorX', 'CompetitorY', 'CompetitorZ']
+      }
+    ]
+  }
+
+  private getMockCompanyInsight(companyId: string): ClayCompanyData | null {
+    const insights = this.getMockCompanyInsights()
+    return insights.find(c => c.name.toLowerCase().includes(companyId.toLowerCase())) || null
+  }
+
+  private getMockProspects(): ClayProspect[] {
+    return [
+      {
+        id: 'prospect_1',
+        email: 'jane@techstartup.com',
+        firstName: 'Jane',
+        lastName: 'Doe',
+        title: 'CTO',
+        company: 'TechStartup Inc',
+        companyDomain: 'techstartup.com',
+        industry: 'Technology',
+        employeeCount: 50,
+        location: 'Austin, TX',
+        linkedinUrl: 'https://linkedin.com/in/janedoe',
+        phone: '+1-555-0789',
+        score: 0.88,
+        matchReason: 'High growth tech company, recent Series A funding',
+        source: 'clay_search'
+      },
+      {
+        id: 'prospect_2',
+        email: 'mike@healthtech.com',
+        firstName: 'Mike',
+        lastName: 'Johnson',
+        title: 'VP of Product',
+        company: 'HealthTech Solutions',
+        companyDomain: 'healthtech.com',
+        industry: 'Healthcare',
+        employeeCount: 120,
+        location: 'Boston, MA',
+        linkedinUrl: 'https://linkedin.com/in/mikejohnson',
+        score: 0.82,
+        matchReason: 'Healthcare technology company, expanding product team',
+        source: 'clay_search'
+      }
+    ]
+  }
+
+  private getMockVerificationResults(): ClayVerificationResult[] {
+    return [
+      {
+        contactId: 'contact_1',
+        email: 'john@acme.com',
+        verificationStatus: 'valid',
+        deliverability: 'high',
+        bounceRisk: 'low',
+        suggestions: [
+          'Email is valid and deliverable',
+          'Contact information is up to date'
+        ],
+        updatedData: {
+          phone: '+1-555-0123',
+          location: 'San Francisco, CA'
+        }
+      },
+      {
+        contactId: 'contact_2',
+        email: 'sarah@beta.com',
+        verificationStatus: 'risky',
+        deliverability: 'medium',
+        bounceRisk: 'medium',
+        suggestions: [
+          'Email may be outdated',
+          'Consider verifying with alternative contact method',
+          'Check company domain for updated email format'
+        ]
+      }
+    ]
+  }
+}
+
+// Factory function to create Clay MCP client
+export function createClayMCPClient(config?: Partial<ClayMCPConfig>): ClayMCPClient {
+  const defaultConfig: ClayMCPConfig = {
+    apiKey: process.env.CLAY_API_KEY || '',
+    readOnly: process.env.CLAY_MCP_READ_ONLY === 'true',
+    maxResults: parseInt(process.env.CLAY_MCP_MAX_RESULTS || '100'),
+    timeout: parseInt(process.env.CLAY_MCP_TIMEOUT || '300'),
+    auditLogging: process.env.CLAY_MCP_AUDIT_LOGGING === 'true'
+  }
+
+  const finalConfig = { ...defaultConfig, ...config }
+  return new ClayMCPClient(finalConfig)
+}
+
+// Export types for use in other modules
+export type {
+  ClayMCPConfig,
+  ClayQueryOptions,
+  ClayEnrichedContact,
+  ClayCompanyData,
+  ClaySocialProfile,
+  ClayProspect,
+  ClayVerificationResult,
+  ClayLeadGenerationCriteria
+}

@@ -33,7 +33,6 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
   const [cloneResult, setCloneResult] = useState<N8NCloneResult | null>(null)
   const [isCloning, setIsCloning] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [showComparison, setShowComparison] = useState(false)
 
   // Initialize user variables with defaults
   useEffect(() => {
@@ -42,7 +41,7 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
     
     if (template.template_variables && template.template_variables.length > 0) {
       template.template_variables.forEach(variable => {
-        console.log('Processing variable:', variable.name, 'type:', variable.type, 'category:', variable.category)
+        console.log('Processing variable:', variable.name, 'type:', variable.type, 'category:', (variable as any).category)
         if (variable.default_value !== null) {
           initialVariables[variable.name] = variable.default_value
         } else {
@@ -120,152 +119,7 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
     }
   }
 
-  const copyImportUrl = async () => {
-    if (cloneResult?.importUrl) {
-      try {
-        await navigator.clipboard.writeText(cloneResult.importUrl)
-        alert('Import URL copied to clipboard!')
-      } catch (err) {
-        console.error('Failed to copy URL:', err)
-      }
-    }
-  }
 
-  const compareWorkflows = () => {
-    if (!template.n8n_workflow_json || !cloneResult?.workflowJson) {
-      alert('No workflows to compare')
-      return
-    }
-
-    try {
-      const original = template.n8n_workflow_json
-      const cloned = JSON.parse(cloneResult.workflowJson)
-      
-      console.log('🔍 WORKFLOW COMPARISON')
-      console.log('====================')
-      
-      let totalInjections = 0
-      let totalChanges = 0
-      
-      // Simple approach: look for {{ $json. }} patterns in the cloned workflow
-      const clonedJsonString = JSON.stringify(cloned)
-      const variableMatches = clonedJsonString.match(/\{\{\s*\$json\.\w+\s*\}\}/g) || []
-      totalInjections = variableMatches.length
-      
-      console.log('🔍 SIMPLE VARIABLE DETECTION:')
-      console.log('Found variable expressions:', variableMatches)
-      console.log('Total variable expressions found:', totalInjections)
-      
-      // Also do detailed comparison
-      original.nodes?.forEach((originalNode: any, index: number) => {
-        const clonedNode = cloned.nodes?.[index]
-        if (!clonedNode) {
-          console.log(`❌ Node ${index} (${originalNode.name}) missing in cloned version`)
-          return
-        }
-        
-        console.log(`\n📋 Node: ${originalNode.name} (${originalNode.type})`)
-        
-        // Compare parameters
-        const paramChanges = compareNodeParameters(originalNode.parameters, clonedNode.parameters)
-        if (paramChanges.length > 0) {
-          totalChanges += paramChanges.length
-          paramChanges.forEach(change => {
-            if (change.type === 'variable_injection') {
-              console.log(`  ✅ ${change.path}: "${change.original}" → "${change.cloned}" (Variable: ${change.variableName})`)
-            } else {
-              console.log(`  ⚠️  ${change.path}: "${change.original}" → "${change.cloned}" (Type: ${change.type})`)
-            }
-          })
-        } else {
-          console.log(`  ✅ No parameter changes`)
-        }
-      })
-      
-      console.log('\n📊 SUMMARY:')
-      console.log(`Total parameter changes: ${totalChanges}`)
-      console.log(`Variable injections (simple): ${totalInjections}`)
-      console.log(`Variable injections (detailed): ${totalChanges}`)
-      
-      if (totalInjections === 0) {
-        console.log('\n⚠️  WARNING: No variable injections detected!')
-        alert('⚠️ No variable injections detected! Check console for details.')
-      } else {
-        console.log('\n✅ Variable injection is working!')
-        alert(`✅ Variable injection working! ${totalInjections} variables injected. Check console for details.`)
-      }
-      
-      setShowComparison(true)
-    } catch (err) {
-      console.error('Comparison error:', err)
-      alert('Error comparing workflows. Check console for details.')
-    }
-  }
-
-  const compareNodeParameters = (original: any, cloned: any, path = ''): any[] => {
-    const changes: any[] = []
-    
-    if (!original || !cloned) return changes
-    
-    function compareValue(orig: any, cloned: any, currentPath: string) {
-      if (typeof orig !== typeof cloned) {
-        changes.push({
-          path: currentPath,
-          type: 'type_change',
-          original: orig,
-          cloned: cloned
-        })
-        return
-      }
-      
-      if (typeof orig === 'object' && orig !== null) {
-        if (Array.isArray(orig)) {
-          orig.forEach((item: any, index: number) => {
-            compareValue(item, cloned[index], `${currentPath}[${index}]`)
-          })
-        } else {
-          Object.keys(orig).forEach(key => {
-            const newPath = currentPath ? `${currentPath}.${key}` : key
-            if (cloned.hasOwnProperty(key)) {
-              compareValue(orig[key], cloned[key], newPath)
-            }
-          })
-        }
-      } else if (orig !== cloned) {
-        if (typeof cloned === 'string' && cloned.includes('{{ $json.')) {
-          const variableName = cloned.match(/\{\{\s*\$json\.(\w+)\s*\}\}/)?.[1]
-          changes.push({
-            path: currentPath,
-            type: 'variable_injection',
-            original: orig,
-            cloned: cloned,
-            variableName: variableName
-          })
-        } else if (typeof orig === 'string' && typeof cloned === 'string' && 
-                   cloned.includes('{{ $json.') && orig !== cloned) {
-          // Handle cases where the original value is different but gets replaced with variable
-          const variableName = cloned.match(/\{\{\s*\$json\.(\w+)\s*\}\}/)?.[1]
-          changes.push({
-            path: currentPath,
-            type: 'variable_injection',
-            original: orig,
-            cloned: cloned,
-            variableName: variableName
-          })
-        } else {
-          changes.push({
-            path: currentPath,
-            type: 'value_change',
-            original: orig,
-            cloned: cloned
-          })
-        }
-      }
-    }
-    
-    compareValue(original, cloned, path)
-    return changes
-  }
 
   const downloadWorkflow = () => {
     if (cloneResult?.workflowJson) {
@@ -298,7 +152,7 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
             {template.template_variables && template.template_variables.length > 0 ? (
               <div className="space-y-4">
                 {template.template_variables.map((variable, index) => {
-                  console.log('Rendering variable:', variable.name, 'type:', variable.type, 'category:', variable.category)
+                  const varWithExtras = variable as any // Type assertion for extended fields
                   return (
                   <div key={variable.id || index} className="space-y-2">
                     <div className="flex items-center space-x-2">
@@ -307,7 +161,7 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
                         {variable.required && <span className="text-red-500 ml-1">*</span>}
                       </label>
                       <Badge variant="outline">{variable.type}</Badge>
-                      {variable.category && <Badge variant="secondary">{variable.category}</Badge>}
+                      {varWithExtras.category && <Badge variant="secondary">{varWithExtras.category}</Badge>}
                     </div>
                     
                     {variable.description && (
@@ -329,8 +183,8 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
                         onChange={(e) => handleVariableChange(variable.name, parseInt(e.target.value) || 1)}
                         placeholder={`Enter your ${variable.name}`}
                         required={variable.required}
-                        min={variable.validation?.min}
-                        max={variable.validation?.max}
+                        min={varWithExtras.validation?.min}
+                        max={varWithExtras.validation?.max}
                       />
                     ) : variable.type === 'boolean' ? (
                       <Select
@@ -355,9 +209,8 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
                         </SelectTrigger>
                         <SelectContent>
                           {(() => {
-                            const options = variable.options || variable.n8n_enum || getDefaultOptionsForVariable(variable)
-                            console.log(`Options for ${variable.name}:`, options)
-                            return options.map((option) => (
+                            const options = varWithExtras.options || varWithExtras.n8n_enum || getDefaultOptionsForVariable(variable)
+                            return options.map((option: string) => (
                               <SelectItem key={option} value={option}>
                                 {option}
                               </SelectItem>
@@ -369,7 +222,7 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
                       <div className="space-y-2">
                         <p className="text-sm text-gray-600">Select multiple options:</p>
                         <div className="space-y-1">
-                          {(variable.options || []).map((option) => (
+                          {(varWithExtras.options || []).map((option: string) => (
                             <label key={option} className="flex items-center space-x-2">
                               <input
                                 type="checkbox"
@@ -379,7 +232,7 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
                                   if (e.target.checked) {
                                     handleVariableChange(variable.name, [...currentValues, option])
                                   } else {
-                                    handleVariableChange(variable.name, currentValues.filter(v => v !== option))
+                                    handleVariableChange(variable.name, currentValues.filter((v: string) => v !== option))
                                   }
                                 }}
                                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
@@ -389,7 +242,7 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
                           ))}
                         </div>
                       </div>
-                    ) : variable.name === 'Trigger Interval' || variable.category === 'schedule' || variable.name.includes('Trigger') ? (
+                    ) : variable.name === 'Trigger Interval' || varWithExtras.category === 'schedule' || variable.name.includes('Trigger') ? (
                       <div className="space-y-4 p-4 border rounded-lg bg-blue-50">
                         <h4 className="font-medium text-blue-900">n8n Schedule Trigger Configuration</h4>
                         <p className="text-sm text-blue-800">
@@ -405,14 +258,14 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
                           initialValues={userVariables}
                         />
                       </div>
-                    ) : variable.type === 'object' && variable.category === 'excel_config' ? (
+                    ) : varWithExtras.category === 'excel_config' ? (
                       <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
                         <h4 className="font-medium">Excel Worksheet Configuration</h4>
-                        {variable.excelConfig?.sheets.map((sheet) => (
+                        {varWithExtras.excelConfig?.sheets.map((sheet: string) => (
                           <div key={sheet} className="space-y-2">
                             <label className="font-medium text-sm">{sheet}</label>
                             <div className="space-y-1">
-                              {variable.excelConfig?.columns[sheet]?.map((column) => (
+                              {varWithExtras.excelConfig?.columns[sheet]?.map((column: string) => (
                                 <label key={column} className="flex items-center space-x-2">
                                   <input
                                     type="checkbox"
@@ -428,7 +281,7 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
                                       } else {
                                         handleVariableChange(variable.name, {
                                           ...currentConfig,
-                                          [sheet]: currentColumns.filter(c => c !== column)
+                                          [sheet]: currentColumns.filter((c: string) => c !== column)
                                         })
                                       }
                                     }}
@@ -528,60 +381,17 @@ export function TemplateCloneForm({ template, onClose }: TemplateCloneFormProps)
           <CardContent className="space-y-4">
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Method 1: Direct Import URL</label>
-                <div className="flex items-center space-x-2">
-                  <Input
-                    value={cloneResult.importUrl}
-                    readOnly
-                    className="flex-1"
-                  />
+                <div className="flex justify-center">
                   <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={copyImportUrl}
-                  >
-                    <Copy className="h-4 w-4 mr-2" />
-                    Copy
-                  </Button>
-                  <Button
-                    onClick={() => window.open(cloneResult.importUrl, '_blank')}
-                    className="flex items-center space-x-2"
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Try Import
-                  </Button>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Method 2: Manual Import</label>
-                <div className="flex items-center space-x-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => window.open(cloneResult.alternativeUrl, '_blank')}
-                    className="flex items-center space-x-2"
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Open n8n
-                  </Button>
-                  <Button
-                    variant="outline"
                     onClick={downloadWorkflow}
-                    className="flex items-center space-x-2"
+                    className="flex items-center space-x-2 bg-wl-accent hover:bg-wl-accent/90 text-white px-6 py-3"
                   >
-                    <Download className="h-4 w-4 mr-2" />
+                    <Download className="h-5 w-5 mr-2" />
                     Download JSON
                   </Button>
-                  <Button
-                    variant="secondary"
-                    onClick={compareWorkflows}
-                    className="flex items-center space-x-2"
-                  >
-                    🔍 Compare
-                  </Button>
                 </div>
-                <p className="text-xs text-gray-500">
-                  Download the JSON file and import it manually in n8n
+                <p className="text-sm text-gray-600 text-center">
+                  Download the workflow and import it manually in n8n
                 </p>
               </div>
             </div>
